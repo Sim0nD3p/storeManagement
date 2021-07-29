@@ -1,0 +1,21 @@
+{
+  "name": "consommation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "consom.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "csv-parser": "^3.0.0",
+    "csv-writer": "^1.6.0",
+    "jquery": "^3.6.0",
+    "jsdom": "^16.6.0",
+    "prompt-sync": "^4.2.0",
+    "sendkeys": "^1.1.1",
+    "terminal-kit": "^2.1.5"
+  }
+}

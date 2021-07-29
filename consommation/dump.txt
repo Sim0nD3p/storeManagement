@@ -1,0 +1,170 @@
+ console.log('allo');
+                let n = 0;
+                let array = [];
+                let types = [];
+                let restants = [];
+                let total = [];
+                let parts = [];
+                let consommables = [];
+                let bac1 = [];
+                let bac2 = [];
+                let palette = [];
+                let bundle = [];
+                this.store.PFEP.map((part, index) => {
+                    if (part.emballage.TF.type) {
+                        let type = part.emballage.TF.type;
+
+                        /* 
+                        if(List.indexOf(part.code) !== -1){
+                            n++
+                            part.emballage.TF.type = this.store.getContainer('bac1')
+                            console.log('------------------------------------------------------')
+                        }
+                        */
+
+                        if (type.type) { console.log(type) }
+
+                        if (!type.type) {
+
+                        }
+                        
+                        //PREDETERMINÉS BAC1
+                        if (bac1Parts.indexOf(part.code) !== -1) {
+                            bac1.push({[part.code]: part.emballage.TF.nbPieces});
+                            part.emballage.TF.type = 'bac1';
+                            //bac1
+                        }
+                        //PREDETERMINÉS BAC2
+                        else if (bac2Parts.indexOf(part.code) !== -1) {
+                            //bac2
+                            bac2.push({[part.code]: part.emballage.TF.nbPieces})
+                            part.emballage.TF.type = 'bac2'
+                        }
+                        //DANS LA LISTE POUR BAC1
+                        else if(List.indexOf(part.code) !== -1){
+                            bac1.push({[part.code]: part.emballage.TF.nbPieces});
+                        }
+                        else {
+                            if (type.includes('TABLETTE') || type.includes('RACKING')) {
+                                if (type.includes('BAC') == false && type.includes('BOITE') == false && type.includes('PALETTE') == false && type.includes('BOLT') == false && type.includes('DERRIERE') == false) {
+                                    //direct sur etagere
+                                    if (List.indexOf(part.code) !== -1) {   //list faite avec photos etageres
+                                        part.emballage.TF.type = 'bac1'
+                                    }
+                                    else {                                        
+                                            if(Math.max(Number(part.specs.length), Number(part.specs.width), Number(part.specs.height)) < 315){
+                                                bac1.push({[part.code]: part.emballage.TF.nbPieces});
+                                                part.emballage.TF.type = 'bac1';
+                                                //bac 1
+                                            }
+                                            else if(Math.max(Number(part.specs.length), Number(part.specs.width), Number(part.specs.height)) < 645){
+                                                //bac2
+
+                                                bac2.push({[part.code]: part.emballage.TF.nbPieces})
+                                               part.emballage.TF.type = 'bac2'
+                                            }
+                                            else if(Math.max(Number(part.specs.length), Number(part.specs.width), Number(part.specs.height)) > this.store.getContainer('bac2').inside.length){
+                                                //trop grand pour bac
+                                            }
+                                            else{
+                                                //pas de bac
+                                                restants.push({[part.code]: part.family, type: type});
+                                                if (types.indexOf(type) == -1) {
+                                                    types.push(type)
+                                                }
+                                                
+                                            }
+                                        }
+                                    }
+                                }
+                            if (type.includes('BAC') || type.includes('BOITE') || type.includes('DERRIERE') || type.includes('SOUS') || type.includes('RACK A BOULON') || type.includes('TS')) {
+                                    if(Math.max(Number(part.specs.length), Number(part.specs.width), Number(part.specs.height)) < this.store.getContainer('bac1').inside.length){
+                                        bac1.push({[part.code]: part.emballage.TF.nbPieces});
+                                        part.emballage.TF.type = 'bac1';
+                                        //bac 1
+                                    }
+                                    else if(Math.max(Number(part.specs.length), Number(part.specs.width), Number(part.specs.height)) < this.store.getContainer('bac2').inside.length && Math.max(Number(part.specs.length), Number(part.specs.width), Number(part.specs.height)) > this.store.getContainer('bac1').inside.length){
+                                        //bac2
+
+                                        part.emballage.TF.type = 'bac2'
+                                        bac2.push({[part.code]: part.emballage.TF.nbPieces})
+                                    }
+                                    else if(Math.max(Number(part.specs.length), Number(part.specs.width), Number(part.specs.height)) > this.store.getContainer('bac2').inside.length){
+                                        //trop grand pour un bac
+                                    }
+                                    else{
+                                        //pas de bac
+                                        restants.push({[part.code]: part.family, type: type});
+                                        if (types.indexOf(type) == -1) {
+                                            types.push(type)
+                                        }
+                                        
+                                    }
+
+                                //emballage = boite ou bac
+                                //if(types.indexOf(type) == -1){ types.push(type) }
+
+                            }
+                            if (type.includes('PALETTE')) {
+                                palette.push(part.code);
+                                part.emballage.TF.type = 'palette'
+                                //if(types.indexOf(type) == -1){ types.push(type) }
+
+                            }
+                            if (type.includes('BUNDEL')) {
+                                bundle.push(part.code);
+                                //if(types.indexOf(type) == -1){ types.push(type) }
+                            }
+                            if (type.includes('EMBALLAGE')) {
+                                //if(types.indexOf(type) == -1){ types.push(type) }
+                            }
+                            if (type.includes('bac1')) {
+                                //if(types.indexOf(type) == -1){ types.push(type) }
+                            }
+
+                            if (types.indexOf(type) == -1 && restants.indexOf(type) == -1) {
+                                //restants.push(type)
+                            }
+                        }
+
+
+                    }
+                    else{
+                        if(part.family){
+                            if(part.family.includes('Extrusion') && part.family.includes('usin') == false){
+                                bundle.push(part.code);
+                                part.emballage.TF.type = 'bundle'
+                                console.log(part);
+                                
+    
+                            }
+                            if(part.family.includes('Consommable')){
+                                consommables.push(part.code)
+                                part.emballage.TF.type = 'consom'
+
+                            }
+
+                        }
+                    }
+
+                })
+                console.log('types')
+                console.log(types)
+                console.log(types.length)
+                console.log('restants')
+                console.log(restants)
+                console.log(restants.length)
+                console.log(total.length)
+                console.log('parts')
+                console.log(parts);
+                console.log('bac1')
+                console.log(bac1)
+                console.log('bac2')
+                console.log(bac2)
+                console.log('palette');
+                console.log(palette)
+                console.log('bundle');
+                console.log(bundle)
+                console.log(`${bac1.length + bac2.length + palette.length + bundle.length + consommables.length} pieces placees`)
+                this.store.bundleManager('EXS002-2425', 500)
+                console.log(this.store.temp)
