@@ -509,7 +509,8 @@ class App {
         term(`Sélectionner option\n`);
         let menuItems = [
             'Afficher contenants',
-            'Afficher Étagères'
+            'Afficher Étagères',
+            'Afficher contenu étagères',
         ]
         term.singleColumnMenu(menuItems,
             { cancelable: true, keyBindings: { ENTER: 'submit', DOWN: 'next', UP: 'previous', CTRL_Z: 'escape' } },
@@ -522,6 +523,10 @@ class App {
                     else if(response.selectedIndex === 1){
                         this.lastScreen.screen = 'afficherMagasin';
                         this.displayStore.displayShelf();
+                    }
+                    else if(response.selectedIndex === 2){
+                        this.lastScreen.screen = 'afficherMagasin';
+                        this.displayStore.displayShelfContent()
                     }
                 }
             })

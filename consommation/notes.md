@@ -29,18 +29,19 @@
     - mains etageres
     - etageres!!!
 
-# SHELF MANAGER
-
-# TO FIX
-- decalage lorsque 4 bac dans une col
-- 2 side shelf
-    
-
+## TO DO
+- new shelf distribution
+- fix bundle
+- palette
+- fix double sided shelves with only 1 container on back side 
+- priority category
+- have same length shelf for same things
 
 ## IMPORTANT RANDOM SHIT TO DO
 - masse extrusions
 - dessins manquants
-- bundle size bundle class (nbWidth, nbHeight)
+- bundle size bundle
+ class (nbWidth, nbHeight)
 - normaliser bundles
 
 ## Things that might be interesting

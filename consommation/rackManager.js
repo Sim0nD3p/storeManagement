@@ -106,11 +106,14 @@ class RackManager{
         
         //partList = ['SEP3978', 'SEP260-0G4456', 'SEP3979', 'SEP4059', 'SEP2504', 'SEP3807-LA', 'SEP3782'];
         //partList = ['EXV001-2600', 'EXV001-1720'];
+        //partList = ['SEP4022', 'SEP3550', 'SEP3553', 'SEP3562', 'SEP3568', 'SEP3799']
         //partList = partList.map(part => this.app.store.getItemFromPFEP(part))
-
-
+        
+        
         partList = partList.map((part, index) => { return this.app.store.getItemFromPFEP(part.code) })
         for(let i = 0; i < partList.length; i++){
+            console.log('\n----- NEW PART -----')
+            console.log(`${this.app.store.shelves.length} shelves in racking`)
             //console.log('----- placing in racking -----\n')
             let categorisation = {
                 consoMens: partList[i].consommation ? partList[i].consommation.mensuelleMoy : undefined,
@@ -118,29 +121,65 @@ class RackManager{
                 type: partList[i].storage[0].type
             }
             let potentialShelves = this.shelfManager.findPotentialShelf(partList[i], categorisation);
+            let shelf; let accessPoint = FRONT;
+            let place;
             
+            //let place = shelf.searchPlace(partList[i], BACK);  //returns place
+            let newShelf;
+            
+
+            //thats fine
+            
+            console.log(`${potentialShelves.filter(a => a !== null).length} potential shelves`)
+
             if(potentialShelves.findIndex((shelf) => shelf !== null) == -1){
-                let shelf = this.requestNewShelf(partList, i);  //returns shelf
-                let place = shelf.searchPlace(partList[i], BACK);  //returns place
+                console.log('NEW SHELF')
+                newShelf = true;
+                shelf = this.requestNewShelf(partList, i);  //returns shelf
+                if(partList[i].code.includes('EXV') && shelf !== null){
+                    console.log('new shelf for exv')
+                }
+            }
+
+            else {
+                //potentialShelves.map(shelf => {if(shelf !== null){console.log(shelf[1], shelf[2])}})
+                shelf = this.shelfManager.matchPartToShelf(potentialShelves, partList[i]);
+                let test = shelf[0].searchPlace(partList[i], shelf[1])
+                if(partList[i].code.includes('EXV')){
+
+                    console.log('exv')
+                    console.log(test)
+                }
+                accessPoint = shelf[1];
+                shelf = shelf[0];
+
+                newShelf = false
+            }
+            
+            console.log(`placing in new shelf? ${newShelf}`)
+            if(shelf !== null){
+                console.log(`placing ${partList[i].code} in ${shelf.name}`)
+                let place = shelf.searchPlace(partList[i], accessPoint)
+                console.log(place)
+                
+                
+                if(place == false){
+                    let test = this.shelfManager.findPotentialShelf(partList[i], categorisation);
+                    //console.log(test)
+                    //console.log(partList[i])
+                }
+                
+                
                 for(let j = 0; j < place.length; j++){
-                    shelf.putInShelf(place[j][0], place[j][1], place[j][2], partList[i].storage[j])
-
-                }
-            }
-            else{
-                //console.log(`Placing part ${partList[i].code} index is ${i}`)
-                let shelf = this.shelfManager.matchPartToShelf(potentialShelves, partList[i])
-
-                if(shelf !== null){
-                    let place = shelf.searchPlace(partList[i], BACK)
-                    //console.log(place)
-                    for(let j = 0; j < place.length; j++){
-                        shelf.putInShelf(place[j][0], place[j][1], place[j][2], partList[i].storage[j])                
+                    shelf.putInShelf(place[j][0], place[j][1], place[j][2], partList[i].storage[j], partList[i])                
+                    if(partList[i].code.includes('EXV')){
+                        console.log('calisse de exv')
+                        //console.log(shelf.content)
                     }
-
                 }
 
             }
+            else console.log('SHELF == NULL')
         }
     }
 }

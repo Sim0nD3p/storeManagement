@@ -13,6 +13,10 @@ class ShelfManager{
     constructor(app){
         this.app = app;
         this.unusedShelves = shelves;
+        this.shelfQte = {
+            bundle: 0,
+            container: 0
+        }
     }
     checkAvailability(part, shelf, returnFull){
 
@@ -82,14 +86,16 @@ class ShelfManager{
                 
                 let shelfData = this.unusedShelves[shelfIndex]
                 this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1;
-                let shelf = new Shelf('bundleTest', shelfData, 'bundle')
+                let shelf = new Shelf(`bundle_${this.shelfQte.bundle}`, shelfData, 'bundle')
+                this.shelfQte.bundle++
                 finalShelf = shelf
 
 
                 break;
             }
             case 'bac': {
-                let shelf = new Shelf(`shelf_${this.app.store.shelves.length + 1}`, this.unusedShelves[0], 'bac')
+                let shelf = new Shelf(`shelf_${this.shelfQte.container}`, this.unusedShelves[2], 'bac')
+                this.shelfQte.container++;
                 let content = totalContainerArray[totalContainerArray.length - 1];
                 let bacParPiece = (content.bac1 + content.bac2) / totalContainerArray.length
                 //console.log(`${bacParPiece} BAC PAR PIECE EN MOYENNE`)
@@ -110,7 +116,7 @@ class ShelfManager{
                 break;
             }
             case 'pal': {
-                let shelf = new Shelf(`shelf_${this.app.store.shelves.length + 1}`, this.unusedShelves[0], 'bundle');
+                let shelf = new Shelf(`shelf_${this.app.store.shelves.length + 1}`, this.unusedShelves[2], 'bundle');
                 finalShelf = shelf
                 break;
             }
@@ -130,24 +136,28 @@ class ShelfManager{
      * 
      * @param {*array} shelves - array of potential shelves 
      * @param {*object} item - item to place
-     * @returns shelf for the item to be placed on
+     * @returns [shelf, accessPoint]
      */
     matchPartToShelf(potentialShelves, item){
         //criteres pour match item a shelf
         //doit avoir de la place
+        const accessOptions = [FRONT, BACK];
 
-        //kinda useless, findPotentialShelf kinda does the same thing
 
-        let targetShelf = null
+        let accessPoint = FRONT;
+        let targetShelf = null;
         for(let i = 0; i < potentialShelves.length; i++){
             if(potentialShelves[i] !== null){
                 if(potentialShelves[i][1] !== false || potentialShelves[i][2] !== false){
-                    targetShelf = potentialShelves[i][0];
+                    let placement = [potentialShelves[i][1], potentialShelves[i][2]];   //[FRONT, BACK] (bool)
+                    accessPoint = accessOptions[placement.findIndex((a) => a !== false)]
+                    let ecart = Math.abs(Number(potentialShelves[i][0].priority) - Number(item.consommation.mensuelleMoy)) / Number(potentialShelves[i][0].priority)
+                    if(targetShelf == null){ targetShelf = [potentialShelves[i][0], accessPoint, ecart] }
+                    else if(ecart < targetShelf[2]){ targetShelf = [potentialShelves[i][0], accessPoint, ecart] }
                 }
             }
         }
-        return targetShelf
-
+        return [targetShelf[0], targetShelf[1]]
     }
     
 
@@ -160,8 +170,10 @@ class ShelfManager{
     findPotentialShelf = (part, categorisation) => {
         return this.app.store.shelves.map((shelf, index) => {
             if (shelf.type.substring(0, 3) == categorisation.type.substring(0, 3)) {
-                let placement = [shelf.searchPlace(part, FRONT), shelf.searchPlace(part, BACK)]
-                if (placement[0] !== false || placement[1] !== false) { return [shelf, placement[0], placement[1]] }
+                let placement = [shelf.searchPlace(part, FRONT) !== false ? true : false, shelf.searchPlace(part, BACK) !== false ? true : false]
+                if (placement[0] !== false || placement[1] !== false) {
+                    return [shelf, placement[0], placement[1]]
+                }
                 else return null
             } else { return null }
         })

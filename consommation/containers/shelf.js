@@ -11,9 +11,10 @@ function clearScreen() {
 }
 
 class containerObject{
-    constructor(name, position, dimensions, height){
+    constructor(name, position, dimensions, height, consomMensMoy){
         this.name = name;
         this.height = height
+        this.consommation = consomMensMoy;
         this.position = {
             front: position.front,
             width: position.width,
@@ -53,6 +54,7 @@ class Shelf{
     constructor(name, shelfData, type){
         this.name = name;
         this.type = type;
+        this.priority;
         this.isDoubleSided = false;
         this.width = 107; //mm
         this.capacity = shelfData.rating / 2.2046;  //1 kg == 2.2046 lbs
@@ -463,7 +465,9 @@ class Shelf{
                         }
                     }
                 }
-                if(conflictedCol.indexOf(true) == -1){ return false }
+                if(conflictedCol.indexOf(true) == -1){ 
+                    return false
+                }
                 else return true
     
             })
@@ -592,7 +596,6 @@ class Shelf{
                         return [position, dimensions, height]
 
                     } else {
-                        
                         return null
                     }
                 })
@@ -652,10 +655,7 @@ class Shelf{
 
         let shelfContent = [];
         
-        /*
-        shelfContent=[]
 
-        */
     
        this.content.map((container, index) => {
             let data = container.getPosCoord(ratioL, ratioW);
@@ -676,13 +676,26 @@ class Shelf{
 
         })
     }
+
+    getPriorityIndex = () => {
+        let array = []
+        let shelfConsom = 0;
+        this.content.map((content, index) => {
+            if(array.indexOf(content.name.split('_')[1]) == -1){
+                array.push(content.name.split('_')[1]);
+                shelfConsom += Number(content.consommation);
+            }
+        })
+        return shelfConsom / array.length
+    }
     
 
     //position={front, width}   dimensions={front, width}
-    putInShelf = (position, dimensions, height, item) => {
+    putInShelf = (position, dimensions, height, item, part) => {
         if(!height){ height = 1 }
-
-        this.content.push(new containerObject(item.name, position, dimensions, height))
+        
+        this.content.push(new containerObject(item.name, position, dimensions, height, part.consommation.mensuelleMoy))
+        this.priority = this.getPriorityIndex();
         for(let x = position.front; x < position.front + dimensions.front; x++){
             for(let y = position.width; y < position.width + dimensions.width; y++){
                 if(this.space[x] !== undefined && this.space[x][y] !== undefined){
@@ -690,6 +703,9 @@ class Shelf{
                 }
             }
             
+        }
+        if(part.code.includes('EXV')){
+            console.log(this.content)
         }
 
     }

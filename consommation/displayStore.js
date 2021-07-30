@@ -162,11 +162,35 @@ class DispayStore {
                     shelf.getShelf();
                     term.moveTo(0, term.height); term('\n\n\n')
                     console.log(shelf.content)
+                    console.log('\n\n')
+                    console.log(`Shelf priority index is ${shelf.priority}`)
 
 
                 }
             }
         )
+    }
+    displayShelfContent(){
+        term.bold('Contenu des étagères\n')
+        for(let i = 0; i < this.app.store.shelves.length; i++){
+            console.log(this.app.store.shelves[i].name)
+            console.log(this.app.store.shelves[i].content)
+            console.log('--------------------\n')
+        }
+
+        let totalParts = 0;
+        for(let i = 0; i < this.app.store.shelves.length; i++){
+            let array = [];
+            for(let j = 0; j < this.app.store.shelves[i].content.length; j++){
+                if(array.indexOf(this.app.store.shelves[i].content[j].name.split('_')[1]) == -1){
+
+                    array.push(this.app.store.shelves[i].content[j].name.split('_')[1])
+                }
+            }
+            totalParts += array.length
+
+        }
+        console.log(`${totalParts} parts placed on shelves`)
     }
 
 }
