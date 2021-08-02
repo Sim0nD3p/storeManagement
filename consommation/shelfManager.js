@@ -46,11 +46,18 @@ class ShelfManager{
             potential = potential.sort((a, b) => a[0] - b[0])
             return potential[0][1]
         }
+        else if(prop == `container`){
+            let potential = this.unusedShelves.map((shelf, index) => {
+                if(shelf.qte > 0){
+
+                }
+            })
+        }
     }
 
     //should return shelf
     createShelf(partsToPlace){
-        //console.log('----------------------- CREATING SHELF -----------------------')
+        console.log('----------------------- CREATING SHELF -----------------------')
         let weightArray = []; let totalWeightArray = []; let containersArray = []; let totalContainerArray = []; let finalShelf;
         for(let i = 0; i < partsToPlace.length; i++){
             //weightArray
@@ -143,20 +150,64 @@ class ShelfManager{
         //doit avoir de la place
         const accessOptions = [FRONT, BACK];
 
-
+        //add heightNb constraint
         let accessPoint = FRONT;
         let targetShelf = null;
-        for(let i = 0; i < potentialShelves.length; i++){
-            if(potentialShelves[i] !== null){
-                if(potentialShelves[i][1] !== false || potentialShelves[i][2] !== false){
-                    let placement = [potentialShelves[i][1], potentialShelves[i][2]];   //[FRONT, BACK] (bool)
-                    accessPoint = accessOptions[placement.findIndex((a) => a !== false)]
-                    let ecart = Math.abs(Number(potentialShelves[i][0].priority) - Number(item.consommation.mensuelleMoy)) / Number(potentialShelves[i][0].priority)
-                    if(targetShelf == null){ targetShelf = [potentialShelves[i][0], accessPoint, ecart] }
-                    else if(ecart < targetShelf[2]){ targetShelf = [potentialShelves[i][0], accessPoint, ecart] }
+
+        let heightNeeded = 0;
+        if (item.storage.length >= 2) { heightNeeded = 2 * item.storage[0].height }
+        else { heightNeeded = item.storage[0].height }
+
+        let array = potentialShelves.map((shelf, index) => {
+            if(shelf !== null){
+                //which access point to chose: front if possible else back
+                let placement = [shelf[1], shelf[2]];   //[FRONT, BACK] (bool)
+                accessPoint = accessOptions[placement.findIndex((a) => a !== false)]
+                //ecart priorite
+                let ecart
+                if(Number(item.consommation.mensuelleMoy) == 0){ ecart = NaN }
+                else { ecart = Math.abs(Number(shelf[0].priority) - Number(item.consommation.mensuelleMoy)) / Number(shelf[0].priority) }
+
+                let spareHeight = shelf[0].height - heightNeeded
+
+                return [accessPoint, ecart, spareHeight]
+            } else return null
+        })
+        //targetShelf = [shelf, accessPoint, ecart, spareHeight]
+        if(isNaN(item.consommation.mensuelleMoy) == false){
+            for(let i = 0; i < array.length; i++){
+                if(array[i] !== null){
+                    if(targetShelf == null){ targetShelf = [potentialShelves[i][0], array[i][0], array[i][1], array[i][2]] }
+                        //ecart > ecart
+                    if(targetShelf[2] > array[i][1]){
+                        //spareHeight
+                        if(targetShelf[3] > array[i][2]){
+                            targetShelf = [potentialShelves[i][0], array[i][0], array[i][1], array[i][2]]
+                        }
+                    }
+                    //spareHeight && ecart avec facteur
+                    if(array[i][2] < targetShelf[3] && array[i][1] >= targetShelf[2] - 0.05){
+                        targetShelf = [potentialShelves[i][0], array[i][0], array[i][1], array[i][2]]
+                    }
                 }
             }
         }
+        else{
+            for(let i = array.length; i = 0; i--){
+                if(array[i] !== null){
+                    if (targetShelf == null) { targetShelf = [potentialShelves[i][0], array[i][0], array[i][1], array[i][2]] }
+                    //spareHeight
+                    if (targetShelf[3] > array[i][2]) {
+                        targetShelf = [potentialShelves[i][0], array[i][0], array[i][1], array[i][2]]
+                    }   
+                }
+            }
+        }
+        
+        //console.log('potentialShelf array')
+        //console.log(array)
+        //console.log('targetShelf')
+        //console.log(targetShelf[1], targetShelf[2], targetShelf[3])
         return [targetShelf[0], targetShelf[1]]
     }
     

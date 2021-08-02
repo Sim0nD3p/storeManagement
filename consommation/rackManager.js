@@ -1,4 +1,6 @@
 const ShelfManager = require('./shelfManager');
+const Racking = require('./containers/racking');
+//const { emitCallback } = require('terminal-kit/ScreenBufferHD');
 const FRONT = 'FRONT';
 const BACK = 'BACK'
 /* ROLES
@@ -18,6 +20,14 @@ class RackManager{
 
     test(){
         console.log(this.store.racking);
+    }
+
+    getRacking(name){
+        let rackIndex = -1
+        for(let i = 0; i < this.app.store.racking.length; i++){
+            if(this.app.store.racking[i].name == name){ rackIndex = i }
+        }
+        return this.app.store.racking[rackIndex]
     }
 
     getPriorityList(array){
@@ -68,7 +78,11 @@ class RackManager{
 
         let MP = object.MP.map((mp, index) => { return this.app.store.getItemFromPFEP(mp.code) })
         let assemblages = object.assemblages.map((ass, index) => { return this.app.store.getItemFromPFEP(ass.code) })
+        
+        console.log(`MP ${MP.length}`)
+        console.log(`assemblages ${assemblages.length}`)
         this.placeInRacking(MP);
+        //this.placeInRacking(assemblages)
     }
 
     /**
@@ -98,10 +112,63 @@ class RackManager{
         //console.log('end of requestNewShelf')
         let newShelf = this.shelfManager.createShelf(partsToPlace); //returns new Shelf
         //console.log(result.content)
+        this.placeNewShelf(newShelf)
         return newShelf
         
 
     }
+
+    createRacking(length){
+        let name = -'name1';
+        let type = 'type1';
+        let rack = new Racking(name, length, type)
+
+        return rack
+    }
+    placeNewShelf(shelf) {
+        console.log('place in racking')
+        let targetRack;
+        let potentialRacks = this.app.store.racking.map((rack, index) => {
+            if (shelf.length == rack.length) { return rack }
+            else return null
+        })
+
+        console.log(potentialRacks)
+
+
+        console.log(potentialRacks.findIndex((a) => a !== null))
+        if(potentialRacks.findIndex((a) => a !== null) == -1){
+            console.log('create new racking')
+
+            let rack = new Racking(`racking_${this.app.store.racking.length + 1}`, shelf.length, 'shelfTest')
+            rack.addShelf(shelf)
+            console.log(rack.shelves.length)
+            this.app.store.racking.push(rack)
+        }
+        else{
+            let potential = potentialRacks.filter((a) => a !== null && a.length == shelf.length);
+            let targetRackName = undefined
+            for(let i = 0; i < potential.length; i++){ if(potential[i].height < 1600){ targetRackName = potential[i].name; break; } }
+
+            if (targetRackName == undefined) {
+                let rack = new Racking(`racking_${this.app.store.racking.length + 1}`, shelf.length, 'shelfTest')
+                rack.addShelf(shelf)
+                console.log(rack.shelves.length)
+                this.app.store.racking.push(rack)
+
+            }
+            else {
+                this.getRacking(targetRackName).addShelf(shelf)
+            }
+            console.log(`shelves in rack: ${this.app.store.racking[potentialRacks.findIndex((a) => a !== null)].shelves.length}`)
+            console.log('place in already existing rack')
+        }
+
+        this.app.store.racking.map((rack, index) => {
+            console.log(rack.name, rack.length, rack.shelves.length)
+        })
+    }
+
     placeInRacking(partList){
         
         //partList = ['SEP3978', 'SEP260-0G4456', 'SEP3979', 'SEP4059', 'SEP2504', 'SEP3807-LA', 'SEP3782'];
@@ -109,7 +176,7 @@ class RackManager{
         //partList = ['SEP4022', 'SEP3550', 'SEP3553', 'SEP3562', 'SEP3568', 'SEP3799']
         //partList = partList.map(part => this.app.store.getItemFromPFEP(part))
         
-        
+        let failedParts = []
         partList = partList.map((part, index) => { return this.app.store.getItemFromPFEP(part.code) })
         for(let i = 0; i < partList.length; i++){
             console.log('\n----- NEW PART -----')
@@ -164,6 +231,7 @@ class RackManager{
                 
                 
                 if(place == false){
+                    failedParts.push(partList[i])
                     let test = this.shelfManager.findPotentialShelf(partList[i], categorisation);
                     //console.log(test)
                     //console.log(partList[i])
@@ -181,6 +249,8 @@ class RackManager{
             }
             else console.log('SHELF == NULL')
         }
+        console.log(`${partList.length} parts should be placed`)
+        console.log(failedParts)
     }
 }
 

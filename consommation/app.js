@@ -511,6 +511,7 @@ class App {
             'Afficher contenants',
             'Afficher Étagères',
             'Afficher contenu étagères',
+            'Afficher racking'
         ]
         term.singleColumnMenu(menuItems,
             { cancelable: true, keyBindings: { ENTER: 'submit', DOWN: 'next', UP: 'previous', CTRL_Z: 'escape' } },
@@ -527,6 +528,10 @@ class App {
                     else if(response.selectedIndex === 2){
                         this.lastScreen.screen = 'afficherMagasin';
                         this.displayStore.displayShelfContent()
+                    }
+                    else if(response.selectedIndex === 3){
+                        this.lastScreen.screen = 'afficherMagasin';
+                        this.displayStore.displayRacking();
                     }
                 }
             })

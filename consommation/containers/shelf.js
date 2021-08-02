@@ -11,9 +11,10 @@ function clearScreen() {
 }
 
 class containerObject{
-    constructor(name, position, dimensions, height, consomMensMoy){
+    constructor(name, position, dimensions, heightNb, container, consomMensMoy){
         this.name = name;
-        this.height = height
+        this.height = heightNb
+        this.totalHeight = container.height * heightNb
         this.consommation = consomMensMoy;
         this.position = {
             front: position.front,
@@ -62,7 +63,7 @@ class Shelf{
         this.load = 0; //masse kg
         
         this.content = []
-        this.height = this.setHeight()
+        this.height = 0
 
         this.space = this.initShelf(shelfData)
 
@@ -691,10 +692,10 @@ class Shelf{
     
 
     //position={front, width}   dimensions={front, width}
-    putInShelf = (position, dimensions, height, item, part) => {
-        if(!height){ height = 1 }
+    putInShelf = (position, dimensions, heightNb, item, part) => {
+        if(!heightNb){ heightNb = 1 }
         
-        this.content.push(new containerObject(item.name, position, dimensions, height, part.consommation.mensuelleMoy))
+        this.content.push(new containerObject(item.name, position, dimensions, heightNb, item, part.consommation.mensuelleMoy))
         this.priority = this.getPriorityIndex();
         for(let x = position.front; x < position.front + dimensions.front; x++){
             for(let y = position.width; y < position.width + dimensions.width; y++){
@@ -707,9 +708,13 @@ class Shelf{
         if(part.code.includes('EXV')){
             console.log(this.content)
         }
+        this.height = this.setHeight();
 
     }
     setHeight(){
+        let array = this.content.map(content => content.totalHeight ? content.totalHeight : 0)
+        array = array.sort((a, b) => { return b - a})
+        return array[0]
 
     }
     initShelf(shelfData){

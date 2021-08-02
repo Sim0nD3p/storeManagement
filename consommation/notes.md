@@ -31,7 +31,7 @@
 
 ## TO DO
 - new shelf distribution
-- fix bundle
+- fix bundle (bundle seems fiexd)
 - palette
 - fix double sided shelves with only 1 container on back side 
 - priority category

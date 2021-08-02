@@ -193,6 +193,16 @@ class DispayStore {
         console.log(`${totalParts} parts placed on shelves`)
     }
 
+    displayRacking(){
+        for(let i = 0; i < this.app.store.racking.length; i++){
+            term(`${this.app.store.racking[i].name} - ${this.app.store.racking[i].height}\n`)
+            for(let j = 0; j < this.app.store.racking[i].shelves.length; j++){
+                term.right(5); term(`${this.app.store.racking[i].shelves[j].name} - ${this.app.store.racking[i].shelves[j].priority}\n`)
+            }
+        }
+
+    }
+
 }
 
 
