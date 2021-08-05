@@ -565,6 +565,7 @@ class App {
             'Trouver contenants pour pieces',
             'console.log storage for all parts + export JSON',
             'Set nbPieces par emballage TF',
+            'Vérifier entreposage des pièces',
         ]
         term.singleColumnMenu(menuItems, { cancelable: true, keyBindings: { CTRL_Z: 'escape', ENTER: 'submit', UP: 'previous', DOWN: 'next' } }, (error, response) => {
             if (response !== undefined) {
@@ -697,6 +698,79 @@ class App {
                             }
                         }
                     }
+                }
+                else if(response.selectedIndex === 9){
+                    let baseRef = this.store.PFEP.map((part, index) => {
+                        if (part.family !== 'Consommable' && part !== undefined) {
+                            if(part.consommation.totalOrders.nbOrders > 5){
+                                if (part.class && part.class.includes('barr') == false) { return part.code }
+                                else if (!part.class) { return part.code }
+                                else return null
+                            }
+                            else if(part.family){
+                                if(part.family.includes('usin') || part.family.includes('assem')){
+                                    if (part.class && part.class.includes('barr') == false) { return part.code }
+                                    else if (!part.class) { return part.code }
+                                    else return null
+                                } else return null
+                            }else return null
+                        }
+                        else return null
+                    })
+                    baseRef = baseRef.filter((a) => a !== null)
+                    console.log(baseRef)
+                    //parts that have storage containers
+                    let partStorage = this.store.PFEP.map((part, index) => {
+                        if (part.storage.length !== 0) {
+                            if (part.family !== 'Consommable') {
+                                if (part.class && part.class.includes('barr') == false) { return part }
+                                else if(!part.class){ return part }
+                                else return null
+                            } else return null
+                        } else return null
+                    })
+                    partStorage = partStorage.filter((a) => a !== null)
+
+
+
+                    let array = [];
+                    for(let i = 0; i < this.store.racking.length; i++){
+                        for(let j = 0; j < this.store.racking[i].shelves.length; j++){
+                            let shelf = this.store.racking[i].shelves[j]
+                            for(let k = 0; k < shelf.content.length; k++){
+                                if(array.indexOf(shelf.content[k].name.split('_')[1]) == -1){
+                                    array.push(shelf.content[k].name.split('_')[1])
+                                }
+                            }
+                        }
+                    }
+
+                    let missingStorage = baseRef.map((part, index) => {
+                        if(array.indexOf(part) == -1){ return this.store.getItemFromPFEP(part) }
+                        else return null
+                    })
+                    missingStorage = missingStorage.filter((a) => a !== null)
+                    
+                    
+                    console.log(`${baseRef.length} parts should be placed overall`)
+                    console.log(`${array.length} parts in racking`)
+                    console.log(`${partStorage.length} parts have storage containers`)
+                    partStorage.map((part, index) => {
+                        if(array.indexOf(part.code) == -1){
+                            console.log(part.code, part.description, part.storage.length)
+                        }
+                    })
+
+                    console.log('----------------------------------')
+                    //console.log(baseRef.length)
+                    //console.dir(baseRef, {maxArrayLength: null})
+                    missingStorage.map((part) => {
+                        term.column(0); term(part.code);
+                        term.column(20); term(part.description.toString().substring(0, 25));
+                        term.column(50); term(part.family);
+                        term.column(80); term(part.class);
+                        term('\n')
+                    })
                 }
             }
 

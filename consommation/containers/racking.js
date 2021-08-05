@@ -14,14 +14,12 @@ class Racking{
     getTotalHeight(){
         let totalHeight = 0
         for(let i = 0; i < this.shelves.length; i++){ totalHeight += Number(this.shelves[i].height) }
-        console.log(`totalHeight is ${totalHeight}`)
         return totalHeight;
 
     }
     addShelf = (shelf) => {
         this.shelves.push(shelf)
         this.height = this.getTotalHeight();
-        console.log('add shelf to racking');
 
     }
 }

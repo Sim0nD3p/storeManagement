@@ -37,6 +37,16 @@
 - priority category
 - have same length shelf for same things
 
+
+# Problèmes parts
+- CAR (emballage)
+- collants
+- EXF extrusions
+- EXS extrusions
+- EXV extrusions
+- MAIN
+- SEA
+
 ## IMPORTANT RANDOM SHIT TO DO
 - masse extrusions
 - dessins manquants

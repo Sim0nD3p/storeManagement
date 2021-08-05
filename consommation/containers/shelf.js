@@ -659,20 +659,20 @@ class Shelf{
 
     
        this.content.map((container, index) => {
-            let data = container.getPosCoord(ratioL, ratioW);
+           let data = container.getPosCoord(ratioL, ratioW);
+           for(let x = data.position.front; x < data.position.front + data.dimensions.front; x++){
+               term.moveTo(padding + x, term.height - padding - data.position.width); term('-');
+               term.moveTo(padding + x, term.height - padding - (data.position.width + data.dimensions.width)); term('-')
+           }
+           for(let y = data.position.width; y < data.position.width + data.dimensions.width + 1; y++){
+               term.moveTo(padding + data.position.front, term.height - padding - y); term('|');
+               term.moveTo(padding + data.position.front + data.dimensions.front, term.height - padding - y); term('|')
+           }
             let name = container.name.split('_')
             let middleFront = data.position.front + data.dimensions.front / 2;
             let middleWidth = data.position.width + data.dimensions.width / 2;
             term.moveTo(middleFront - name[1].length/2 + padding, term.height - padding - middleWidth); term(`${name[1]}`);
-            term.moveTo(middleFront + padding, term.height - padding - middleWidth + 1); term(`(${container.height})`)
-            for(let x = data.position.front; x < data.position.front + data.dimensions.front; x++){
-                term.moveTo(padding + x, term.height - padding - data.position.width); term('-');
-                term.moveTo(padding + x, term.height - padding - (data.position.width + data.dimensions.width)); term('-')
-            }
-            for(let y = data.position.width; y < data.position.width + data.dimensions.width + 1; y++){
-                term.moveTo(padding + data.position.front, term.height - padding - y); term('|');
-                term.moveTo(padding + data.position.front + data.dimensions.front, term.height - padding - y); term('|')
-            }
+            term.moveTo(middleFront + padding, term.height - padding - middleWidth + 1); term(`(${container.height}) - ${Math.ceil(container.consommation)}`)
             
 
         })
