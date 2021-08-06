@@ -32,13 +32,31 @@ class ShelfManager{
     }
 
     /**
-     * @param {*prop} - length
+     * @param {*prop} - (length, priority)
      * @param {*} length 
      * @param {*} weight 
      * @returns index of the chosen shelf type
      */
-    choseShelf = (prop, length, weight, priority) => {
+    choseShelf = (prop, length, weight, priority, type) => {
+        term.column(5); term(`chosing shelf based on ${prop}\n`)
+        let options = this.app.store.racking.map((rack, index) => {
+            let totalPriority = 0;
+            let nbPriority = 0;
+            rack.shelves.map((shelf, index) => { if(isNaN(shelf.priority) == false){ totalPriority += shelf.priority; nbPriority++ } })
+            totalPriority = isNaN(totalPriority / nbPriority) ? 0 : totalPriority / nbPriority
+            return [rack.name, totalPriority, rack.height, rack.length, rack.contentType]
+        })
+
+        if (priority) {
+            if (priority !== 0) {
+                options = options.sort((a, b) => { return Math.abs(a[1] - priority) / a[1] - Math.abs(b[1] - priority) / b[1] })
+            } else { options = options.sort((a, b) => { return a[1] - b[1] }) }
+
+        }
         if(prop == 'length'){
+            term.column(5); term(`target length is ${length}\n`);
+            term.column(5); term(`options are:`); console.log(options)
+
             //returns spare length when shelfLength > objectLength
             let potential = this.unusedShelves.map((shelf, index) => {
                 if (shelf.length > length && shelf.qte > 0) { return [shelf.length - length, index] }
@@ -48,46 +66,73 @@ class ShelfManager{
             potential = potential.sort((a, b) => a[0] - b[0])
             return potential[0][1]; //the most tight shelf
         }
-        else if(prop == `container`){
-            let options = this.app.store.racking.map((rack, index) => {
-
-                let priorityArray = []
-                rack.shelves.map((shelf, index) => {
-                    if(isNaN(shelf.priority) == false){ priorityArray.push(shelf.priority) }
-                    //console.log(shelf.name, shelf.length, shelf.height, shelf.priority)
-                })
-
+        else if(prop == `priority`){
+            //build options => arrayOf[rack.name, totalPriority, rack.height, rack.length, rack.type]
+            /* let options = this.app.store.racking.map((rack, index) => {
                 let totalPriority = 0;
-                for(let i = 0; i < priorityArray.length; i++){ totalPriority += Number(priorityArray[i]) }
-                totalPriority = isNaN(totalPriority / priorityArray.length) ? 0 : totalPriority / priorityArray.length
-                return [rack.name, totalPriority, rack.height, rack.length]
-            })
+                let nbPriority = 0;
+                rack.shelves.map((shelf, index) => { if(isNaN(shelf.priority) == false){ totalPriority += shelf.priority; nbPriority++ } })
+                totalPriority = isNaN(totalPriority / nbPriority) ? 0 : totalPriority / nbPriority
+                return [rack.name, totalPriority, rack.height, rack.length, rack.type]
+            }) */
 
-            if(priority !== 0){
-                options = options.sort((a, b) => { return Math.abs(a[1] - priority)/a[1] - Math.abs(b[1] - priority)/b[1] })
-            } else { options = options.sort((a, b) => { return a[1] - b[1] }) }
+            //sorts options shelf.priority vs options.priority
+            
+
+            //console.log(this.app.store.racking)
+            //options = options.filter((a) => a[4] == type);  //filter type
+            term.column(5); term(`target priority is ${priority}\n`)
+            term.column(5); term('options are:'); console.log(options)
 
             
             
-            let targetLength;
-            let targetIndex = 0
-            options:
-            for(let i = 0; i < options.length; i++){
+            let potential = []
+            let targetIndex = -1
+            options:    //on choisi parmi les options [rack.name, totalPriority, rack.height, rack.length]
+            for(let i = 0; i < options.length; i++){    //options = [rack.name, totalPriority, rack.heigt, rack.length, rack.type]
                 for(let j = 0; j < this.unusedShelves.length; j++){
-                    if(this.unusedShelves[j].length == options[i][3] && this.unusedShelves[j].qte > 0 && options[i][2] < 1600){
-                        targetLength = this.unusedShelves[j]
-                        targetIndex = j;
-                        break options;
+                    if(this.unusedShelves[j].length == options[i][3] && this.unusedShelves[j].qte > 0){    //length, qte, type(removed)
+                        potential.push([options[i], j])
                     }
                 }
             }
+            
+            if(potential.length == 0){
+                //need new racking
+                let unusedShelves = [...this.unusedShelves]
+                unusedShelves = unusedShelves.sort((a, b) => { return b.qte - a.qte })
+                targetIndex = this.unusedShelves.findIndex((a) => a == unusedShelves[0]); //targetIndex
+            }
+            else {
+                for(let i = 0; i < potential.length; i++){
+                    //aglo to find potential good fit
+                    if(Math.abs(potential[i][1] - priority) / potential[i][1] < 0.80){      //!!! creates new racking when rel diff > 0.20 !!! might want to change
+                        targetIndex = potential[i][1];
+                        break;
+                    }
+                    
+
+
+                    
+                }
+                
+                
+            }
+            //console.log('potential')
+            //console.log(potential)
+            term.column(5); term(`this is the unused shelves\n`)
+            console.log(this.unusedShelves)
+            if(targetIndex == -1){
+                targetIndex = this.unusedShelves.findIndex((a) => a.qte > 0)
+
+            }
+            //^^^ NEED TO BE REMOVED ^^^
             return targetIndex
         }
     }
 
     //should return shelf
     createShelf(partsToPlace){
-        term('\n----- CREATING SHELF -----\n')
         let weightArray = []; let totalWeightArray = []; let containersArray = []; let totalContainerArray = []; let finalShelf; let priorityArray = []
         for(let i = 0; i < partsToPlace.length; i++){
             //weightArray
@@ -136,7 +181,7 @@ class ShelfManager{
                     let lengthArray = part.part.storage.map((container, index) => container.length).sort((a, b) => b - a)
                     return lengthArray[0]
                 })
-                let shelfIndex = this.choseShelf('length', maxLengthArray.sort((a, b) => b - a)[0])
+                let shelfIndex = this.choseShelf('length', maxLengthArray.sort((a, b) => b - a)[0], null, null, 'bundle')
 
                 
                 let shelfData = this.unusedShelves[shelfIndex]
@@ -151,7 +196,7 @@ class ShelfManager{
             case 'bac': {
 
 
-                let shelfIndex = this.choseShelf('container', null, null, totalPriority)
+                let shelfIndex = this.choseShelf('priority', null, null, totalPriority, 'bac')
                 let shelf = new Shelf(`shelf_${this.shelfQte.container}`, this.unusedShelves[shelfIndex], 'bac')
                 this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1
                 this.shelfQte.container++;
@@ -174,6 +219,11 @@ class ShelfManager{
 
                 break;
             }
+            case 'customShelf': {
+                //check priority for placement options CHOSESHELF
+
+                break;
+            }
             case 'pal': {
                 let shelf = new Shelf(`shelf_${this.app.store.shelves.length + 1}`, this.unusedShelves[2], 'bundle');
                 finalShelf = shelf
@@ -185,6 +235,8 @@ class ShelfManager{
 
         }
         this.app.store.shelves.push(finalShelf)
+        //term.column(5);
+        term(`created shelf ${finalShelf.name}, length ${finalShelf.length}\n`)
         return finalShelf
     }
 

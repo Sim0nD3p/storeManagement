@@ -64,6 +64,7 @@ class Shelf{
         
         this.content = []
         this.height = 0
+        this.baseHeight = undefined
 
         this.space = this.initShelf(shelfData)
 
@@ -689,6 +690,14 @@ class Shelf{
         })
         return shelfConsom / array.length
     }
+
+    isShelfFrontFull = () => {
+        let occupiedSpace = 0;
+        for(let i = 0; i < this.space.length; i++){
+            if(this.space[i][0] !== null){ occupiedSpace++ }
+        }
+        return occupiedSpace / this.space.length
+    }
     
 
     //position={front, width}   dimensions={front, width}
@@ -705,16 +714,13 @@ class Shelf{
             }
             
         }
-        if(part.code.includes('EXV')){
-            console.log(this.content)
-        }
         this.height = this.setHeight();
 
     }
     setHeight(){
         let array = this.content.map(content => content.totalHeight ? content.totalHeight : 0)
         array = array.sort((a, b) => { return b - a})
-        return array[0]
+        return array[0] + 100
 
     }
     initShelf(shelfData){

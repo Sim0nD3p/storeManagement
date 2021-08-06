@@ -47,7 +47,7 @@ class RackManager{
         MP = MP.sort(function(a, b){ return b.consoMens - a.consoMens })
         assemblages = assemblages.sort(function(a, b){ return a.class > b.class ? 1 : -1 })
 
-        return { MP: MP, assemblages, assemblages}
+        return { MP: MP, assemblages: assemblages}
     }
 
     filterParts(PFEP){
@@ -113,51 +113,108 @@ class RackManager{
         //console.log('end of requestNewShelf')
         let newShelf = this.shelfManager.createShelf(partsToPlace); //returns new Shelf
         //console.log(result.content)
-        this.placeNewShelf(newShelf)
+
+        //we gonna place the shelf when we know its height
+        //this.placeNewShelf(newShelf, partsToPlace)
         return newShelf
         
 
     }
 
-    createRacking(length){
-        let name = -'name1';
-        let type = 'type1';
-        let rack = new Racking(name, length, type)
 
-        return rack
+    /**
+     * 
+     * @param {array} partsPriority array of parts priority
+     * @returns array of average priority for parts
+     */
+    predictNewShelfPriority = (partsPriority) => {
+        partsPriority = partsPriority.filter((a) => a !== undefined && !isNaN(a) && a !== 0)
+        let sum = partsPriority.map((part, index) => {
+            let locSum = 0;
+            for(let i = 0; i <= index; i++){ locSum += partsPriority[i] }
+            return locSum / (index + 1)
+        })
+        let moyenne = 0;
+        if(sum.length > 0){
+            for(let i = 0; i < sum.length; i++){ moyenne += sum[i] }
+            moyenne = moyenne / sum.length
+        } 
+        return moyenne
     }
-    placeNewShelf(shelf) {
+    placeNewShelf(shelf, partsToPlace) {
+        let rackType = shelf.type == 'bac' ? 'mixed' : shelf.type;
+        //console.log(`shelf.type ${shelf.type}`)
+        //let shelfPriority = this.predictNewShelfPriority(partsToPlace.map(part => part.categorisation.consoMens))
+        for(let i = 0; i < this.app.store.racking.length; i++){
+            this.app.store.racking[i].height = this.app.store.racking[i].getTotalHeight();
+        }
+
+
+        let baseHeight = 0;
         let targetRack;
-        let potentialRacks = this.app.store.racking.map((rack, index) => {
+        let potentialRacks = this.app.store.racking.map((rack, index) => {  //finds potential racks (length, type)
             if (shelf.length == rack.length) { return rack }
             else return null
         })
 
-        if(potentialRacks.findIndex((a) => a !== null) == -1){
+        //console.log('potentialRacks')
+        //console.log(potentialRacks)
 
-            let rack = new Racking(`racking_${this.app.store.racking.length + 1}`, shelf.length, 'shelfTest')
-            //rack.addShelf(shelf)
+        if(potentialRacks.findIndex((a) => a !== null) == -1){  //si aucun potential rack => create new rack
+            term.column(5); term(`no options available for length ${shelf.length}\n`)
+            let rack = new Racking(`racking_${this.app.store.racking.length + 1}`, shelf.length, rackType)
             this.app.store.racking.push(rack)
             targetRack = rack
         }
         else{
-            let potential = potentialRacks.filter((a) => a !== null && a.length == shelf.length);
-            let targetRackName = undefined
-            for(let i = 0; i < potential.length; i++){ if(potential[i].height < 1600){ targetRackName = potential[i].name; break; } }
-            
-            if (targetRackName == undefined) {
-                let rack = new Racking(`racking_${this.app.store.racking.length + 1}`, shelf.length, 'shelfTest')
-                //rack.addShelf(shelf)
-                targetRack = rack
-                this.app.store.racking.push(rack)
-                
+            potentialRacks = potentialRacks.filter((a) => a !== null);   //filters potentialRacks (null)
+            //console.log('potentialRacking')
+            //console.log(potentialRacks)
+
+
+            let rackName;
+            term.column(5); term('potential racking are:\n')
+            potentialRacks.map(rack => { term.column(10); term(`${rack.name}, ${rack.length}, ${rack.height}, ${rack.contentType}\n`) })
+
+            let options = potentialRacks.map((rack, index) => {
+                return [rack.name, rack.searchPlace(shelf)]
+            })
+            term.column(5); term(`options are: \n`)
+            options.map(option => { term.column(10); term(`${option[0]}, ${option[1]}\n`)})
+            for(let i = 0; i < potentialRacks.length; i++){
+                let place = potentialRacks[i].searchPlace(shelf)
+                if(!isNaN(place) && rackType == potentialRacks[i].contentType){
+                    baseHeight = place
+                    targetRack = this.getRacking(potentialRacks[i].name)
+        
+                    
             }
-            else {
-                targetRack = this.getRacking(targetRackName)
+                //ALGO TO FIND BEST POTENTIAL RACK
+                //nb of shelf already on rack => priorityZone
+                //we got to check for priority (consomMens)
+                
+
+
+
+
+                //console.log(potentialRacks[i].shelves.length)
+                if(potentialRacks[i].shelves.length <= 5){
+//                    targetRack = this.getRacking(potentialRacks[i].name)
+
+                } 
+
+            }
+            
+            if (targetRack == undefined) {
+                let rack = new Racking(`racking_${this.app.store.racking.length + 1}`, shelf.length, rackType)
+                targetRack = rack
+                this.app.store.racking.push(rack)                
             }
         }
-        targetRack.addShelf(shelf)
-        term(`\n--- New racking (${targetRack.name}, ${targetRack.length}) ---\n`)
+        //targetRack.getBlocs(shelf)
+        
+        targetRack.addShelf(shelf, baseHeight)
+        term(`\nshelf added to racking (${targetRack.name}, ${targetRack.length})\n`)
 
     }
 
@@ -192,8 +249,20 @@ class RackManager{
             term(`${this.app.store.shelves.length} shelves in store, ${potentialShelves.filter(a => a !== null).length} potential shelves\n`)
 
             if(potentialShelves.findIndex((shelf) => shelf !== null) == -1){
+                term('\n----- CREATING SHELF -----\n')
                 newShelf = true;
-                shelf = this.requestNewShelf(partList, i);  //returns shelf
+                shelf = this.requestNewShelf(partList, i);  //returns new shelf
+
+
+                let lostShelf = null
+                let u = 0;
+                while (lostShelf == null & u < this.app.store.shelves.length){
+                    if(this.app.store.shelves[u].isShelfFrontFull() > 0.50 && this.app.store.shelves[u].baseHeight == undefined){
+                        term(`\nplacing shelf (${this.app.store.shelves[u].name}), length: ${this.app.store.shelves[u].length}\n`)
+                        this.placeNewShelf(this.app.store.shelves[u])
+                    }
+                    u++
+                }
             }
 
             else {
@@ -256,16 +325,7 @@ class RackManager{
                     }
 
                     console.log(part.storage.length)
-
-                    console.log(part.code, partList[i].code)
-
-
-
-
-                    
-
-                    console.log(`${partList[i].storage.length} containers`)
-                    console.log(partList[i].storage[0])
+                    //console.log(partList[i].storage[0])
 
 
 
