@@ -19,6 +19,7 @@ const containersData = require('./containers/containerData');
 const ExportData = require('./exportData');
 const nbPieces = require('./nbPieces')
 const DisplayStore = require('./displayStore');
+const data2021_08_06 = require
 
 const List = require('./draftInput');
 //const prompt = require('prompt-sync')({ sigint: true });
@@ -556,16 +557,17 @@ class App {
         this.clearScreen();
         this.lastScreen.screen = 'home';
         let menuItems = [
-            'mettre à jour les données de consommation du PFEP',
-            'console.log PFEP',
-            'Calculer stock de sécurité',
-            'console.log(store)',
-            'Convertir , en . pour dimensions',
-            'Rechercher PFEP',
-            'Trouver contenants pour pieces',
-            'console.log storage for all parts + export JSON',
-            'Set nbPieces par emballage TF',
+            'mettre à jour les données de consommation du PFEP',                            
+            'console.log PFEP',                         
+            'Calculer stock de sécurité',                           
+            'console.log(store)',                           
+            'Convertir , en . pour dimensions',                         
+            'Rechercher PFEP',                          
+            'Trouver contenants pour pieces',                           
+            'console.log storage for all parts + export JSON',                          
+            'Set nbPieces par emballage TF',                            
             'Vérifier entreposage des pièces',
+            'getData 2021-08-06 (DEV ONLY)'                          
         ]
         term.singleColumnMenu(menuItems, { cancelable: true, keyBindings: { CTRL_Z: 'escape', ENTER: 'submit', UP: 'previous', DOWN: 'next' } }, (error, response) => {
             if (response !== undefined) {
@@ -771,6 +773,35 @@ class App {
                         term.column(80); term(part.class);
                         term('\n')
                     })
+                }
+                else if(response.selectedIndex === 10){
+                    console.log('dasdas')
+                    fs.readFile('../ENTRÉE/test.json', 'utf8', (err, jsonString) => {
+                        if(err){ console.log(err) }
+                        else{
+                            let json = JSON.parse(jsonString);
+
+                            json.map((part, index) => {
+                                let item = this.store.getItemFromPFEP(part.CODE)
+                                let utilite = []
+                                let options = ['TS', 'TE', 'TW', 'TH', 'TF', 'SAE', 'SEO']
+                                if(part && part.UTILITE){
+                                    for(let i = 0; i < options.length; i++){
+                                        if(part.UTILITE.toString().includes(options[i])){ utilite.push(options[i]) }
+                                    }
+                                    this.store.getItemFromPFEP(part.CODE).utilite = utilite
+                                }
+/* 
+
+                                if(part !== undefined && part.UTILITE !== undefined){
+                                    console.log(part.UTILITE)
+                                }
+
+                                 */
+                            })
+                        }
+                    })
+
                 }
             }
 
