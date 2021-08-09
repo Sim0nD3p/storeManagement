@@ -282,6 +282,8 @@ class RackManager{
                 if(place !== false){
                     console.log(place)
                     term.green(`part successfully placed\n`)
+                    console.log(partList[i].storage.length)
+                    console.log(place.length)
                     for(let j = 0; j < place.length; j++){
                         shelf.putInShelf(place[j][0], place[j][1], place[j][2], partList[i].storage[j], partList[i])                
                     }

@@ -19,8 +19,10 @@ const containersData = require('./containers/containerData');
 const ExportData = require('./exportData');
 const nbPieces = require('./nbPieces')
 const DisplayStore = require('./displayStore');
+const Bundle = require('./containers/bundle');
 const data2021_08_06 = require
 const storageData = require('./storageData')
+const bundleSize = require('./containers/bundleSize');
 
 const List = require('./draftInput');
 //const prompt = require('prompt-sync')({ sigint: true });
@@ -569,7 +571,8 @@ class App {
             'Set nbPieces par emballage TF',                            
             'Vérifier entreposage des pièces',
             'getData 2021-08-06 (DEV ONLY)',
-            'Fix "-LA" history'                     
+            'Fix "-LA" history',
+            'Bundle specs'                   
         ]
         term.singleColumnMenu(menuItems, { cancelable: true, keyBindings: { CTRL_Z: 'escape', ENTER: 'submit', UP: 'previous', DOWN: 'next' } }, (error, response) => {
             if (response !== undefined) {
@@ -872,6 +875,41 @@ class App {
                             }
                         }
                     }
+                }
+                else if(response.selectedIndex === 12){
+                    let profiles = []
+                    this.store.PFEP.map((part, index) => {
+                        if(part.family == 'Extrusion' && part.code.includes('EX')){
+                            if(profiles.findIndex((a) => a[0] == part.code.substring(0, 6)) == -1){
+                                profiles.push([part.code.substring(0, 6), index])
+                            }
+                        }
+                    })
+                    console.log(profiles)
+                    console.log(bundleSize[1])
+                    let array = profiles.map((profile, index) => {
+                        if(bundleSize.findIndex((a) => a.code == profile[0]) !== -1){
+                            let tab = bundleSize.findIndex((a) => a.code == profile[0])
+                            let contentData = {
+                                name: `test_${index}`,
+                                code: profile[0],
+                                specs: this.store.PFEP[profile[1]].specs,
+                                qte: 1000
+                            }
+                            let bundle = new Bundle(contentData)
+                            return {
+                                code: bundleSize[tab].code,
+                                width: bundle.width,
+                                widthNb: bundle.widthNb,
+                                heightNb: bundle.heightMaxNb,
+                                height: bundle.height,
+                                item_width_height: `${contentData.specs.width}, ${contentData.specs.height}`
+                            }
+                        }
+                        else return `error on profile ${profile[0]}`
+                    })
+                    console.log(array)
+
                 }
             }
 

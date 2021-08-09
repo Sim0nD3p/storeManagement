@@ -92,6 +92,7 @@ class Shelf{
                 let option = []
                 for(let i = 0; i < containerCount; i++){ option.push(HORIZONTAL) }
                 orientationArray.push(option);
+                console.log(orientationArray)
                 result = this.searchPlaceForBundle(item)
             }
             return result
@@ -241,6 +242,9 @@ class Shelf{
             }
             else {
                 let coordArray = getCoord(bestOption, blocs);
+                if(coordArray.length > item.storage.length){
+                    coordArray = coordArray.slice(0, item.storage.length);  //QUICK FIX (algo was returning best option for filling up the shelf with containers so it was possible to have more placement than containers)
+                }
                 return coordArray
 
             }
@@ -703,6 +707,8 @@ class Shelf{
     //position={front, width}   dimensions={front, width}
     putInShelf = (position, dimensions, heightNb, item, part) => {
         if(!heightNb){ heightNb = 1 }
+        console.log(item)
+        console.log('^^item')
         
         this.content.push(new containerObject(item.name, position, dimensions, heightNb, item, part.consommation.mensuelleMoy))
         this.priority = this.getPriorityIndex();

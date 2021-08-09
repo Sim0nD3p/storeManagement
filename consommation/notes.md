@@ -39,52 +39,17 @@
 
 
 
-## TO DO 2021-08-09
-- custom shelf
-- entrer infos liste
+## TO DO 2021-08-10
 - optimize bundle length vs shelf length for small bundle
+- FUCKING BUNDLES
+- entrer infos liste
+- custom shelf
 
 
-CONTINER STORAGEDATA
-
-
-
-
-## Optimization problem
-max accessHeight for bac in racking
-place bundle over bac
-- variables height & accessHeight
-const limitBac = number
-
-
-FAIRE FICHIER CONSTANTES POUR REGLAGES CHARGE, HAUTEUR, VARIABLES ALGO
-
-placeBundleOverBac(){
-    si accessHeight du plus haut element > limit 
-        checker le plus haut element (height + accessHeight) et place au dessus
-    else
-        placer au dessus de limit
-}
-placeBac(){
-    checker place entre 0 et limite, comp avec height du shelf
-
-}
-
-deal with 2accessSides
-accessSide
-    - bac : 1 seul accessSide lorsque mainType === mixed
-    - bundle: 1 seul access Side
-    access shelf on different sides for bundle and bac on mixed racking
-
-mainType form racking (bac, bundle)
-    - mainType === bac : bac uniquement
-    - mainType === bundle : bundle uniquement 
-    - mainType === mixed : bac et bundle possible over la limite accessHeight
 
 
 
 # Shelf algorithm improvement:
-- return number left ans position when containers doesn't all fit in shelf
 - fix single container on back
 
 # Problèmes parts
