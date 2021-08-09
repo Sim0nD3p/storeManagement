@@ -80,8 +80,16 @@ class Store{
 
 
 
-    storeManagerDesk(type, part, qte, data){
-        let containers;
+
+    /**
+     * Fills containers
+     * @param {string} type - container type
+     * @param {*object} part - part object from PFEP
+     * @param {*number} qte - qte to place
+     * @param {*} data 
+     */
+    storeManagerDesk(type, part, qte, data) {
+        let containers = []
         switch(type){
             case 'bundle': {
                 containers = this.storeManager.bundleManager(part, qte)
@@ -102,6 +110,7 @@ class Store{
         }
         this.containers = this.containers.concat(containers);
         this.getItemFromPFEP(part.code).storage = containers;
+        return containers
     }
 
     generateRacking(){

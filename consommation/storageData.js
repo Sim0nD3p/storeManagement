@@ -300,8 +300,8 @@ const storageData = {
         storage: true
     },
     "FI20-0011LP": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "FI20-0012LP": {
@@ -420,8 +420,8 @@ const storageData = {
         storage: true
     },
     "MAIN150A-LA": {
-        container: "etagereMain",
-        nbPieces: "",
+        container: "storageMain",
+        nbPieces: "unlimited",
         storage: false
     },
     "MAIN150A-RU": {
@@ -430,62 +430,62 @@ const storageData = {
         storage: false
     },
     "MAIN215B-LA": {
-        container: "etagereMain",
-        nbPieces: "",
+        container: "storageMain",
+        nbPieces: "unlimited",
         storage: false
     },
     "MAIN215B-RU": {
-        container: "etagereMain",
-        nbPieces: "",
+        container: "storageMain",
+        nbPieces: "unlimited",
         storage: false
     },
     "MAIN215C-LA": {
-        container: "etagereMain",
-        nbPieces: "",
+        container: "storageMain",
+        nbPieces: "unlimited",
         storage: false
     },
     "MAIN215C-RU": {
-        container: "etagereMain",
+        container: "storageMain",
         nbPieces: "",
         storage: false
     },
     "MAIN215D-LA": {
-        container: "etagereMain",
+        container: "storageMain",
         nbPieces: "",
         storage: false
     },
     "MAIN215D-RU": {
-        container: "etagereMain",
+        container: "storageMain",
         nbPieces: "",
         storage: false
     },
     "MAIN261A-LA": {
-        container: "etagereMain",
+        container: "storageMain",
         nbPieces: "",
         storage: false
     },
     "MAIN261A-RU": {
-        container: "etagereMain",
+        container: "storageMain",
         nbPieces: "",
         storage: false
     },
     "MAIN261B-LA": {
-        container: "etagereMain",
+        container: "storageMain",
         nbPieces: "",
         storage: false
     },
     "MAIN261B-RU": {
-        container: "etagereMain",
+        container: "storageMain",
         nbPieces: "",
         storage: false
     },
     "MAIN295A-LA": {
-        container: "etagereMain",
+        container: "storageMain",
         nbPieces: "",
         storage: false
     },
     "MAIN295A-RU": {
-        container: "etagereMain",
+        container: "storageMain",
         nbPieces: "",
         storage: false
     },
@@ -499,35 +499,41 @@ const storageData = {
         nbPieces: "35",
         storage: false
     },
+    //emballage
     "PAPIER-EMB": {
         container: "EMBALLAGE",
         nbPieces: "40",
         storage: false
     },
     "PA-YYLP-001U": {
-        container: "",
-        nbPieces: "",
-        storage: false
+        container: "bac1",
+        nbPieces: "singleBac",
+        storage: false,
+        checkup: true,
     },
     "PI-FXLP-009U": {
         container: "",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true,
     },
     "POICA-5''": {
         container: "RACKING",
         nbPieces: "1000",
-        storage: false
+        storage: false,
+        checkup: true,
     },
     "PU-0001S-2": {
         container: "collant",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true,
     },
     "PU-0001SC": {
         container: "",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true,
     },
     "QPYY-4.0-001": {
         container: "",
@@ -542,7 +548,8 @@ const storageData = {
     "RUBAN-BELL2": {
         container: "",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true
     },
     "SAC-3X5": {
         container: "AU DESUS DU RACK A BOULON",
@@ -560,8 +567,8 @@ const storageData = {
         storage: false
     },
     "SEA205-004323": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEA205-005012": {
@@ -570,13 +577,13 @@ const storageData = {
         storage: true
     },
     "SEA205-005036": {
-        container: "",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: "singlebac",
         storage: false
     },
     "SEA205-005147": {
-        container: "",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEA210-004226": {
@@ -584,10 +591,12 @@ const storageData = {
         nbPieces: "singleBac",
         storage: true
     },
+    //axe avec bras pivot (long)
     "SEA210-004249": {
-        container: "",
+        container: "customShelf",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true
     },
     "SEA210-004262": {
         container: "bac2",
@@ -599,55 +608,66 @@ const storageData = {
         nbPieces: "singleBac",
         storage: true
     },
+    //axe avec bras pivot TE
     "SEA210-0D4244": {
-        container: "",
+        container: "customShelf",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true,
     },
     "SEA215-003011": {
-        container: "restant",
+        container: "customShelf",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true,
     },
     "SEA215-005048": {
-        container: "",
+        container: "customShelf",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true,
     },
     "SEA215-005071": {
-        container: "",
+        container: "customshelf",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true,
     },
     "SEA215-0D3012": {
-        container: "restant",
+        container: "customShelf",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true,
     },
     "SEA215-0G3012": {
-        container: "restant",
+        container: "customShelf",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true
     },
     "SEA220-003288": {
         container: "",
         nbPieces: "",
-        storage: false
+        storage: false,
+        drop: true
     },
     "SEA220-003291": {
         container: "",
         nbPieces: "",
-        storage: false
+        storage: false,
+        drop: true
     },
     "SEA220-003292": {
         container: "",
         nbPieces: "",
-        storage: false
+        storage: false,
+        drop: true
     },
     "SEA225-003793": {
-        container: "restant",
+        container: "customShelf",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true
     },
     "SEA240-002499": {
         container: "bac1",
@@ -680,22 +700,24 @@ const storageData = {
         storage: true
     },
     "SEA240-005047": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEA245-0D3051": {
-        container: "",
+        container: "extrusionUsine",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true,
     },
     "SEA245-0G3051": {
-        container: "",
+        container: "extrusionUsine",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true,
     },
     "SEA250-005100": {
-        container: "",
+        container: "extrusionUsine",
         nbPieces: "",
         storage: false
     },
@@ -710,18 +732,20 @@ const storageData = {
         storage: true
     },
     "SEA260-005081": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
+    //TS-59 fini? 
     "SEA270-003644": {
         container: "",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true
     },
     "SEA285-005074": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEA285-0D3597": {
@@ -740,98 +764,98 @@ const storageData = {
         storage: false
     },
     "SEO205-001530": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO205-004420": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO205-004690": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO205-004840": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO205-004960": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO205-005018": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO205-005019": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO205-005111": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO205-005123": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO205-005128": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO205-005131": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO205-005132": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-3490-A": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-3490-B": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-3830": {
-        container: "restant",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4010": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4010-M": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4030": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4090": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singlebac",
         storage: false
     },
     "SEO-4180": {
@@ -955,8 +979,8 @@ const storageData = {
         storage: false
     },
     "SEP130-004262": {
-        container: "",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: "singlebac",
         storage: false
     },
     "SEP130-0L4272": {
@@ -980,8 +1004,8 @@ const storageData = {
         storage: true
     },
     "SEP205-004344": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP205-004375": {
@@ -1000,13 +1024,13 @@ const storageData = {
         storage: true
     },
     "SEP205-004382": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP205-004384": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP205-004385": {
@@ -1015,18 +1039,18 @@ const storageData = {
         storage: false
     },
     "SEP205-004387": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP205-004404": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP205-004407": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP205-004411": {
@@ -1040,18 +1064,18 @@ const storageData = {
         storage: true
     },
     "SEP205-004459": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP205-004460": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP205-004461": {
-        container: "",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP205-004477": {
@@ -1080,13 +1104,13 @@ const storageData = {
         storage: true
     },
     "SEP205-005031": {
-        container: "",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP205-005154": {
-        container: "",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: "singlebac",
         storage: false
     },
     "SEP205-0L4430": {
@@ -1115,9 +1139,10 @@ const storageData = {
         storage: true
     },
     "SEP210-004332": {
-        container: "etagere?",
+        container: "bac2",
         nbPieces: 17,
-        storage: false
+        storage: false,
+        checkup: true
     },
     "SEP210-004345": {
         container: "bundleUsine",
@@ -1125,38 +1150,42 @@ const storageData = {
         storage: false
     },
     "SEP210-005058": {
-        container: "RACKING TS",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP215-004308": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP215-004309": {
         container: "",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true,
     },
     "SEP220-004292": {
-        container: "etagere?",
+        container: "",
         nbPieces: "",
-        storage: false
+        storage: false,
+        chcekcup: true,
     },
+    //cover porte supper escabeau arriere
     "SEP230-003659": {
         container: "restant",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true
     },
     "SEP240-004293": {
-        container: "etagere?",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP240-004297": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP240-004308": {
@@ -1322,7 +1351,8 @@ const storageData = {
     "SEP255-004263": {
         container: "RACKING ORANGE",
         nbPieces: "",
-        storage: false
+        storage: false,
+        checkup: true,
     },
     "SEP255-004337": {
         container: "etagereMain",
@@ -1385,23 +1415,23 @@ const storageData = {
         storage: true
     },
     "SEP260-005039": {
-        container: "PALETTE RACKING TS",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP260-005041": {
-        container: "GRAND BAC RACKING ORANGE",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP260-005042": {
-        container: "BAC RACKING TW",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP260-005052": {
-        container: "",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP260-005053": {
@@ -1420,13 +1450,13 @@ const storageData = {
         storage: false
     },
     "SEP260-0D4354": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP260-0D4379": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP260-0D4456": {
@@ -1440,8 +1470,8 @@ const storageData = {
         storage: false
     },
     "SEP260-0G4379": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP260-0G4456": {
@@ -1455,13 +1485,13 @@ const storageData = {
         storage: false
     },
     "SEP260-0L4429": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP260-0L4435": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP270-005059": {
@@ -1500,8 +1530,8 @@ const storageData = {
         storage: true
     },
     "SEP280-004358": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP280-004369": {
@@ -1535,8 +1565,8 @@ const storageData = {
         storage: false
     },
     "SEP285-004291": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP285-004292": {
@@ -1545,8 +1575,8 @@ const storageData = {
         storage: false
     },
     "SEP285-004296": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP285-005055": {
@@ -1585,8 +1615,8 @@ const storageData = {
         storage: false
     },
     "SEP3018-LA": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3027": {
@@ -1600,8 +1630,8 @@ const storageData = {
         storage: true
     },
     "SEP3069-LA": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3071": {
@@ -1620,13 +1650,13 @@ const storageData = {
         storage: true
     },
     "SEP3134": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3135": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3154": {
@@ -1705,8 +1735,8 @@ const storageData = {
         storage: true
     },
     "SEP3297": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3306": {
@@ -1720,8 +1750,8 @@ const storageData = {
         storage: false
     },
     "SEP3323-LA": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3324": {
@@ -1785,13 +1815,13 @@ const storageData = {
         storage: true
     },
     "SEP3461": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3464-LA": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3467": {
@@ -1800,8 +1830,8 @@ const storageData = {
         storage: false
     },
     "SEP3469-LA": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3471": {
@@ -1825,13 +1855,13 @@ const storageData = {
         storage: true
     },
     "SEP3516": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3518": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3519": {
@@ -1840,8 +1870,8 @@ const storageData = {
         storage: true
     },
     "SEP3520": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3523": {
@@ -1855,18 +1885,18 @@ const storageData = {
         storage: false
     },
     "SEP3526": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3529": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3531": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3534": {
@@ -1880,8 +1910,8 @@ const storageData = {
         storage: false
     },
     "SEP3538": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3539": {
@@ -1890,8 +1920,8 @@ const storageData = {
         storage: true
     },
     "SEP3541": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3542": {
@@ -1900,8 +1930,8 @@ const storageData = {
         storage: true
     },
     "SEP3544": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3550": {
@@ -1915,8 +1945,8 @@ const storageData = {
         storage: true
     },
     "SEP3554": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3555": {
@@ -1930,28 +1960,28 @@ const storageData = {
         storage: true
     },
     "SEP3558": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3559D": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3559G": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3560": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3561": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3562": {
@@ -1965,8 +1995,8 @@ const storageData = {
         storage: true
     },
     "SEP3573": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3574": {
@@ -1975,8 +2005,8 @@ const storageData = {
         storage: false
     },
     "SEP3591": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3595": {
@@ -2010,8 +2040,8 @@ const storageData = {
         storage: false
     },
     "SEP3614G": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3658": {
@@ -2285,18 +2315,18 @@ const storageData = {
         storage: false
     },
     "SEP3903": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3904": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3905": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3918": {
@@ -2330,8 +2360,8 @@ const storageData = {
         storage: true
     },
     "SEP3922-LA": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3923": {
@@ -2365,8 +2395,8 @@ const storageData = {
         storage: true
     },
     "SEP3945": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3946-LA": {
@@ -2380,8 +2410,8 @@ const storageData = {
         storage: true
     },
     "SEP3953": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3954": {
@@ -2395,28 +2425,28 @@ const storageData = {
         storage: true
     },
     "SEP3961-LA": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3962": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3963": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3964-LA": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3972": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3978": {
@@ -2440,8 +2470,8 @@ const storageData = {
         storage: false
     },
     "SEP3982": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP3986": {
@@ -2465,8 +2495,8 @@ const storageData = {
         storage: true
     },
     "SEP4034": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4036-D": {
@@ -2495,8 +2525,8 @@ const storageData = {
         storage: true
     },
     "SEP4046": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4056": {
@@ -2565,33 +2595,33 @@ const storageData = {
         storage: true
     },
     "SEP4075": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4077": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4078": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4079": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4083": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: true
     },
     "SEP4084": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4085": {
@@ -2600,8 +2630,8 @@ const storageData = {
         storage: true
     },
     "SEP4088": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4092": {
@@ -2610,13 +2640,13 @@ const storageData = {
         storage: true
     },
     "SEP4093": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4095": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4114": {
@@ -2635,18 +2665,18 @@ const storageData = {
         storage: false
     },
     "SEP4118": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4119-LA": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4120": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4121": {
@@ -2660,8 +2690,8 @@ const storageData = {
         storage: true
     },
     "SEP4136": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4137": {
@@ -2670,8 +2700,8 @@ const storageData = {
         storage: true
     },
     "SEP4138": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4139": {
@@ -2685,13 +2715,13 @@ const storageData = {
         storage: true
     },
     "SEP4178": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4179": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4181-LA": {
@@ -2750,13 +2780,13 @@ const storageData = {
         storage: true
     },
     "SEP4202-D": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4202-G": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4212-M3": {
@@ -2800,28 +2830,28 @@ const storageData = {
         storage: true
     },
     "SEP4305": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4321-D": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4321-G": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4323-D": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4323-G": {
-        container: "bac2FromBac1",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "bac2FromBac1",
         storage: true
     },
     "SEP4325": {

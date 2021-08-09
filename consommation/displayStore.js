@@ -173,8 +173,12 @@ class DispayStore {
     displayShelfContent(){
         term.bold('Contenu des étagères\n')
         for(let i = 0; i < this.app.store.shelves.length; i++){
-            console.log(this.app.store.shelves[i].name)
-            console.log(this.app.store.shelves[i].content)
+            term(`${this.app.store.shelves[i].name}\n`)
+            for(let j = 0; j < this.app.store.shelves[i].content.length; j++){
+                term.column(5); term(`${this.app.store.shelves[i].content[j].name}`);
+                term.column(35); term(`${this.app.store.shelves[i].content[j].consommation}`)
+                term('\n')
+            }
             console.log('--------------------\n')
         }
 

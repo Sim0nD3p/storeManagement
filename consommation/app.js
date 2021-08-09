@@ -564,7 +564,7 @@ class App {
             'console.log(store)',                           
             'Convertir , en . pour dimensions',                         
             'Rechercher PFEP',                          
-            'Trouver contenants pour pieces',                           
+            'CONTENANTS PIECES',                           
             'console.log storage for all parts + export JSON',                          
             'Set nbPieces par emballage TF',                            
             'Vérifier entreposage des pièces',
@@ -655,6 +655,7 @@ class App {
                             }
                             else {
                                 term.red('Piece introuvable dans le PFEP \n')
+                                
                             }
 
 
@@ -663,6 +664,36 @@ class App {
                 }
                 else if (response.selectedIndex === 6) {
                     //this.categorizeParts()
+                    console.log('CONTENANTS POUR PIECES')
+
+                    
+
+                    for(const code in storageData){
+                        this.store.getItemFromPFEP(code.toString()).emballage.TF.type = storageData[code].container
+                        this.store.getItemFromPFEP(code.toString()).emballage.TF.nbPieces = isNaN(Number(storageData[code].nbPieces)) ? storageData[code].nbPieces : Number(storageData[code].nbPieces);
+                    }
+
+
+                    for(let i = 0; i < this.store.PFEP.length; i++){
+                        if(this.store.PFEP[i].code.includes('SEO')){
+                            console.log(this.store.PFEP[i].code)
+                            this.store.PFEP[i].emballage.TF.type = 'bac2';
+                            this.store.PFEP[i].emballage.TF.nbPieces = 'singleBac'
+                            this.store.PFEP[i].qteMax = 'singleBac'
+                        }
+                    }
+
+
+                    for(let i = 0; i < this.store.PFEP.length; i++){
+                        let containers = this.store.storeManagerDesk(
+                            this.store.PFEP[i].emballage.TF.type,
+                            this.store.PFEP[i],
+                            isNaN(this.store.PFEP[i].qteMax) ? this.store.PFEP[i].qteMax : Math.ceil(this.store.PFEP[i].qteMax)
+                        )
+
+                        console.log(`${this.store.PFEP[i].code} has ${containers.length} containers`)
+                    }
+
 
 
                 }
@@ -733,6 +764,11 @@ class App {
                         if(typeof part == 'number'){ return part }
                         else return null
                     })
+
+                    //RENFORT == EXTRUSION USINE
+                    //SEO => bac2, singleBac
+
+
                     baseRef = baseRef.filter((a) => typeof a !== 'number')
                     failed = failed.filter((a) => a !== null)
                     failed = failed.map(i => this.store.PFEP[i])
@@ -764,6 +800,8 @@ class App {
                         if(part.storage.length == 0){ noStorage = { ...noStorage, [part.code]: part} }
                     });
                     exportData.exportJSON(noStorage, 'noStorage', '../SORTIE')
+                    let partStorage = this.store.PFEP.map((part) => {if(part.storage.length > 0){ return part } else return null }); partStorage = partStorage.filter((a) => a !== null)
+                    console.log(`partStorage.length: ${partStorage.length}`)
 
                     let placedInRacking = [];
                     this.store.racking.map((rack, index) => {
@@ -778,11 +816,8 @@ class App {
                     console.log(placedInRacking)
 
 
-                    let i = 0
-                    for(const code in storageData){
-                        console.log(code, i);
-                        i++
-                    }
+
+                    
 
                     
 
@@ -1129,7 +1164,7 @@ class App {
         this.store.importPFEPJSON();
 
         setTimeout(() => {
-            this.categorizeParts()
+            //this.categorizeParts()
             this.home()
 
         }, 150)

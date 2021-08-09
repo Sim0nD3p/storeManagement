@@ -38,6 +38,18 @@
 - have same length shelf for same things
 
 
+
+## TO DO 2021-08-09
+- custom shelf
+- entrer infos liste
+- optimize bundle length vs shelf length for small bundle
+
+
+CONTINER STORAGEDATA
+
+
+
+
 ## Optimization problem
 max accessHeight for bac in racking
 place bundle over bac
@@ -72,7 +84,7 @@ mainType form racking (bac, bundle)
 
 
 # Shelf algorithm improvement:
-- return number left ans position when containers doesn't all fit in shelf - DONE
+- return number left ans position when containers doesn't all fit in shelf
 - fix single container on back
 
 # Problèmes parts
