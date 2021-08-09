@@ -72,7 +72,7 @@ mainType form racking (bac, bundle)
 
 
 # Shelf algorithm improvement:
-- return number left ans position when containers doesn't all fit in shelf
+- return number left ans position when containers doesn't all fit in shelf - DONE
 - fix single container on back
 
 # Problèmes parts
