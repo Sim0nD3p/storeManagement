@@ -20,6 +20,7 @@ const ExportData = require('./exportData');
 const nbPieces = require('./nbPieces')
 const DisplayStore = require('./displayStore');
 const data2021_08_06 = require
+const storageData = require('./storageData')
 
 const List = require('./draftInput');
 //const prompt = require('prompt-sync')({ sigint: true });
@@ -567,7 +568,8 @@ class App {
             'console.log storage for all parts + export JSON',                          
             'Set nbPieces par emballage TF',                            
             'Vérifier entreposage des pièces',
-            'getData 2021-08-06 (DEV ONLY)'                          
+            'getData 2021-08-06 (DEV ONLY)',
+            'Fix "-LA" history'                     
         ]
         term.singleColumnMenu(menuItems, { cancelable: true, keyBindings: { CTRL_Z: 'escape', ENTER: 'submit', UP: 'previous', DOWN: 'next' } }, (error, response) => {
             if (response !== undefined) {
@@ -702,77 +704,88 @@ class App {
                     }
                 }
                 else if(response.selectedIndex === 9){
+                    console.log(`PFEP has ${this.store.PFEP.length} parts`)
+
+                    let array = []
+
                     let baseRef = this.store.PFEP.map((part, index) => {
-                        if (part.family !== 'Consommable' && part !== undefined) {
-                            if(part.consommation.totalOrders.nbOrders > 5){
-                                if (part.class && part.class.includes('barr') == false) { return part.code }
-                                else if (!part.class) { return part.code }
-                                else return null
+                        if(part !== undefined && part.family !== 'Consommable'){
+                            if(part.consommation.totalOrders.nbOrders > 2){
+                                if(part.class && part.class.includes('barr') == false){ return part }
+                                else if(!part.class){ return part }
+                                else return index
                             }
+                            else if(part.code.includes('SEA') || part.code.includes('SEO')){ return part}
+                            else if(part.storage.length > 0){ return part }
                             else if(part.family){
-                                if(part.family.includes('usin') || part.family.includes('assem')){
-                                    if (part.class && part.class.includes('barr') == false) { return part.code }
-                                    else if (!part.class) { return part.code }
-                                    else return null
-                                } else return null
-                            }else return null
+                                if(part.family.includes('Assem') || part.family.includes('usin') || part.family.includes('transversale') || part.family.includes('Main')){
+                                    return part
+                                }
+                                else return index
+                            }
+                            else if(!part.family){ return part }
+                            else return index
                         }
+                        else return index
+                    })
+
+                    let failed = baseRef.map((part, index) => {
+                        if(typeof part == 'number'){ return part }
                         else return null
                     })
-                    baseRef = baseRef.filter((a) => a !== null)
-                    console.log(baseRef)
-                    //parts that have storage containers
-                    let partStorage = this.store.PFEP.map((part, index) => {
-                        if (part.storage.length !== 0) {
-                            if (part.family !== 'Consommable') {
-                                if (part.class && part.class.includes('barr') == false) { return part }
-                                else if(!part.class){ return part }
-                                else return null
-                            } else return null
-                        } else return null
-                    })
-                    partStorage = partStorage.filter((a) => a !== null)
+                    baseRef = baseRef.filter((a) => typeof a !== 'number')
+                    failed = failed.filter((a) => a !== null)
+                    failed = failed.map(i => this.store.PFEP[i])
+
+                    term(`\n\nLe PFEP contient un total de ${this.store.PFEP.length} pièces\n`); term(`${baseRef.length} pièces ont été retenues pour le magasin\n`)
+                    term(`${failed.length} pièces ont été rejetées pour le magasin\n`); let passed = []; let data = [];
+                    baseRef.map(part => { passed = {...passed, [part.code]: part }}); failed.map(part => { data = {...data, [part.code]: part }})
+                    term(`La liste des pièces rejetées est exportée en JSON\n`); exportData.exportJSON(data, 'failedPièces', '../SORTIE')
+                    term(`La liste de pièces considérées pour le magsin est exportée en JSON\n`); exportData.exportJSON(passed, 'piècesMagasin', '../SORTIE');
+                    term('\n\n')
 
 
-
-                    let array = [];
-                    for(let i = 0; i < this.store.racking.length; i++){
-                        for(let j = 0; j < this.store.racking[i].shelves.length; j++){
-                            let shelf = this.store.racking[i].shelves[j]
-                            for(let k = 0; k < shelf.content.length; k++){
-                                if(array.indexOf(shelf.content[k].name.split('_')[1]) == -1){
-                                    array.push(shelf.content[k].name.split('_')[1])
-                                }
+                    let storageData = {}
+                    baseRef.map((part, index) => {
+                        storageData = {
+                            ...storageData,
+                            [part.code]: {
+                                container: part.emballage.TF.type,
+                                nbPiece: part.emballage.TF.nbPieces,
+                                storage: part.storage[0] ? true : false
                             }
                         }
+                    })
+                    exportData.exportJSON(storageData, 'storageData', '../SORTIE')
+
+                    //No storage parts
+                    let noStorage = [];
+                    baseRef.map((part, index) => {
+                        if(part.storage.length == 0){ noStorage = { ...noStorage, [part.code]: part} }
+                    });
+                    exportData.exportJSON(noStorage, 'noStorage', '../SORTIE')
+
+                    let placedInRacking = [];
+                    this.store.racking.map((rack, index) => {
+                        rack.shelves.map((shelf, index) => {
+                            shelf.content.map((container, index) => {
+                                if(placedInRacking.indexOf(container.name.split('_')[1]) == -1){
+                                    placedInRacking.push(container.name.split('_')[1])
+                                }
+                            })
+                        })
+                    })
+                    console.log(placedInRacking)
+
+
+                    let i = 0
+                    for(const code in storageData){
+                        console.log(code, i);
+                        i++
                     }
 
-                    let missingStorage = baseRef.map((part, index) => {
-                        if(array.indexOf(part) == -1){ return this.store.getItemFromPFEP(part) }
-                        else return null
-                    })
-                    missingStorage = missingStorage.filter((a) => a !== null)
                     
-                    
-                    console.log(`${baseRef.length} parts should be placed overall`)
-                    console.log(`${array.length} parts in racking`)
-                    console.log(`${partStorage.length} parts have storage containers`)
-                    partStorage.map((part, index) => {
-                        if(array.indexOf(part.code) == -1){
-                            console.log(part.code, part.description, part.storage.length)
-                        }
-                    })
 
-                    console.log('----------------------------------')
-                    //console.log(baseRef.length)
-                    //console.dir(baseRef, {maxArrayLength: null})
-                    missingStorage.map((part) => {
-                        term.column(0); term(part.code);
-                        term.column(20); term(part.description.toString().substring(0, 25));
-                        term.column(50); term(part.family);
-                        term.column(80); term(part.class);
-                        term('\n')
-                    })
                 }
                 else if(response.selectedIndex === 10){
                     console.log('dasdas')
@@ -780,8 +793,10 @@ class App {
                         if(err){ console.log(err) }
                         else{
                             let json = JSON.parse(jsonString);
+                            let data = [];
 
                             json.map((part, index) => {
+                                data = { ...data, [part.CODE]: part}
                                 let item = this.store.getItemFromPFEP(part.CODE)
                                 let utilite = []
                                 let options = ['TS', 'TE', 'TW', 'TH', 'TF', 'SAE', 'SEO']
@@ -789,6 +804,7 @@ class App {
                                     for(let i = 0; i < options.length; i++){
                                         if(part.UTILITE.toString().includes(options[i])){ utilite.push(options[i]) }
                                     }
+                                    console.log(utilite)
                                     this.store.getItemFromPFEP(part.CODE).utilite = utilite
                                 }
 /* 
@@ -799,9 +815,28 @@ class App {
 
                                  */
                             })
+                            exportData.exportJSON(data, 'infos', '../SORTIE')
+
                         }
                     })
 
+                }
+                else if(response.selectedIndex === 11){
+                    let ref = this.store.PFEP.map(part => part.code)
+                    for(let i = 0; i < this.store.PFEP.length; i++){
+                        if(this.store.PFEP[i].code.indexOf('LA') !== -1){
+                            if(ref.indexOf(this.store.PFEP[i].code.substring(0, this.store.PFEP[i].code.indexOf('-LA'))) !== -1){
+                                console.log(this.store.PFEP[ref.indexOf(this.store.PFEP[i].code.substring(0, this.store.PFEP[i].code.indexOf('-LA')))].history)
+                                this.store.PFEP[ref.indexOf(this.store.PFEP[i].code.substring(0, this.store.PFEP[i].code.indexOf('-LA')))].history = {
+                                    ...this.store.PFEP[ref.indexOf(this.store.PFEP[i].code.substring(0, this.store.PFEP[i].code.indexOf('-LA')))].history,
+                                    ...this.store.PFEP[i].history,
+                                    
+                                }
+                                console.log(this.store.PFEP[ref.indexOf(this.store.PFEP[i].code.substring(0, this.store.PFEP[i].code.indexOf('-LA')))].history)
+                                console.log('--------------------')
+                            }
+                        }
+                    }
                 }
             }
 
