@@ -92,8 +92,11 @@ class Shelf{
                 let option = []
                 for(let i = 0; i < containerCount; i++){ option.push(HORIZONTAL) }
                 orientationArray.push(option);
-                console.log(orientationArray)
                 result = this.searchPlaceForBundle(item)
+            }
+            else if(generalType == 'cus'){
+                orientationArray = [[VERTICAL]];
+                result = this.searchPlaceForBac(item, orientationArray, accessSide)
             }
             return result
 
@@ -142,7 +145,7 @@ class Shelf{
          * @returns array of options [nbDepth, nbHeight, nbLength]
          */
         const genOptions = (blocs) => {
-            let maxHeight = item.storage[0].height * 3;
+            let maxHeight = item.storage[0].height * 2;
             let options = blocs.map((bloc, index) => {
                 let nbDepth = Math.floor(bloc[0] / item.storage[0].width);
                 let nbLength = Math.floor(bloc[1] / item.storage[0].length);
@@ -359,8 +362,8 @@ class Shelf{
             let columns = [];   //col: column, arrangement dans le sens width (array)
             for(let i = 0; i < blocs.length; i++){
                 if(blocs[i][0] !== 0){
-                    for(let j = 0; j < orientationOptions.length; j++){
-                        let col = [[]];    
+                    for(let j = 0; j < orientationOptions.length; j++){     //might/should be optimized
+                        let col = [[]];                             //col (array) = [[depthTakenByContainer, frontTakenByContainer]]
                         containers:
                         for(let u = 0; u < containerCount; u++){    //containers loop
                             if(col[col.length - 1].length == 0){
@@ -394,7 +397,7 @@ class Shelf{
                                     }
                                     else if(blocs[i][0] >= totalWidth + 0.90 * item.storage[u].length){
                                         col[col.length - 1].push([item.storage[u].length, item.storage[u].width]);
-                                        col.push([])
+                                        //col.push([])      removed 2021-08-10 pm
                                     }
                                     else{
                                         col.push([[item.storage[u].length, item.storage[u].width]])
@@ -406,7 +409,7 @@ class Shelf{
                                     }
                                     else if(blocs[i][0] >= totalWidth + 0.90 * item.storage[u].width){
                                         col[col.length - 1].push([item.storage[u].width, item.storage[u].length])
-                                        col.push([])
+                                        //col.push([])      removed 2021-08-10 pm
                                     }
                                     else{
                                         col.push([[item.storage[u].width, item.storage[u].length]])
@@ -422,17 +425,25 @@ class Shelf{
         }
         /**
          * Minimize column options, minimize number of columns(front space taken by part)
-         * @param {array} columns - Array of columns possible
+         * @param {array} columns - Array of columns possible ( col => [depthTaken, frontTaken] )
          * @returns array of columns with the minimum column possible
          */
         const genFinalCol = (columns) => {
-            let nbCol = 999;
+            //console.log('columns')
+            //columns.map(col => console.log(col))    //why are some columns empty???
+
+
+            let nbCol = Infinity;
             let colOptions = columns.map((column, index) => {
-                if(column[0].length > 0){
-                    if(column.length < nbCol){ nbCol = column.length }
-                    return [index, column.length] }
+                if(column[0].length > 0){           //if the option is not empty
+                    if(column.length < nbCol){ nbCol = column.length }  //minimizing nbCol 
+                    return [index, column.length]       //returns number of column in the option
+                }
                 else return [index, null]
             })
+
+            //console.log('colOptions')
+            //console.log(colOptions)
     
             let array = []
             for(let i = 0; i < columns.length; i++){
@@ -456,25 +467,45 @@ class Shelf{
          * @param {array} finalCol - minimized array columns possibilities
          * @returns [bestOption (array), width, depth]
          */
-        const getBestOption = (finalCol) => {            
+        const getBestOption = (finalCol) => { 
+            //console.log('finalCol')
+            //finalCol.map((col, index) => console.log(col))         
             let width; let bestOption;
-            //check for overlap when bac have 2 orientation in the same column
-            let conflictIndex = finalCol.map((col, index) => {
-                let conflictedCol = []
-                for (let j = 0; j < col.length; j++) {    //columns
+
+
+            //Could be better to allow odd number of container to be placed across column like the exemple below
+            /*
+                |---------------|
+                |               |
+                |---------------|
+                |       |       |
+                |       |       |
+                |-------|-------|       
+            */
+
+
+
+            //check for overlap when bac have 2 orientation in the same column (.old)
+            //conflictedIndex => arrayOf(bool) => 
+            let conflictIndex = finalCol.map((opt, index) => {
+                //iterates options^^
+                let conflictedCol = []  // {bool} - false if no conflict(all the containers take the same front space in the column), checks if containers in a column are all in the same orientation
+                for (let col = 0; col < opt.length; col++) {    //columns
                     let containerWidth;
-                    for (let c = 0; c < col[j].length; c++) {     //containers
-                        if (c === 0) { containerWidth = col[j][c][1] }
+                    for (let container = 0; container < opt[col].length; container++) {     //containers
+                        if (container === 0) { containerWidth = opt[col][container][1] }    //initial width for comparaison
                         else {
-                            if (col[j][c][1] == containerWidth) { conflictedCol[j] = false }
-                            else conflictedCol[j] = true
+                            if (opt[col][container][1] == containerWidth) { conflictedCol[col] = false }    //if next container takes the same front space, conflict = false
+                            else conflictedCol[col] = true      //true: one of the container in the column takes more front space
                         }
                     }
                 }
-                if(conflictedCol.indexOf(true) == -1){ 
+
+
+                if(conflictedCol.indexOf(true) == -1){  //if all the containers take the same front space 
                     return false
                 }
-                else return true
+                else return true    //if some container takes more front space
     
             })
             
@@ -484,7 +515,7 @@ class Shelf{
                 //loop dans les differentes options
                 for(let i = 0; i < conflictIndex.length; i++){
                     if(conflictIndex[i] === false){
-                        let totalWidth = 0;
+                        let totalWidth = 0;                         //finalCol and conflictIndex have the same index
                         finalCol[i].map((col, index) => { totalWidth += col[0][1] })
                         widthOptions[i] = totalWidth;
                     }
@@ -511,7 +542,7 @@ class Shelf{
                 colDepth = colDepth.sort(function(a, b){ return a - b })
                 return [bestOption, colDepth[0], width] 
             } else{
-                console.log('CONFLICT WITH BAC ORIENTATION');
+                //console.log('CONFLICT WITH BAC ORIENTATION');
                 return 'PROBLEM'
 
             } 
@@ -648,7 +679,6 @@ class Shelf{
         //ratios => real/screen .. real*screen/real = screen => screen = real/ratio
         let ratioL = (this.space.length / (term.width - 2 * padding));
         let ratioW = (this.width / (term.height - 2 * padding));
-        clearScreen()
 
         for(let i = padding; i < term.width - padding; i++){
             term.moveTo(i, padding); term('-')
@@ -681,6 +711,7 @@ class Shelf{
             
 
         })
+        term.moveTo(term.height, 1);
     }
 
     getPriorityIndex = () => {
@@ -706,9 +737,8 @@ class Shelf{
 
     //position={front, width}   dimensions={front, width}
     putInShelf = (position, dimensions, heightNb, item, part) => {
+        term.green(`placed ${item.name} in ${this.name}\n`)
         if(!heightNb){ heightNb = 1 }
-        console.log(item)
-        console.log('^^item')
         
         this.content.push(new containerObject(item.name, position, dimensions, heightNb, item, part.consommation.mensuelleMoy))
         this.priority = this.getPriorityIndex();

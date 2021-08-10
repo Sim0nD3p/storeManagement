@@ -32,12 +32,15 @@ class ShelfManager{
     }
 
     /**
-     * @param {*prop} - (length, priority)
-     * @param {*} length 
-     * @param {*} weight 
+     * @param {string} prop (length, priority)
+     * @param {number} length 
+     * @param {number} weight
+     * @param {number} priority
+     * @param {*} type
+     * @param {number} qte of container to place
      * @returns index of the chosen shelf type
      */
-    choseShelf = (prop, length, weight, priority, type) => {
+    choseShelf = (prop, length, weight, priority, type, qte) => {
         term.column(5); term(`chosing shelf based on ${prop}\n`)
         let options = this.app.store.racking.map((rack, index) => {
             let totalPriority = 0;
@@ -58,12 +61,18 @@ class ShelfManager{
             term.column(5); term(`options are:`); console.log(options)
 
             //returns spare length when shelfLength > objectLength
+            //[spareLength, index, lengthNb]
             let potential = this.unusedShelves.map((shelf, index) => {
-                if (shelf.length > length && shelf.qte > 0) { return [shelf.length - length, index] }
+                if(qte > 8 && shelf.length > 3 * 1.10 * length && shelf.qte > 0){ return [shelf.length - 3 * length, index, 3] }
+                if(qte > 4 && shelf.length > 2 * 1.10 * length && shelf.qte > 0){ return [shelf.length - 2 * length, index, 2] }
+                else if(shelf.length > length && shelf.qte > 0){ return [shelf.length - length, index, 2, 1] }
                 else return null
             })
-            potential = potential.filter(a => a !== null)
-            potential = potential.sort((a, b) => a[0] - b[0])
+            
+            potential = potential.filter(a => a !== null);                  //filters non compatible shelves
+            potential = potential.sort((a, b) => b[2] - a[2]);              //sort lengthNb
+            potential = potential.filter((a) => a !== potential[0][2]);     //filters lengthNb to only keep the highest
+            potential = potential.sort((a, b) => a[1] - b[1])                  //filter spare length to have the most tight shelf in index 0
             return potential[0][1]; //the most tight shelf
         }
         else if(prop == `priority`){
@@ -181,7 +190,7 @@ class ShelfManager{
                     let lengthArray = part.part.storage.map((container, index) => container.length).sort((a, b) => b - a)
                     return lengthArray[0]
                 })
-                let shelfIndex = this.choseShelf('length', maxLengthArray.sort((a, b) => b - a)[0], null, null, 'bundle')
+                let shelfIndex = this.choseShelf('length', maxLengthArray.sort((a, b) => b - a)[0], null, null, 'bundle', partsToPlace[0].part.storage.length)
 
                 
                 let shelfData = this.unusedShelves[shelfIndex]
@@ -204,13 +213,13 @@ class ShelfManager{
                 let bacParPiece = (content.bac1 + content.bac2) / totalContainerArray.length
                 //console.log(`${bacParPiece} BAC PAR PIECE EN MOYENNE`)
 
+                finalShelf = shelf
                 for(let i = 0; i < partsToPlace.length; i++){
                     //console.log(partsToPlace[i].part)
                     //partsToPlace = [this.app.store.getItemFromPFEP('SEP3411')]
-                    let place = shelf.searchPlace(partsToPlace[i].part, FRONT);
+                    //let place = shelf.searchPlace(partsToPlace[i].part, FRONT);
                     //console.log('place')
                     //console.log(place)
-                    finalShelf = shelf
 
 
                 }
@@ -219,8 +228,26 @@ class ShelfManager{
 
                 break;
             }
-            case 'customShelf': {
+            case 'cus': {
                 //check priority for placement options CHOSESHELF
+                let shelfIndex = this.choseShelf('priority', null, null, totalPriority, 'bac')
+                let shelf = new Shelf(`shelf_${this.shelfQte.container}`, this.unusedShelves[shelfIndex], 'bac')
+                this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1
+                this.shelfQte.container++;
+                let content = totalContainerArray[totalContainerArray.length - 1];
+                let bacParPiece = (content.bac1 + content.bac2) / totalContainerArray.length
+                //console.log(`${bacParPiece} BAC PAR PIECE EN MOYENNE`)
+
+                finalShelf = shelf
+                for(let i = 0; i < partsToPlace.length; i++){
+                    //console.log(partsToPlace[i].part)
+                    //partsToPlace = [this.app.store.getItemFromPFEP('SEP3411')]
+                    //let place = shelf.searchPlace(partsToPlace[i].part, FRONT);
+                    //console.log('place')
+                    //console.log(place)
+
+
+                }
 
                 break;
             }
@@ -323,8 +350,12 @@ class ShelfManager{
      * @returns [shelf, front, back]
      */
     findPotentialShelf = (part, categorisation) => {
+        let targetType = [categorisation.type.substring(0, 3)]
+        if(targetType == 'bun'){ targetType = ['bun'] }
+        else if(targetType == 'bac' || targetType == 'cus'){ targetType = ['bac', 'cus'] }
+
         return this.app.store.shelves.map((shelf, index) => {
-            if (shelf.type.substring(0, 3) == categorisation.type.substring(0, 3)) {
+            if (targetType.indexOf(shelf.type.substring(0, 3)) !== -1) {
                 let placement = [shelf.searchPlace(part, FRONT) !== false ? true : false, shelf.searchPlace(part, BACK) !== false ? true : false]
                 if (placement[0] !== false || placement[1] !== false) {
                     return [shelf, placement[0], placement[1]]

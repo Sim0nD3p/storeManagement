@@ -93,15 +93,24 @@ class RackManager{
      * @returns new shelf
      */
     requestNewShelf(partList, index){
-        let typeNeeded = partList[index].storage[0].type.substring(0, 3);   //bac, bun, pal (types de contenants)
+        let typeNeeded = [partList[index].storage[0].type.substring(0, 3)]
+        let nextPartType = partList[index].storage[0].type.substring(0, 3)
+        if(nextPartType == 'bun'){ typeNeeded = ['bun'] }
+        else if(nextPartType == 'bac' || nextPartType == 'cus'){ typeNeeded = ['bac', 'cus'] }
+        
+        
+        //let typeNeeded = partList[index].storage[0].type.substring(0, 3);   //bac, bun, pal (types de contenants)
+        
+        
         let partsToPlace = [];
         while(partsToPlace.length < 25){
             if(partList[index + partsToPlace.length]){
-                if(partList[index + partsToPlace.length].storage[0].type.substring(0, 3) == typeNeeded){
+                if(typeNeeded.indexOf(partList[index + partsToPlace.length].storage[0].type.substring(0, 3)) !== -1){
                     let categorisation = {
                         consoMens: partList[index + partsToPlace.length].consommation ? partList[index + partsToPlace.length].consommation.mensuelleMoy : undefined,
                         classe: partList[index + partsToPlace.length].class ? partList[index + partsToPlace.length].class : undefined,
-                        type: partList[index + partsToPlace.length].storage[0].type
+                        type: typeNeeded[0],
+                        //type: partList[index + partsToPlace.length].storage[0].type
                     }
                     partsToPlace.push({ part: partList[index + partsToPlace.length], categorisation: categorisation })
                 }
@@ -219,14 +228,17 @@ class RackManager{
     }
 
     placeInRacking(partList){
+        //let mains = ['SEP2506', 'SEP2507', 'SEP2521']
         
-        //partList = ['SEP3978', 'SEP260-0G4456', 'SEP3979', 'SEP4059', 'SEP2504', 'SEP3807-LA', 'SEP3782'];
+       // partList = ['SEP3978', 'SEP260-0G4456', 'SEP3979', 'SEP4059', 'SEP2504', 'SEP3807-LA', 'SEP3782', 'SEP2506', 'SEP2507', 'SEP2521'];
+        
+        //partList = partList.concat(mains)
         //partList = ['EXV001-2600', 'EXV001-1720'];
         //partList = ['SEP4022', 'SEP3550', 'SEP3553', 'SEP3562', 'SEP3568', 'SEP3799']
         //partList = partList.map(part => this.app.store.getItemFromPFEP(part))
         
         let failedParts = []
-        partList = partList.map((part, index) => { return this.app.store.getItemFromPFEP(part.code) })
+        //partList = partList.map((part, index) => { return this.app.store.getItemFromPFEP(part.code) })
         for(let i = 0; i < partList.length; i++){
             term(`\n---------- NEW PART ----------\n`)
             term(`${partList[i].code} - ${partList[i].storage.length} containers - priority: ${Math.ceil(partList[i].consommation.mensuelleMoy)}\n`)
@@ -276,7 +288,7 @@ class RackManager{
             }
             
             if(shelf !== null){
-                term(`placing ${partList[i].code} in ${shelf.name}\n`)
+                //term(`placing ${partList[i].code} in ${shelf.name}\n`)
                 let place = shelf.searchPlace(partList[i], accessPoint)
                 
                 if(place !== false){
@@ -290,6 +302,7 @@ class RackManager{
                     
                 }
                 else {
+                    console.log('DIDNT WORK ON FIRST TRY')
                     let part = { ...partList[i] }
                     let containerCount = part.storage.length;
                     let containerNbToPlace = containerCount;

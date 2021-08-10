@@ -158,6 +158,7 @@ class DispayStore {
             {cancelable: true, keyBindings:{ ENTER: 'submit', CTRL_Z: 'escape', UP: 'previous', DOWN: 'next'}},
             (error, response) => {
                 if(response){
+                    this.app.clearScreen()
                     let shelf = this.app.store.rackManager.shelfManager.getShelf(response.selectedText)
                     shelf.getShelf();
                     term.moveTo(0, term.height); term('\n\n\n')
@@ -175,8 +176,15 @@ class DispayStore {
         for(let i = 0; i < this.app.store.shelves.length; i++){
             term(`${this.app.store.shelves[i].name}\n`)
             for(let j = 0; j < this.app.store.shelves[i].content.length; j++){
-                term.column(5); term(`${this.app.store.shelves[i].content[j].name}`);
-                term.column(35); term(`${this.app.store.shelves[i].content[j].consommation}`)
+                if(this.app.store.getItemFromPFEP(this.app.store.shelves[i].content[j].name.split('_')[1]).utilite.indexOf('TS') !== -1){
+                    term.column(5); term.green(`${this.app.store.shelves[i].content[j].name}`);
+                    term.column(35); term.green(`${this.app.store.shelves[i].content[j].consommation}`)
+                }
+                else {
+                    term.column(5); term(`${this.app.store.shelves[i].content[j].name}`);
+                    term.column(35); term(`${this.app.store.shelves[i].content[j].consommation}`)
+
+                }
                 term('\n')
             }
             console.log('--------------------\n')
@@ -194,7 +202,14 @@ class DispayStore {
             totalParts += array.length
 
         }
+        let tsParts = this.app.store.PFEP.map((part, index) => {
+            if(part.utilite == 'TS'){ return part }
+            else if(Array.isArray(part.utilite) && part.utilite.indexOf('TS') !== -1){ return part }
+            else return null
+        })
+        tsParts = tsParts.filter((a) => a !== null)
         console.log(`${totalParts} parts placed on shelves`)
+        console.log(`${tsParts.length} parts have the tag TS`)
     }
 
     displayRacking(){
@@ -205,6 +220,34 @@ class DispayStore {
             }
         }
 
+    }
+    getAllShelves(){
+        this.app.clearScreen();
+        let allowSwitch = true
+        let index = 0;
+        term.on('key', (key) => {
+            if(allowSwitch == true){
+                if(key === 'UP' && allowSwitch == true){
+                    if(index < this.app.store.shelves.length - 1){
+                        this.app.clearScreen();
+                        index++
+                        this.app.store.shelves[index].getShelf()
+                    }
+                }
+                else if(key === 'DOWN' && allowSwitch == true){
+                    if(index > 0){
+                        this.app.clearScreen()
+                        index--
+                        this.app.store.shelves[index].getShelf();
+                    }
+                }
+                else if(key === 'ESCAPE'){
+                    allowSwitch = false
+                }
+
+            }
+            })
+        
     }
 
 }

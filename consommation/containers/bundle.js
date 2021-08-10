@@ -146,9 +146,9 @@ class Bundle{
 
     getWidth(){
         if(this.extrusionOrientation == 'vertical'){
-            return this.itemSpecs.height * this.widthNb
+            return (this.itemSpecs.height * this.widthNb) > 1070 / 2 ? (1070 / 2) : this.itemSpecs.height * this.widthNb 
         }
-        else return this.itemSpecs.width * this.widthNb
+        else return (this.itemSpecs.width * this.widthNb) > 1070 / 2 ? (1070 / 2) : this.itemSpecs.width * this.widthNb 
     }
     getHeight(){
         if(this.extrusionOrientation == 'vertical'){

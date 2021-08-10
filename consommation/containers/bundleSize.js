@@ -64,6 +64,13 @@ const storage = [
         code: 'EXV007',
         width: 10,  //A CHANGER
         height: 10, //A CHANGER
+    },
+    {
+        profil: 'EXV029',
+        code: 'EXV029',
+        width: 10,
+        height: 10,
+        orientation: 'horizontal'
     }
 
 ]

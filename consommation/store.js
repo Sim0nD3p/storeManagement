@@ -107,6 +107,12 @@ class Store{
                 containers = this.storeManager.paletteManager(part, qte, data);
                 break;
             }
+            case 'customContainer': {
+                let customType;
+                if(part.family == 'Main'){ customType = 'main' }
+                containers = this.storeManager.makeCustomContainer(part, customType, qte);
+                break;
+            }
         }
         this.containers = this.containers.concat(containers);
         this.getItemFromPFEP(part.code).storage = containers;

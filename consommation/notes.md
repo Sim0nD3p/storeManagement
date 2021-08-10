@@ -40,10 +40,17 @@
 
 
 ## TO DO 2021-08-10
+- DEBUGGER ALGORITHME
 - optimize bundle length vs shelf length for small bundle
 - FUCKING BUNDLES
+- more control over accessSides
 - entrer infos liste
-- custom shelf
+- custom shelf - DONE
+- racking mains - DONE
+- racking BT
+- racking cornes
+- optimize racking function
+- shelf TS-59 (only 13-16 parts have the TS tag)
 
 
 
@@ -64,9 +71,6 @@
 ## IMPORTANT RANDOM SHIT TO DO
 - masse extrusions
 - dessins manquants
-- bundle size bundle
- class (nbWidth, nbHeight)
-- normaliser bundles
 
 ## Things that might be interesting
 - group container of same size on shelf

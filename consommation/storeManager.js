@@ -5,6 +5,7 @@ const Shelf = require('./containers/shelf');
 const shelves = require('./containers/shelves');
 const containersData = require('./containers/containerData');
 const ShelfManager = require('./shelfManager');
+const CustomContainer = require('./containers/customContainer');
 
 
 //Crée et remplis les containers et les retourne au store
@@ -58,6 +59,30 @@ class StoreManager {
         return array
 
     }
+    /**
+     * Creates and assign new customContainer
+     * @param {*object} item 
+     * @param {*string} type 
+     * @param {number} qte 
+     * @returns Array of single customContainer
+     */
+    makeCustomContainer(item, type, qte){
+        let container
+        let partsLeft = qte;
+        console.log(`customContainer type ${type}`)
+        if(!isNaN(partsLeft)){
+            let name = 'customContainer_' + item.code + '_0';
+            container = new CustomContainer(name, type, item, partsLeft)
+        }
+        else{
+            partsLeft = 50; //WE DEFINE qteMax WHEN IT IS UNDEFINED!!! NOT OPTIMAL
+            let name = 'customContainer_' + item.code + '_0';
+            container = new CustomContainer(name, type, item, partsLeft)
+        }
+        console.log(container)
+        return [container]
+    }
+
     paletteManager(item, qte, data){
         console.log(item.code, qte)
         let array = []

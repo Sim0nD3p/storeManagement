@@ -515,7 +515,8 @@ class App {
             'Afficher contenants',
             'Afficher Étagères',
             'Afficher contenu étagères',
-            'Afficher racking'
+            'Afficher racking',
+            'Afficher toutes les étagères',
         ]
         term.singleColumnMenu(menuItems,
             { cancelable: true, keyBindings: { ENTER: 'submit', DOWN: 'next', UP: 'previous', CTRL_Z: 'escape' } },
@@ -536,6 +537,11 @@ class App {
                     else if(response.selectedIndex === 3){
                         this.lastScreen.screen = 'afficherMagasin';
                         this.displayStore.displayRacking();
+                    }
+                    else if(response.selectedIndex === 4){
+                        this.lastScreen.screen = 'afficherMagasin';
+                        this.displayStore.getAllShelves()
+
                     }
                 }
             })
@@ -678,6 +684,9 @@ class App {
 
 
                     for(let i = 0; i < this.store.PFEP.length; i++){
+                        if(this.store.PFEP[i].emballage.TF.type == 'etagereMain'){
+                            this.store.PFEP[i].emballage.TF.type = 'customContainer'
+                        }
                         if(this.store.PFEP[i].code.includes('SEO')){
                             console.log(this.store.PFEP[i].code)
                             this.store.PFEP[i].emballage.TF.type = 'bac2';
@@ -744,27 +753,31 @@ class App {
 
                     let baseRef = this.store.PFEP.map((part, index) => {
                         if(part !== undefined && part.family !== 'Consommable'){
-                            if(part.consommation.totalOrders.nbOrders > 2){
-                                if(part.class && part.class.includes('barr') == false){ return part }
-                                else if(!part.class){ return part }
-                                else return index
-                            }
-                            else if(part.code.includes('SEA') || part.code.includes('SEO')){ return part}
-                            else if(part.storage.length > 0){ return part }
-                            else if(part.family){
-                                if(part.family.includes('Assem') || part.family.includes('usin') || part.family.includes('transversale') || part.family.includes('Main')){
-                                    return part
+                            if(!part.class || part.class.includes('barr') == false){
+                                if(part.consommation.totalOrders.nbOrders > 2){
+                                    if(part.class && part.class.includes('barr') == false){ return part }
+                                    else if(!part.class){ return part }
+                                    else return index
                                 }
+                                else if(part.code.includes('SEA') || part.code.includes('SEO')){ return part}
+                                else if(part.storage.length > 0){ return part }
+                                else if(part.family){
+                                    if(part.family.includes('Assem') || part.family.includes('usin') || part.family.includes('transversale') || part.family.includes('Main')){
+                                        return part
+                                    }
+                                    else return index
+                                }
+                                else if(!part.family){ return part }
                                 else return index
-                            }
-                            else if(!part.family){ return part }
-                            else return index
+                            } else return index
+                                
                         }
                         else return index
                     })
 
+                    //not in baseRef
                     let failed = baseRef.map((part, index) => {
-                        if(typeof part == 'number'){ return part }
+                        if(typeof part == 'number'){ return this.store.PFEP[part] }
                         else return null
                     })
 
@@ -774,16 +787,11 @@ class App {
 
                     baseRef = baseRef.filter((a) => typeof a !== 'number')
                     failed = failed.filter((a) => a !== null)
-                    failed = failed.map(i => this.store.PFEP[i])
 
-                    term(`\n\nLe PFEP contient un total de ${this.store.PFEP.length} pièces\n`); term(`${baseRef.length} pièces ont été retenues pour le magasin\n`)
-                    term(`${failed.length} pièces ont été rejetées pour le magasin\n`); let passed = []; let data = [];
-                    baseRef.map(part => { passed = {...passed, [part.code]: part }}); failed.map(part => { data = {...data, [part.code]: part }})
-                    term(`La liste des pièces rejetées est exportée en JSON\n`); exportData.exportJSON(data, 'failedPièces', '../SORTIE')
-                    term(`La liste de pièces considérées pour le magsin est exportée en JSON\n`); exportData.exportJSON(passed, 'piècesMagasin', '../SORTIE');
-                    term('\n\n')
-
-
+                    let baseRefObj = []; let notOnBaseRefObj = [];
+                    baseRef.map(part => { baseRefObj = {...baseRefObj, [part.code]: part }}); failed.map(part => { notOnBaseRefObj = {...notOnBaseRefObj, [part.code]: part }})
+                    
+                    
                     let storageData = {}
                     baseRef.map((part, index) => {
                         storageData = {
@@ -795,17 +803,14 @@ class App {
                             }
                         }
                     })
-                    exportData.exportJSON(storageData, 'storageData', '../SORTIE')
-
+                    
                     //No storage parts
                     let noStorage = [];
                     baseRef.map((part, index) => {
                         if(part.storage.length == 0){ noStorage = { ...noStorage, [part.code]: part} }
                     });
-                    exportData.exportJSON(noStorage, 'noStorage', '../SORTIE')
                     let partStorage = this.store.PFEP.map((part) => {if(part.storage.length > 0){ return part } else return null }); partStorage = partStorage.filter((a) => a !== null)
-                    console.log(`partStorage.length: ${partStorage.length}`)
-
+                    
                     let placedInRacking = [];
                     this.store.racking.map((rack, index) => {
                         rack.shelves.map((shelf, index) => {
@@ -816,14 +821,44 @@ class App {
                             })
                         })
                     })
-                    console.log(placedInRacking)
 
+                    let notInRacking = {};
+                    this.store.PFEP.map((part, index) => {
+                        if(placedInRacking.indexOf(part.code) == -1 && baseRef.findIndex((a) => a.code == part.code) !== -1){
+                            notInRacking = {
+                                ...notInRacking,
+                                [part.code]: {
+                                    type: part.emballage.TF.type,
+                                }
+                            }
+                        }
+                    })
+                    console.log(notInRacking)
 
+                    term(`\n\nLe PFEP contient un total de ${this.store.PFEP.length} pièces\n`);
+                    term(`${baseRef.length} pièces ont été retenues pour le magasin\n`)
+                    term(`${failed.length} pièces ont été rejetées pour le magasin\n`); 
 
+                    term(`${partStorage.length} pièces ont des containers\n`)
+                    term(`${placedInRacking.length} pièces sont placées dans les racking\n`)
+                    term('\n\n')
                     
-
+                    term(`La liste des pièces rejetées est exportée en JSON (notOnBaseRef.json)\n`);
+                    term(`La liste de pièces considérées pour le magsin est exportée en JSON (baseRef.json)\n`);
+                    term(`La liste des données d'entreposage est exportée en JSON (storageData.json)\n`) 
+                    term(`La liste des pièces n'ayant pas été placées dans le magasin est exportée en JSON (notInRacking.json)\n`)
+                    exportData.exportJSON(notInRacking, 'notInRacking', '../SORTIE');
+                    exportData.exportJSON(storageData, 'storageData', '../SORTIE')
+                    exportData.exportJSON(noStorage, 'noStorage', '../SORTIE')
+                    exportData.exportJSON(notOnBaseRefObj, 'notOnBaseRef', '../SORTIE')
+                    exportData.exportJSON(baseRefObj, 'baseRef', '../SORTIE');
                     
-
+                    
+                    
+                    
+                    
+                    
+                    
                 }
                 else if(response.selectedIndex === 10){
                     console.log('dasdas')
