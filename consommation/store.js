@@ -110,6 +110,7 @@ class Store{
             case 'customContainer': {
                 let customType;
                 if(part.family == 'Main'){ customType = 'main' }
+                else { customType = part.family }
                 containers = this.storeManager.makeCustomContainer(part, customType, qte);
                 break;
             }

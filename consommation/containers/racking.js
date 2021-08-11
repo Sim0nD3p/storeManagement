@@ -1,13 +1,15 @@
-const REACH_LIMIT = 1600;
+const REACH_LIMIT = 2500;
+const PRIORITY_LIMIT = 1600
 const GAP = 100;
 const MAX_HEIGHT = 6000;
 /*
 Racking will have a 'good zone' were priority shelves will be placed
 */
 class Racking{
-    constructor(name, length, type){
+    constructor(name, length, type, tag){
         this.name = name;
         this.length = length;
+        this.tag = tag
         this.type;  //assemblage ou MP
         this.shelves = []
         this.contentType = type;

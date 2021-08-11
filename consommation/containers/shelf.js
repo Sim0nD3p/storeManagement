@@ -52,9 +52,10 @@ class containerObject{
 }
 
 class Shelf{
-    constructor(name, shelfData, type){
+    constructor(name, shelfData, type, tag){
         this.name = name;
         this.type = type;
+        this.tag = tag;
         this.priority;
         this.isDoubleSided = false;
         this.width = 107; //mm

@@ -38,16 +38,17 @@ class ShelfManager{
      * @param {number} priority
      * @param {*} type
      * @param {number} qte of container to place
+     * @param {string} tag (MP, ASS)
      * @returns index of the chosen shelf type
      */
-    choseShelf = (prop, length, weight, priority, type, qte) => {
+    choseShelf = (prop, length, weight, priority, type, qte, tag) => {
         term.column(5); term(`chosing shelf based on ${prop}\n`)
         let options = this.app.store.racking.map((rack, index) => {
             let totalPriority = 0;
             let nbPriority = 0;
             rack.shelves.map((shelf, index) => { if(isNaN(shelf.priority) == false){ totalPriority += shelf.priority; nbPriority++ } })
             totalPriority = isNaN(totalPriority / nbPriority) ? 0 : totalPriority / nbPriority
-            return [rack.name, totalPriority, rack.height, rack.length, rack.contentType]
+            return [rack.name, totalPriority, rack.height, rack.length, rack.contentType, rack.tag]
         })
 
         if (priority) {
@@ -100,7 +101,7 @@ class ShelfManager{
             options:    //on choisi parmi les options [rack.name, totalPriority, rack.height, rack.length]
             for(let i = 0; i < options.length; i++){    //options = [rack.name, totalPriority, rack.heigt, rack.length, rack.type]
                 for(let j = 0; j < this.unusedShelves.length; j++){
-                    if(this.unusedShelves[j].length == options[i][3] && this.unusedShelves[j].qte > 0){    //length, qte, type(removed)
+                    if(this.unusedShelves[j].length == options[i][3] && options[i][5] == tag && this.unusedShelves[j].qte > 0){    //length, qte, type(removed)
                         potential.push([options[i], j])
                     }
                 }
@@ -141,7 +142,7 @@ class ShelfManager{
     }
 
     //should return shelf
-    createShelf(partsToPlace){
+    createShelf(partsToPlace, tag){
         let weightArray = []; let totalWeightArray = []; let containersArray = []; let totalContainerArray = []; let finalShelf; let priorityArray = []
         for(let i = 0; i < partsToPlace.length; i++){
             //weightArray
@@ -190,12 +191,12 @@ class ShelfManager{
                     let lengthArray = part.part.storage.map((container, index) => container.length).sort((a, b) => b - a)
                     return lengthArray[0]
                 })
-                let shelfIndex = this.choseShelf('length', maxLengthArray.sort((a, b) => b - a)[0], null, null, 'bundle', partsToPlace[0].part.storage.length)
+                let shelfIndex = this.choseShelf('length', maxLengthArray.sort((a, b) => b - a)[0], null, null, 'bundle', partsToPlace[0].part.storage.length, tag)
 
                 
                 let shelfData = this.unusedShelves[shelfIndex]
                 this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1;
-                let shelf = new Shelf(`bundle_${this.shelfQte.bundle}`, shelfData, 'bundle')
+                let shelf = new Shelf(`bundle_${this.shelfQte.bundle}`, shelfData, 'bundle', tag)
                 this.shelfQte.bundle++
                 finalShelf = shelf
 
@@ -206,7 +207,7 @@ class ShelfManager{
 
 
                 let shelfIndex = this.choseShelf('priority', null, null, totalPriority, 'bac')
-                let shelf = new Shelf(`shelf_${this.shelfQte.container}`, this.unusedShelves[shelfIndex], 'bac')
+                let shelf = new Shelf(`shelf_${this.shelfQte.container}`, this.unusedShelves[shelfIndex], 'bac', tag)
                 this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1
                 this.shelfQte.container++;
                 let content = totalContainerArray[totalContainerArray.length - 1];
@@ -349,13 +350,13 @@ class ShelfManager{
      * @param {*} categorisation 
      * @returns [shelf, front, back]
      */
-    findPotentialShelf = (part, categorisation) => {
+    findPotentialShelf = (part, categorisation, tag) => {
         let targetType = [categorisation.type.substring(0, 3)]
         if(targetType == 'bun'){ targetType = ['bun'] }
         else if(targetType == 'bac' || targetType == 'cus'){ targetType = ['bac', 'cus'] }
 
         return this.app.store.shelves.map((shelf, index) => {
-            if (targetType.indexOf(shelf.type.substring(0, 3)) !== -1) {
+            if (targetType.indexOf(shelf.type.substring(0, 3)) !== -1 && shelf.tag == tag) {
                 let placement = [shelf.searchPlace(part, FRONT) !== false ? true : false, shelf.searchPlace(part, BACK) !== false ? true : false]
                 if (placement[0] !== false || placement[1] !== false) {
                     return [shelf, placement[0], placement[1]]

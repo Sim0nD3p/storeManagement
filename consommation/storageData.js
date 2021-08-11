@@ -646,19 +646,19 @@ const storageData = {
         checkup: true
     },
     "SEA220-003288": {
-        container: "",
+        container: "bundleUsine",
         nbPieces: "",
         storage: false,
         drop: true
     },
     "SEA220-003291": {
-        container: "",
+        container: "bundleUsine",
         nbPieces: "",
         storage: false,
         drop: true
     },
     "SEA220-003292": {
-        container: "",
+        container: "bundleUsine",
         nbPieces: "",
         storage: false,
         drop: true
@@ -974,8 +974,8 @@ const storageData = {
         storage: true
     },
     "SEP130-004261": {
-        container: "restant",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: 225,
         storage: false
     },
     "SEP130-004262": {
@@ -1173,7 +1173,7 @@ const storageData = {
     },
     //cover porte supper escabeau arriere
     "SEP230-003659": {
-        container: "restant",
+        container: "customContainer",
         nbPieces: "",
         storage: false,
         checkup: true
@@ -1435,18 +1435,18 @@ const storageData = {
         storage: false
     },
     "SEP260-005053": {
-        container: "",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP260-005054": {
-        container: "",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP260-005089": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP260-0D4354": {
@@ -1465,8 +1465,8 @@ const storageData = {
         storage: true
     },
     "SEP260-0D4459": {
-        container: "restant",
-        nbPieces: "40",
+        container: "bac2",
+        nbPieces: 20,
         storage: false
     },
     "SEP260-0G4379": {
@@ -1480,8 +1480,8 @@ const storageData = {
         storage: true
     },
     "SEP260-0G4459": {
-        container: "restant",
-        nbPieces: "40",
+        container: "bac2",
+        nbPieces: 20,
         storage: false
     },
     "SEP260-0L4429": {
@@ -1495,12 +1495,12 @@ const storageData = {
         storage: true
     },
     "SEP270-005059": {
-        container: "",
+        container: "bundleUsine",
         nbPieces: "",
         storage: false
     },
     "SEP270-005062": {
-        container: "",
+        container: "bundleUsine",
         nbPieces: "",
         storage: false
     },
@@ -1545,23 +1545,23 @@ const storageData = {
         storage: false
     },
     "SEP280-005043": {
-        container: "",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP280-005051": {
-        container: "SOUS TABLE ASSEMBLAGE",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP280-005061": {
-        container: "",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP280-005063": {
-        container: "",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP285-004291": {
@@ -1580,8 +1580,8 @@ const storageData = {
         storage: true
     },
     "SEP285-005055": {
-        container: "",
-        nbPieces: "",
+        container: "bac1",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP285-0L4289": {
@@ -1685,8 +1685,8 @@ const storageData = {
         storage: true
     },
     "SEP3217": {
-        container: "etagere?",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: 26,
         storage: false
     },
     "SEP3218": {
@@ -1900,8 +1900,8 @@ const storageData = {
         storage: true
     },
     "SEP3534": {
-        container: "etagere?",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: 999,
         storage: false
     },
     "SEP3537": {
@@ -2000,8 +2000,8 @@ const storageData = {
         storage: true
     },
     "SEP3574": {
-        container: "etagere?",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: 'singleBac',
         storage: false
     },
     "SEP3591": {
@@ -2025,7 +2025,7 @@ const storageData = {
         storage: true
     },
     "SEP3603": {
-        container: "restant",
+        container: "bundleUsine",
         nbPieces: "",
         storage: false
     },
@@ -2035,7 +2035,7 @@ const storageData = {
         storage: true
     },
     "SEP3608": {
-        container: "etagere?",
+        container: "customContainer",
         nbPieces: "",
         storage: false
     },
@@ -2245,8 +2245,8 @@ const storageData = {
         storage: true
     },
     "SEP3839G": {
-        container: "etagere?",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: 999,
         storage: false
     },
     "SEP3839-LA": {
@@ -2465,8 +2465,8 @@ const storageData = {
         storage: true
     },
     "SEP3981": {
-        container: "SOUS TABLE ASSEMBLAGE",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP3982": {

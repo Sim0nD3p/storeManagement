@@ -173,10 +173,11 @@ class DispayStore {
     }
     displayShelfContent(){
         term.bold('Contenu des étagères\n')
+        let highlight = ['SEP3926', 'SEA240-005047', 'SEP210-004306']
         for(let i = 0; i < this.app.store.shelves.length; i++){
             term(`${this.app.store.shelves[i].name}\n`)
             for(let j = 0; j < this.app.store.shelves[i].content.length; j++){
-                if(this.app.store.getItemFromPFEP(this.app.store.shelves[i].content[j].name.split('_')[1]).utilite.indexOf('TS') !== -1){
+                if(highlight.indexOf(this.app.store.shelves[i].content[j].name.split('_')[1]) !== -1){
                     term.column(5); term.green(`${this.app.store.shelves[i].content[j].name}`);
                     term.column(35); term.green(`${this.app.store.shelves[i].content[j].consommation}`)
                 }

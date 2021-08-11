@@ -17,6 +17,10 @@ class RackManager{
         this.app = app;
         this.store = this.app.store;
         this.shelfManager = new ShelfManager(app)
+        this.partLists = {
+            MP: [],
+            assemblage: []
+        }
     }
 
     test(){
@@ -32,11 +36,11 @@ class RackManager{
     }
 
     getPriorityList(array){
-        let assemblages = new Array(array.length).fill(undefined);
-        let MP = new Array(array.length).fill(undefined);
+        let assemblages = [];   //new Array(array.length).fill(undefined);
+        let MP = [];    //new Array(array.length).fill(undefined);
         for(let i = 0; i < array.length; i++){
-            if(array[i].type == 'MP'){ MP[i] = array[i] }
-            else if(array[i].type == 'assemblage'){ assemblages[i] = array[i] }
+            if(array[i].type == 'MP'){ MP.push(array[i]) }
+            else if(array[i].type == 'assemblage'){ assemblages.push(array[i]) }
         }
 
         assemblages = assemblages.filter(ass => ass !== undefined);
@@ -64,7 +68,7 @@ class RackManager{
         let array = PFEP.map((item, index) => {
             if(item.storage.length > 0){
                 if (item.class) {
-                        if (item.family && item.family !== 'Consommable') {
+                        if (item.family && item.family !== 'Consommable' && item.family !== 'Collant') {
                             if (item.family !== 'Assemblage' && !item.family.includes('Extrusion usin')) {
                                 return { code: item.code, type: 'MP', class: item.class, consoMens: item.consommation ? item.consommation.mensuelleMoy : undefined }
                             }
@@ -75,15 +79,20 @@ class RackManager{
             }
         })
         array = array.filter(part => part !== undefined)
+        term(`${array.length} parts should be placed in racking\n`)
         let object = this.getPriorityList(array)
 
         let MP = object.MP.map((mp, index) => { return this.app.store.getItemFromPFEP(mp.code) })
         let assemblages = object.assemblages.map((ass, index) => { return this.app.store.getItemFromPFEP(ass.code) })
+        this.partLists = {
+            MP: [...MP],
+            assemblages: [...assemblages]
+        }
         
         console.log(`MP ${MP.length}`)
         console.log(`assemblages ${assemblages.length}`)
-        this.placeInRacking(MP);
-        this.placeInRacking(assemblages)
+        this.placeInRacking(MP, 'MP');
+        this.placeInRacking(assemblages, 'ASS')
     }
 
     /**
@@ -92,7 +101,7 @@ class RackManager{
      * @param {*number} index 
      * @returns new shelf
      */
-    requestNewShelf(partList, index){
+    requestNewShelf(partList, index, tag){
         let typeNeeded = [partList[index].storage[0].type.substring(0, 3)]
         let nextPartType = partList[index].storage[0].type.substring(0, 3)
         if(nextPartType == 'bun'){ typeNeeded = ['bun'] }
@@ -120,7 +129,7 @@ class RackManager{
             } else break
         }
         //console.log('end of requestNewShelf')
-        let newShelf = this.shelfManager.createShelf(partsToPlace); //returns new Shelf
+        let newShelf = this.shelfManager.createShelf(partsToPlace, tag); //returns new Shelf
         //console.log(result.content)
 
         //we gonna place the shelf when we know its height
@@ -227,8 +236,13 @@ class RackManager{
 
     }
 
-    placeInRacking(partList){
+    optimizeRacking(){
+
+    }
+
+    placeInRacking(partList, tag){
         //let mains = ['SEP2506', 'SEP2507', 'SEP2521']
+        let qteToPlace = partList.length
         
        // partList = ['SEP3978', 'SEP260-0G4456', 'SEP3979', 'SEP4059', 'SEP2504', 'SEP3807-LA', 'SEP3782', 'SEP2506', 'SEP2507', 'SEP2521'];
         
@@ -237,6 +251,8 @@ class RackManager{
         //partList = ['SEP4022', 'SEP3550', 'SEP3553', 'SEP3562', 'SEP3568', 'SEP3799']
         //partList = partList.map(part => this.app.store.getItemFromPFEP(part))
         
+
+
         let failedParts = []
         //partList = partList.map((part, index) => { return this.app.store.getItemFromPFEP(part.code) })
         for(let i = 0; i < partList.length; i++){
@@ -248,7 +264,7 @@ class RackManager{
                 classe: partList[i].class ? partList[i].class : undefined,
                 type: partList[i].storage[0].type
             }
-            let potentialShelves = this.shelfManager.findPotentialShelf(partList[i], categorisation);
+            let potentialShelves = this.shelfManager.findPotentialShelf(partList[i], categorisation, tag);
             let shelf; let accessPoint = FRONT;
             let place;
             
@@ -263,7 +279,7 @@ class RackManager{
             if(potentialShelves.findIndex((shelf) => shelf !== null) == -1){
                 term('\n----- CREATING SHELF -----\n')
                 newShelf = true;
-                shelf = this.requestNewShelf(partList, i);  //returns new shelf
+                shelf = this.requestNewShelf(partList, i, tag);  //returns new shelf
 
 
                 let lostShelf = null
@@ -351,9 +367,9 @@ class RackManager{
             }
             else console.log('SHELF == NULL')
         }
-        console.log(`${partList.length} parts should be placed`)
+        term(`\n\n\n ${qteToPlace} parts should be placed\n`)
+        term.red(`${failedParts.length} part have not been placed in racking\n`)
         console.log(this.shelfManager.unusedShelves)
-        console.log(failedParts)
     }
 }
 

@@ -750,29 +750,21 @@ class App {
                     console.log(`PFEP has ${this.store.PFEP.length} parts`)
 
                     let array = []
+                    
 
+
+                    //baseRef: target list to be placed in racking
                     let baseRef = this.store.PFEP.map((part, index) => {
-                        if(part !== undefined && part.family !== 'Consommable'){
+                        if(part !== undefined && part.family !== 'Consommable' && part.family !== 'Collant'){
                             if(!part.class || part.class.includes('barr') == false){
-                                if(part.consommation.totalOrders.nbOrders > 2){
-                                    if(part.class && part.class.includes('barr') == false){ return part }
-                                    else if(!part.class){ return part }
-                                    else return index
-                                }
-                                else if(part.code.includes('SEA') || part.code.includes('SEO')){ return part}
+                                if(part.consommation.totalOrders.nbOrders > 2){ return part }
+                                else if(part.code.includes('SEA') || part.code.includes('SEO')){ return part }
                                 else if(part.storage.length > 0){ return part }
-                                else if(part.family){
-                                    if(part.family.includes('Assem') || part.family.includes('usin') || part.family.includes('transversale') || part.family.includes('Main')){
-                                        return part
-                                    }
-                                    else return index
-                                }
-                                else if(!part.family){ return part }
-                                else return index
-                            } else return index
-                                
-                        }
-                        else return index
+                                else if(!part.family || part.family.includes('Assem') || part.family.includes('usin') || part.family.includes('transversale') || part.family.includes('Main')){
+                                    return part
+                                } else return index
+                            } else return index  
+                        } else return index
                     })
 
                     //not in baseRef
@@ -780,13 +772,13 @@ class App {
                         if(typeof part == 'number'){ return this.store.PFEP[part] }
                         else return null
                     })
-
+                    failed = failed.filter((a) => a !== null)
+                    
                     //RENFORT == EXTRUSION USINE
                     //SEO => bac2, singleBac
 
 
                     baseRef = baseRef.filter((a) => typeof a !== 'number')
-                    failed = failed.filter((a) => a !== null)
 
                     let baseRefObj = []; let notOnBaseRefObj = [];
                     baseRef.map(part => { baseRefObj = {...baseRefObj, [part.code]: part }}); failed.map(part => { notOnBaseRefObj = {...notOnBaseRefObj, [part.code]: part }})
@@ -811,6 +803,7 @@ class App {
                     });
                     let partStorage = this.store.PFEP.map((part) => {if(part.storage.length > 0){ return part } else return null }); partStorage = partStorage.filter((a) => a !== null)
                     
+
                     let placedInRacking = [];
                     this.store.racking.map((rack, index) => {
                         rack.shelves.map((shelf, index) => {
@@ -821,23 +814,66 @@ class App {
                             })
                         })
                     })
+                    placedInRacking = placedInRacking.sort()
 
-                    let notInRacking = {};
-                    this.store.PFEP.map((part, index) => {
-                        if(placedInRacking.indexOf(part.code) == -1 && baseRef.findIndex((a) => a.code == part.code) !== -1){
-                            notInRacking = {
-                                ...notInRacking,
+                    let placedInShelves = [];
+                    this.store.shelves.map((shelf, index) => {
+                        shelf.content.map((container, index) => {
+                            if(placedInShelves.indexOf(container.name.split('_')[1]) == -1){
+                                placedInShelves.push(container.name.split('_')[1])
+                            }
+                        })
+                    })
+                    placedInShelves = placedInShelves.sort();
+
+
+                    let errorParts = []
+                    for(let i = 0; i < Math.max(placedInShelves.length, placedInRacking.length); i++){
+                        if(placedInRacking.indexOf(placedInShelves[i]) == -1){
+                            errorParts.push(placedInShelves[i])
+                        }
+                        if(placedInShelves.indexOf(placedInRacking[i]) == -1){
+                            errorParts.push(placedInRacking[i])
+                        }
+                    }
+                    errorParts = errorParts.filter((a) => a !== undefined)
+                    
+                    
+                    
+                    let partList = this.store.rackManager.partLists.MP.concat(this.store.rackManager.partLists.assemblages)
+                    partList = partList.map(part => part.code)
+
+                    let failedToPlace = partList.map((part, index) => {
+                        if(placedInShelves.indexOf(part) == -1){ return part }
+                        else return null
+                    })
+                    failedToPlace = failedToPlace.filter((a) => a !== null)
+
+                    
+                    let notOnPartList = {};
+                    baseRef.map((part, index) => {
+                        if(partList.indexOf(part.code) == -1){
+                            notOnPartList = {
+                                ...notOnPartList,
                                 [part.code]: {
+                                    family: part.family,
                                     type: part.emballage.TF.type,
+                                    specs: part.specs
                                 }
                             }
+                             
                         }
                     })
-                    console.log(notInRacking)
+                    term(`\n\nLe PFEP contient ${this.store.PFEP.length} pièces\n`);
+                    term(`^y${baseRef.length}^: pièces ont été retenues, ^y${failed.length}^: rejetées \n\n`)
+                    
+                    term('PARTLIST: MP: ').yellow(this.store.rackManager.partLists.MP.length)(', assemblages: ').yellow(this.store.rackManager.partLists.assemblages.length)('    -> total: ').yellow(partList.length)('\n')
+                    term('PARTS PLACED: shelves: ').yellow(placedInShelves.length)(', racking: ').yellow(placedInRacking.length)('\n')
+                    console.log(errorParts)
 
-                    term(`\n\nLe PFEP contient un total de ${this.store.PFEP.length} pièces\n`);
-                    term(`${baseRef.length} pièces ont été retenues pour le magasin\n`)
-                    term(`${failed.length} pièces ont été rejetées pour le magasin\n`); 
+                    term(`\n Failed to place ^y${failedToPlace.length}^: parts in shelves\n`)
+                    console.log(failedToPlace)
+
 
                     term(`${partStorage.length} pièces ont des containers\n`)
                     term(`${placedInRacking.length} pièces sont placées dans les racking\n`)
@@ -846,8 +882,8 @@ class App {
                     term(`La liste des pièces rejetées est exportée en JSON (notOnBaseRef.json)\n`);
                     term(`La liste de pièces considérées pour le magsin est exportée en JSON (baseRef.json)\n`);
                     term(`La liste des données d'entreposage est exportée en JSON (storageData.json)\n`) 
-                    term(`La liste des pièces n'ayant pas été placées dans le magasin est exportée en JSON (notInRacking.json)\n`)
-                    exportData.exportJSON(notInRacking, 'notInRacking', '../SORTIE');
+                    term(`notOnPartList: liste des pieces qui devraient etre sur partList mais qui ne le sont pas\n`)
+                    exportData.exportJSON(notOnPartList, 'notOnPartList', '../SORTIE');
                     exportData.exportJSON(storageData, 'storageData', '../SORTIE')
                     exportData.exportJSON(noStorage, 'noStorage', '../SORTIE')
                     exportData.exportJSON(notOnBaseRefObj, 'notOnBaseRef', '../SORTIE')

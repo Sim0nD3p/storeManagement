@@ -69,7 +69,6 @@ class StoreManager {
     makeCustomContainer(item, type, qte){
         let container
         let partsLeft = qte;
-        console.log(`customContainer type ${type}`)
         if(!isNaN(partsLeft)){
             let name = 'customContainer_' + item.code + '_0';
             container = new CustomContainer(name, type, item, partsLeft)
@@ -79,7 +78,6 @@ class StoreManager {
             let name = 'customContainer_' + item.code + '_0';
             container = new CustomContainer(name, type, item, partsLeft)
         }
-        console.log(container)
         return [container]
     }
 
