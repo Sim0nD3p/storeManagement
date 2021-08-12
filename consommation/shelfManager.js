@@ -196,7 +196,7 @@ class ShelfManager{
                 
                 let shelfData = this.unusedShelves[shelfIndex]
                 this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1;
-                let shelf = new Shelf(`bundle_${this.shelfQte.bundle}`, shelfData, 'bundle', tag)
+                let shelf = new Shelf(`bundle_${this.shelfQte.bundle}`, shelfData, 'bundle', null, tag)
                 this.shelfQte.bundle++
                 finalShelf = shelf
 
@@ -207,7 +207,7 @@ class ShelfManager{
 
 
                 let shelfIndex = this.choseShelf('priority', null, null, totalPriority, 'bac')
-                let shelf = new Shelf(`shelf_${this.shelfQte.container}`, this.unusedShelves[shelfIndex], 'bac', tag)
+                let shelf = new Shelf(`shelf_${this.shelfQte.container}`, this.unusedShelves[shelfIndex], 'bac', )
                 this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1
                 this.shelfQte.container++;
                 let content = totalContainerArray[totalContainerArray.length - 1];
