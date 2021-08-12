@@ -160,6 +160,7 @@ class RackManager{
         return moyenne
     }
     placeNewShelf(shelf, partsToPlace, tag) {
+        console.log(`placeNewShelf ${shelf.tag}`)
         let rackType = shelf.type == 'bac' ? 'mixed' : shelf.type;
         //console.log(`shelf.type ${shelf.type}`)
         //let shelfPriority = this.predictNewShelfPriority(partsToPlace.map(part => part.categorisation.consoMens))
@@ -171,7 +172,7 @@ class RackManager{
         let baseHeight = 0;
         let targetRack;
         let potentialRacks = this.app.store.racking.map((rack, index) => {  //finds potential racks (length, type)
-            if (shelf.length == rack.length && tag == rack.tag) { return rack }
+            if (shelf.length == rack.length && shelf.tag == rack.tag) { return rack }
             else return null
         })
 
@@ -180,7 +181,7 @@ class RackManager{
 
         if(potentialRacks.findIndex((a) => a !== null) == -1){  //si aucun potential rack => create new rack
             term.column(5); term(`no options available for length ${shelf.length}\n`)
-            let rack = new Racking(`racking_${this.app.store.racking.length + 1}`, shelf.length, rackType, tag)
+            let rack = new Racking(`racking_${this.app.store.racking.length + 1}`, shelf.length, rackType, shelf.tag)
             this.app.store.racking.push(rack)
             targetRack = rack
         }
@@ -224,7 +225,7 @@ class RackManager{
             }
             
             if (targetRack == undefined) {
-                let rack = new Racking(`racking_${this.app.store.racking.length + 1}`, shelf.length, rackType, tag)
+                let rack = new Racking(`racking_${this.app.store.racking.length + 1}`, shelf.length, rackType, shelf.tag)
                 targetRack = rack
                 this.app.store.racking.push(rack)                
             }

@@ -47,7 +47,7 @@ class Racking{
 
         let i = 0;
         let currentBaseHeight = 0
-        while (currentBaseHeight < MAX_HEIGHT && i < this.shelves.length){
+        while (currentBaseHeight < MAX_HEIGHT && i < this.shelves.length && place == undefined){
             let s = this.shelves[i];
             currentBaseHeight = s.baseHeight;
             if(shelf.type == 'bac'){
@@ -91,6 +91,7 @@ class Racking{
             }
             i++
         }
+        console.log(place)
         return place
     }
     addShelf = (shelf, baseHeight) => {

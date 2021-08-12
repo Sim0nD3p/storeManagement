@@ -196,7 +196,7 @@ class ShelfManager{
                 
                 let shelfData = this.unusedShelves[shelfIndex]
                 this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1;
-                let shelf = new Shelf(`bundle_${this.shelfQte.bundle}`, shelfData, 'bundle', null, tag)
+                let shelf = new Shelf(`bundle_${this.shelfQte.bundle}`, shelfData, 'bundle', tag)
                 this.shelfQte.bundle++
                 finalShelf = shelf
 
@@ -206,8 +206,8 @@ class ShelfManager{
             case 'bac': {
 
 
-                let shelfIndex = this.choseShelf('priority', null, null, totalPriority, 'bac')
-                let shelf = new Shelf(`shelf_${this.shelfQte.container}`, this.unusedShelves[shelfIndex], 'bac', )
+                let shelfIndex = this.choseShelf('priority', null, null, totalPriority, 'bac', null, tag)
+                let shelf = new Shelf(`shelf_${this.shelfQte.container}`, this.unusedShelves[shelfIndex], 'bac', tag)
                 this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1
                 this.shelfQte.container++;
                 let content = totalContainerArray[totalContainerArray.length - 1];
@@ -231,8 +231,8 @@ class ShelfManager{
             }
             case 'cus': {
                 //check priority for placement options CHOSESHELF
-                let shelfIndex = this.choseShelf('priority', null, null, totalPriority, 'bac')
-                let shelf = new Shelf(`shelf_${this.shelfQte.container}`, this.unusedShelves[shelfIndex], 'bac')
+                let shelfIndex = this.choseShelf('priority', null, null, totalPriority, 'bac', null, tag)
+                let shelf = new Shelf(`shelf_${this.shelfQte.container}`, this.unusedShelves[shelfIndex], 'bac', null, tag)
                 this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1
                 this.shelfQte.container++;
                 let content = totalContainerArray[totalContainerArray.length - 1];
