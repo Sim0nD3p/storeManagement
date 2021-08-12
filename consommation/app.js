@@ -675,12 +675,52 @@ class App {
                     //this.categorizeParts()
                     console.log('CONTENANTS POUR PIECES')
 
-                    
-
+                    let baseRef = this.store.PFEP.map((part, index) => {
+                        if(part !== undefined && part.family !== 'Consommable' && part.family !== 'Collant'){
+                            if(!part.class || part.class.includes('barr') == false){
+                                if(part.consommation.totalOrders.nbOrders > 2){ return part }
+                                else if(part.code.includes('SEA') || part.code.includes('SEO')){ return part }
+                                else if(part.storage.length > 0){ return part }
+                                else if(!part.family || part.family.includes('Assem') || part.family.includes('usin') || part.family.includes('transversale') || part.family.includes('Main')){
+                                    return part
+                                } else return index
+                            } else return index  
+                        } else return index
+                    })
                     for(const code in storageData){
                         this.store.getItemFromPFEP(code.toString()).emballage.TF.type = storageData[code].container
                         this.store.getItemFromPFEP(code.toString()).emballage.TF.nbPieces = isNaN(Number(storageData[code].nbPieces)) ? storageData[code].nbPieces : Number(storageData[code].nbPieces);
+                        if(storageData[code].container == 'bundleUsine'){
+                            this.store.getItemFromPFEP(code.toString()).qteMax = storageData[code].nbPieces
+                        }
                     }
+                    
+                    let extrusionUsin = baseRef.map((part, index) => {
+                        if(typeof part !== 'number'){
+                            if(part.family == 'Barre transversale'){ return part }
+                            else return null
+                        } else return null
+                    })
+                    extrusionUsin = extrusionUsin.filter((a) => a !== null)
+                    let bundleUsine = {}
+                    extrusionUsin.map((part) => {
+                        bundleUsine = {
+                            ...bundleUsine,
+                            [part.code]:{
+                                class: part.class,
+                                family: part.family,
+                                specs: `${part.specs.length} x ${part.specs.width} x ${part.specs.height}`,
+                            }
+                        }
+
+                    })
+
+
+                    exportData.exportJSON(bundleUsine, 'bundlesUsine', '../SORTIE')
+
+
+                    
+                    
 
 
                     for(let i = 0; i < this.store.PFEP.length; i++){

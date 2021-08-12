@@ -10,6 +10,9 @@ const StoreManager = require('./storeManager');
 const Palette = require('./containers/palette');
 const RackManager = require('./rackManager');
 
+
+const MINIMUM_BUNDLE_LENGTH = 950;
+
 class Store{
     constructor(app){
         this.inventory = [];    //intenvory wich contains all the info we need
@@ -112,6 +115,16 @@ class Store{
                 if(part.family == 'Main'){ customType = 'main' }
                 else { customType = part.family }
                 containers = this.storeManager.makeCustomContainer(part, customType, qte);
+                break;
+            }
+            case 'bundleUsine': {
+                if(part.specs.length < MINIMUM_BUNDLE_LENGTH){
+
+                }
+                else {
+                    containers = this.storeManager.makeCustomContainer(part, 'bundleUsin', qte)
+                }
+
                 break;
             }
         }

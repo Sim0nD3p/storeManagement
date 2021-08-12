@@ -4,7 +4,7 @@ const shelves = require('./shelves')
  */
 class customShelf{
     constructor(name, type, minLength, height){
-        this.name
+        this.name = name;
         this.height = height;
         this.priority;
         this.content;

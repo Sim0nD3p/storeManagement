@@ -52,7 +52,7 @@ const storageData = {
     //----------------------------------------------------------
     "BA1B-2975A64": {
         container: "bundleUsine",
-        nbPieces: "",
+        nbPieces: 10,
         storage: false
     },
     "BX01-0015C": {
@@ -1035,7 +1035,7 @@ const storageData = {
     },
     "SEP205-004385": {
         container: "bundleUsine",
-        nbPieces: "",
+        nbPieces: 10,
         storage: false
     },
     "SEP205-004387": {
@@ -1146,7 +1146,7 @@ const storageData = {
     },
     "SEP210-004345": {
         container: "bundleUsine",
-        nbPieces: "",
+        nbPieces: 100,
         storage: false
     },
     "SEP210-005058": {
@@ -1215,12 +1215,12 @@ const storageData = {
     },
     "SEP250-004354": {
         container: "bundleUsine",
-        nbPieces: "",
+        nbPieces: 200,
         storage: false
     },
     "SEP250-004360": {
         container: "bundleUsine",
-        nbPieces: "",
+        nbPieces: 100,
         storage: false
     },
     "SEP250-004362": {
@@ -1295,7 +1295,7 @@ const storageData = {
     },
     "SEP2516": {
         container: "bundleUsine",
-        nbPieces: "",
+        nbPieces: 40,
         storage: false
     },
     "SEP2517": {
@@ -1310,7 +1310,7 @@ const storageData = {
     },
     "SEP2522": {
         container: "bundleUsine",
-        nbPieces: "",
+        nbPieces: 15,
         storage: false
     },
     "SEP2523": {
@@ -1345,7 +1345,7 @@ const storageData = {
     },
     "SEP2543": {
         container: "bundleUsine",
-        nbPieces: "",
+        nbPieces: 10,
         storage: false
     },
     "SEP255-004263": {
@@ -1601,7 +1601,7 @@ const storageData = {
     },
     "SEP3005": {
         container: "bundleUsine",
-        nbPieces: "",
+        nbPieces: 40,
         storage: false
     },
     "SEP3012": {
@@ -1711,7 +1711,7 @@ const storageData = {
     },
     "SEP3276": {
         container: "bundleUsine",
-        nbPieces: "",
+        nbPieces: 100,
         storage: false
     },
     "SEP3281": {
@@ -2026,7 +2026,7 @@ const storageData = {
     },
     "SEP3603": {
         container: "bundleUsine",
-        nbPieces: "",
+        nbPieces: 25,
         storage: false
     },
     "SEP3604": {
@@ -2796,7 +2796,7 @@ const storageData = {
     },
     "SEP4213": {
         container: "bundleUsine",
-        nbPieces: "",
+        nbPieces: 20,
         storage: false
     },
     "SEP4251": {
@@ -2861,12 +2861,12 @@ const storageData = {
     },
     "SEP4333-D": {
         container: "bundleUsine",
-        nbPieces: "",
+        nbPieces: 20,
         storage: false
     },
     "SEP4333-G": {
         container: "bundleUsine",
-        nbPieces: "",
+        nbPieces: 20,
         storage: false
     },
     "SEP4636": {

@@ -16,7 +16,8 @@ class ShelfManager{
         this.unusedShelves = shelves;
         this.shelfQte = {
             bundle: 0,
-            container: 0
+            container: 0,
+            bundleUsin: 0,
         }
     }
     checkAvailability(part, shelf, returnFull){
@@ -229,6 +230,27 @@ class ShelfManager{
 
                 break;
             }
+            case 'bUs': {
+                 //let shelf = new Shelf(`shelf_${this.app.store.shelves.length + 1}`, this.unusedShelves[0], 'bundle');
+                 let maxLengthArray = partsToPlace.map((part, index) => {
+                    let lengthArray = part.part.storage.map((container, index) => container.length).sort((a, b) => b - a)
+                    return lengthArray[0]
+                })
+                let shelfIndex = this.choseShelf('length', maxLengthArray.sort((a, b) => b - a)[0], null, null, 'bUs', partsToPlace[0].part.storage.length, tag)
+
+                
+                let shelfData = this.unusedShelves[shelfIndex]
+                //this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1;
+                let shelf = new Shelf(`bundleUsin_${this.shelfQte.bundleUsin}`, shelfData, 'bUs', tag)
+                this.shelfQte.bundleUsin++
+                finalShelf = shelf
+
+
+                break;
+
+
+                break;
+            }
             case 'cus': {
                 //check priority for placement options CHOSESHELF
                 let shelfIndex = this.choseShelf('priority', null, null, totalPriority, 'bac', null, tag)
@@ -354,6 +376,7 @@ class ShelfManager{
         let targetType = [categorisation.type.substring(0, 3)]
         if(targetType == 'bun'){ targetType = ['bun'] }
         else if(targetType == 'bac' || targetType == 'cus'){ targetType = ['bac', 'cus'] }
+        else if(targetType == 'bUs'){ targetType = ['bUs']}
 
         return this.app.store.shelves.map((shelf, index) => {
             if (targetType.indexOf(shelf.type.substring(0, 3)) !== -1 && shelf.tag == tag) {

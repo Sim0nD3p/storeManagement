@@ -96,6 +96,7 @@ class Shelf{
                 result = this.searchPlaceForBundle(item)
             }
             else if(generalType == 'cus'){
+                console.log('searching place for customContainer')
                 orientationArray = [[VERTICAL]];
                 result = this.searchPlaceForBac(item, orientationArray, accessSide)
             }

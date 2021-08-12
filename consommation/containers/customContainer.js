@@ -1,4 +1,4 @@
-
+const MAX_DEPTH = 1070;
 /*
 CustomContainer:
     contains all parts for an item, size is variable
@@ -44,6 +44,72 @@ function handStorage(item, qte){
     }
 }
 
+function bundleStorage(item, qte){
+    let nbBundle; 
+    let container = {
+        length: false,
+        width: false,
+        height: false,
+    }
+    console.log(qte)
+    console.log(item.code)
+    console.log(`part info height: ${item.specs.height}, width: ${item.specs.width}, length: ${item.specs.length}`);
+
+    const bluePrints = (item, qte) => {
+        let nbHeight = 1;
+        let nbWidth = Math.floor(MAX_DEPTH / item.specs.width);
+        if(item.specs.height * Math.ceil(qte / nbWidth) < item.specs.width * nbWidth){
+            nbHeight = Math.ceil(qte / nbWidth)
+        }
+        else {
+            nbHeight = Math.floor(item.specs.width * nbWidth / item.specs.height)
+        }
+        return {
+            nbWidth: nbWidth,
+            nbHeight: nbHeight,
+        }
+    }
+    console.log(bluePrints(item, qte))
+
+    if(bluePrints(item, qte).nbWidth * bluePrints(item, qte).nbHeight < qte){
+        nbBundle = Math.ceil(qte / (bluePrints(item, qte).nbWidth * bluePrints(item, qte).nbHeight))
+    } else nbBundle = 1
+
+    console.log(nbBundle)
+    
+    let bundle = {
+        width: bluePrints(item, qte).nbWidth * item.specs.width,
+        height: bluePrints(item, qte).nbHeight * item.specs.height,
+        length: item.specs.length
+
+    }
+   if(nbBundle == 1){
+       container = {
+           length: bundle.length,
+           width: bundle.width,
+           height: bundle.height,
+       }
+   } 
+   else {
+       if(nbBundle * bundle.width > MAX_DEPTH){
+           container = {
+               length: Math.ceil(nbBundle / (Math.floor(MAX_DEPTH / bundle.width) * bundle.width)) * bundle.length,
+               width: Math.floor(MAX_DEPTH / bundle.width) * bundle.width,
+               height: bundle.height,
+           }
+       }
+       else {
+           container = {
+               length: bundle.length,
+               width: nbBundle * bundle.width,
+               height: bundle.height,
+           }
+       }
+
+   }
+   return container
+}
+
 
 class CustomContainer{
     constructor(name, type, part, qte){
@@ -65,6 +131,10 @@ class CustomContainer{
         console.log(type)
         if(type == 'main'){
             dimensions = handStorage(item, qte)
+            console.log(dimensions)
+        }
+        else if(type = 'bundleUsin'){
+            dimensions = bundleStorage(item, qte);
             console.log(dimensions)
         }
         else {

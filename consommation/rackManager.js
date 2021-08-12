@@ -258,7 +258,7 @@ class RackManager{
         //partList = partList.map((part, index) => { return this.app.store.getItemFromPFEP(part.code) })
         for(let i = 0; i < partList.length; i++){
             term(`\n---------- NEW PART ----------\n`)
-            term(`${partList[i].code} - ${partList[i].storage.length} containers - priority: ${Math.ceil(partList[i].consommation.mensuelleMoy)}\n`)
+            term(`${partList[i].code} - ${partList[i].storage.length} containers (${partList[i].storage[0].name.split('_')[0]}, ${partList[i].storage[0].length}, ${partList[i].storage[0].width}, ${partList[i].storage[0].height}) - priority: ${Math.ceil(partList[i].consommation.mensuelleMoy)}\n`)
             //console.log('----- placing in racking -----\n')
             let categorisation = {
                 consoMens: partList[i].consommation ? partList[i].consommation.mensuelleMoy : undefined,
