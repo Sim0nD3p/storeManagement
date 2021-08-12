@@ -192,7 +192,7 @@ class RackManager{
 
             let rackName;
             term.column(5); term('potential racking are:\n')
-            potentialRacks.map(rack => { term.column(10); term(`${rack.name}, ${rack.length}, ${rack.height}, ${rack.contentType}\n`) })
+            potentialRacks.map(rack => { term.column(10); term(`${rack.name}, ${rack.length}, ${rack.height}, ${rack.contentType}, ${rack.tag}\n`) })
 
             let options = potentialRacks.map((rack, index) => {
                 return [rack.name, rack.searchPlace(shelf)]
