@@ -278,11 +278,6 @@ class RackManager{
             term(`${this.app.store.shelves.length} shelves in store, ${potentialShelves.filter(a => a !== null).length} potential shelves\n`)
 
             if(potentialShelves.findIndex((shelf) => shelf !== null) == -1){
-                term('\n----- CREATING SHELF -----\n')
-                newShelf = true;
-                shelf = this.requestNewShelf(partList, i, tag);  //returns new shelf
-
-
                 let lostShelf = null
                 let u = 0;
                 while (lostShelf == null & u < this.app.store.shelves.length){
@@ -292,6 +287,11 @@ class RackManager{
                     }
                     u++
                 }
+                term('\n----- CREATING SHELF -----\n')
+                newShelf = true;
+                shelf = this.requestNewShelf(partList, i, tag);  //returns new shelf
+
+
             }
 
             else {

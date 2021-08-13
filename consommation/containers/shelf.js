@@ -96,7 +96,6 @@ class Shelf{
                 result = this.searchPlaceForBundle(item)
             }
             else if(generalType == 'cus'){
-                console.log('searching place for customContainer')
                 orientationArray = [[VERTICAL]];
                 result = this.searchPlaceForBac(item, orientationArray, accessSide)
             }
@@ -361,7 +360,6 @@ class Shelf{
          * @returns columns options for the placement of the containers nedded for the part to place
          */
         const initialColumnOptions = (orientationOptions, blocs, item) => {
-            console.log(`containerCount ${containerCount}`)
             let columns = [];   //col: column, arrangement dans le sens width (array)
             for(let i = 0; i < blocs.length; i++){
                 if(blocs[i][0] !== 0){
@@ -371,7 +369,6 @@ class Shelf{
                         for(let u = 0; u < containerCount; u++){    //containers loop
                             if(col[col.length - 1].length == 0){
                                 if(orientationOptions[j][u] == VERTICAL){
-                                    console.log(blocs[i][0], item.storage[u].length)
                                     if(blocs[i][0] >= item.storage[u].length){
                                         col[col.length - 1] = [[item.storage[u].length, item.storage[u].width]]
                                     }
@@ -654,8 +651,6 @@ class Shelf{
             let spaceArray = space(true);
             let blocs = makeBlocs(spaceArray);
             let columns = initialColumnOptions(orientationOptions, blocs, item);
-            console.log('columns')
-            console.log(columns)
             let finalCol = genFinalCol(columns);
             let optionSpecs = getBestOption(finalCol);
             let bestBloc = optimizeBloc(blocs, optionSpecs)

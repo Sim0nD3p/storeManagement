@@ -9,10 +9,10 @@ class Racking{
     constructor(name, length, type, tag){
         this.name = name;
         this.length = length;
-        this.tag = tag
-        this.type;  //assemblage ou MP
+        this.tag = tag; ////assemblage ou MP
+        this.type;  
         this.shelves = []
-        this.contentType = type;
+        this.contentType = type;    //mixed, bac, bundle
         //this.priorityZone = [0, 1600]
         //this.space = new Array(10000).fill(null)
         this.height = 0
@@ -53,7 +53,7 @@ class Racking{
             if(shelf.type == 'bac'){
                 if(this.contentType == 'mixed'){
                     //check entre dernier bac et REACH_LIMIT
-                    if(currentBaseHeight + s.height + GAP + shelf.height <= REACH_LIMIT){
+                    if(currentBaseHeight + s.height + GAP /*+ shelf.height*/ <= REACH_LIMIT){
                         if(place !== false){
                             place = checkPlace(i, shelf)
                         }

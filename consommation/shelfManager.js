@@ -9,6 +9,7 @@ const Bac = require('./containers/bac');
 const { runInThisContext } = require('vm');
 const FRONT = 'FRONT';
 const BACK = 'BACK'
+const BASE_HEIGHT_PRIORITY_LIMIT = 1500
 
 class ShelfManager{
     constructor(app){
@@ -93,7 +94,7 @@ class ShelfManager{
             //console.log(this.app.store.racking)
             //options = options.filter((a) => a[4] == type);  //filter type
             term.column(5); term(`target priority is ${priority}\n`)
-            term.column(5); term('options are:'); console.log(options)
+            term.column(5); term('options are:'); //console.log(options)
 
             
             
@@ -139,6 +140,67 @@ class ShelfManager{
             }
             //^^^ NEED TO BE REMOVED ^^^
             return targetIndex
+        }
+        else if(prop == 'height'){
+            let targetIndex = -1;
+            
+            const newRackOptions = () => {
+                let options = this.unusedShelves.map((shelf, index) => {
+                    if(this.app.store.racking.findIndex((a) => a.length == shelf.length && (a.contentType == type || a.contentType == 'mixed')) == -1){
+                        return shelf
+                    } else return null
+                })
+                options = options.filter((a) => a !== null)
+                return options
+            }
+
+
+
+            //[rack.name, totalPriority, rack.height, rack.length, rack.contentType, rack.tag]
+            options = options.map((rack, index) => {        //filters type and tag
+                if(rack[5] == tag){
+                    if(rack[4] == type || rack[4] == 'mixed'){
+                        return rack
+                    } else return null
+                } else return null
+            })
+            options = options.filter((a) => a !== null)
+            options = options.sort((a, b) => a[2] - b[2])
+
+            let potential = options.map((rack, index) => {      //filters qte and get index
+                let potIndex = -1
+                for(let i = 0; i < this.unusedShelves.length; i++){
+                    if(this.unusedShelves[i].length == rack[3] && this.unusedShelves[i].qte > 0){
+                        potIndex = i
+                        break;
+                    }
+                }
+                if(potIndex !== -1){ return [rack, potIndex] }
+                else return null
+            })
+            potential = potential.filter((a) => a !== null)
+
+
+            console.log('potential')
+            console.log(potential)
+
+            console.log('newRacksOptions')
+            console.log(newRackOptions())
+            
+            if(newRackOptions().length > 0){
+                let newRacks = newRackOptions().sort((a, b) => b.qte - a.qte)
+                targetIndex = this.unusedShelves.findIndex((a) => a.rating == newRacks[0].rating && a.length == newRacks[0].length)
+                
+            }
+            else if(potential.length > 0){
+                targetIndex = potential[0][1]
+
+            }
+            else {
+                targetIndex = this.unusedShelves.findIndex((a) => a.qte > 0) == -1 ? 0 : this.unusedShelves.findIndex((a) => a.qte > 0)
+            }
+            return targetIndex
+
         }
     }
 
@@ -207,7 +269,8 @@ class ShelfManager{
             case 'bac': {
 
 
-                let shelfIndex = this.choseShelf('priority', null, null, totalPriority, 'bac', null, tag)
+
+                let shelfIndex = this.choseShelf('height', null, null, totalPriority, 'bac', null, tag)
                 let shelf = new Shelf(`shelf_${this.shelfQte.container}`, this.unusedShelves[shelfIndex], 'bac', tag)
                 this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1
                 this.shelfQte.container++;
@@ -253,7 +316,7 @@ class ShelfManager{
             }
             case 'cus': {
                 //check priority for placement options CHOSESHELF
-                let shelfIndex = this.choseShelf('priority', null, null, totalPriority, 'bac', null, tag)
+                let shelfIndex = this.choseShelf('height', null, null, totalPriority, 'bac', null, tag)
                 let shelf = new Shelf(`shelf_${this.shelfQte.container}`, this.unusedShelves[shelfIndex], 'bac', null, tag)
                 this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1
                 this.shelfQte.container++;

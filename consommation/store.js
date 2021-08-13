@@ -122,8 +122,8 @@ class Store{
 
                 }
                 else {
-                    containers = this.storeManager.makeCustomContainer(part, 'bundleUsin', qte)
                 }
+                containers = this.storeManager.makeCustomContainer(part, 'bundleUsin', qte)
 
                 break;
             }
