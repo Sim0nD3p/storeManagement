@@ -43,13 +43,15 @@
 - DEBUGGER ALGORITHME
 - optimize bundle length vs shelf length for small bundle
 - FUCKING BUNDLES - DONE
-- more control over accessSides
 - entrer infos liste - DONE
 - custom shelf - DONE
 - racking mains - DONE
 - racking BT - DONE
+- more control over accessSides
 - racking cornes
 - optimize racking function
+
+
 - shelf TS-59 (only 13-16 parts have the TS tag)
 
 
