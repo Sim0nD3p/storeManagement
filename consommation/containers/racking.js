@@ -91,7 +91,6 @@ class Racking{
             }
             i++
         }
-        console.log(place)
         return place
     }
     addShelf = (shelf, baseHeight) => {

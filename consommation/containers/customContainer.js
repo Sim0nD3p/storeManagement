@@ -85,23 +85,23 @@ function bundleStorage(item, qte){
     }
    if(nbBundle == 1){
        container = {
-           length: bundle.length,
-           width: bundle.width,
+           width: bundle.length,
+           length: bundle.width,
            height: bundle.height,
        }
    } 
    else {
        if(nbBundle * bundle.width > MAX_DEPTH){
            container = {
-               length: Math.ceil(nbBundle / (Math.floor(MAX_DEPTH / bundle.width) * bundle.width)) * bundle.length,
-               width: Math.floor(MAX_DEPTH / bundle.width) * bundle.width,
+               width: Math.ceil(nbBundle / (Math.floor(MAX_DEPTH / bundle.width) * bundle.width)) * bundle.length,
+               length: Math.floor(MAX_DEPTH / bundle.width) * bundle.width,
                height: bundle.height,
            }
        }
        else {
            container = {
-               length: bundle.length,
-               width: nbBundle * bundle.width,
+               width: bundle.length,
+               length: nbBundle * bundle.width,
                height: bundle.height,
            }
        }

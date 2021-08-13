@@ -307,12 +307,11 @@ class RackManager{
             if(shelf !== null){
                 //term(`placing ${partList[i].code} in ${shelf.name}\n`)
                 let place = shelf.searchPlace(partList[i], accessPoint)
+                console.log(place)
                 
                 if(place !== false){
-                    console.log(place)
                     term.green(`part successfully placed\n`)
-                    console.log(partList[i].storage.length)
-                    console.log(place.length)
+                    //console.log(partList[i].storage.length)
                     for(let j = 0; j < place.length; j++){
                         shelf.putInShelf(place[j][0], place[j][1], place[j][2], partList[i].storage[j], partList[i])                
                     }
