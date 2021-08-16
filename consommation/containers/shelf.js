@@ -14,7 +14,8 @@ class containerObject{
     constructor(name, position, dimensions, heightNb, container, consomMensMoy){
         this.name = name;
         this.height = heightNb
-        this.totalHeight = container.height * heightNb
+        this.totalHeight = container.height * heightNb;
+        this.weight = container.weight * heightNb;
         this.consommation = consomMensMoy;
         this.position = {
             front: position.front,
@@ -61,7 +62,7 @@ class Shelf{
         this.width = 107; //mm
         this.capacity = shelfData.rating / 2.2046;  //1 kg == 2.2046 lbs
         this.length = shelfData.length;
-        this.load = 0; //masse kg
+        this.weight = 0; //masse kg
         
         this.content = []
         this.height = 0
@@ -78,28 +79,34 @@ class Shelf{
         let containerCount = item.storage.length;
         let containersPlacement;
         let orientationArray = [];
-            if(generalType == 'bac'){
-                for(let i = 0; i < (containerCount / 2) + 1; i++){
+        let totalItemWeight = 0;
+        for(let i = 0; i < item.storage.length; i++){ totalItemWeight += item.storage[i].weight }
+
+        if(this.weight + totalItemWeight <= this.capacity){
+            if (generalType == 'bac') {
+                for (let i = 0; i < (containerCount / 2) + 1; i++) {
                     let option = [];
-                    for(let j = 0; j < (containerCount / 2); j++){
-                        if(j < i){ option.push(HORIZONTAL) }
+                    for (let j = 0; j < (containerCount / 2); j++) {
+                        if (j < i) { option.push(HORIZONTAL) }
                         else option.push(VERTICAL)
                     }
                     orientationArray.push(option)
                 }
                 result = this.searchPlaceForBac(item, orientationArray, accessSide)
             }
-            else if(generalType == 'bun' || generalType == 'pal'){
+            else if (generalType == 'bun' || generalType == 'pal') {
                 let option = []
-                for(let i = 0; i < containerCount; i++){ option.push(HORIZONTAL) }
+                for (let i = 0; i < containerCount; i++) { option.push(HORIZONTAL) }
                 orientationArray.push(option);
                 result = this.searchPlaceForBundle(item)
             }
-            else if(generalType == 'cus'){
+            else if (generalType == 'cus') {
                 orientationArray = [[VERTICAL]];
                 result = this.searchPlaceForBac(item, orientationArray, accessSide)
             }
-            return result
+        }
+        else return false
+        return result
 
     }
     //returns: position, containersPlacement
@@ -734,6 +741,13 @@ class Shelf{
         }
         return occupiedSpace / this.space.length
     }
+    setWeight = () => {
+        let totalWeight = 0;
+        for(let i = 0; i < this.content.length; i++){
+            totalWeight += this.content[i].weight
+        }
+        return totalWeight;
+    }
     
 
     //position={front, width}   dimensions={front, width}
@@ -751,7 +765,9 @@ class Shelf{
             }
             
         }
+        this.weight = this.setWeight()
         this.height = this.setHeight();
+
 
     }
     setHeight(){

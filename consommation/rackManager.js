@@ -93,6 +93,7 @@ class RackManager{
         console.log(`assemblages ${assemblages.length}`)
         this.placeInRacking(MP, 'MP');
         this.placeInRacking(assemblages, 'ASS')
+        this.optimizeRacking()
     }
 
     /**
@@ -159,7 +160,7 @@ class RackManager{
         } 
         return moyenne
     }
-    placeNewShelf(shelf, partsToPlace, tag) {
+    placeNewShelf(shelf) {
         console.log(`placeNewShelf ${shelf.tag}`)
         let rackType = shelf.type == 'bac' ? 'mixed' : shelf.type;
         //console.log(`shelf.type ${shelf.type}`)
@@ -238,6 +239,35 @@ class RackManager{
     }
 
     optimizeRacking(){
+        for(let i = 0; i < this.app.store.shelves.length; i++){
+            if(this.app.store.shelves[i].baseHeight == undefined){
+                this.placeNewShelf(this.app.store.shelves[i])
+            }
+        }
+
+
+        let shelves = {}
+        for(let i = 0; i < this.app.store.shelves.length; i++){
+            shelves = {
+                ...shelves,
+                [this.app.store.shelves[i].length]: {
+                    ...shelves[this.app.store.shelves[i].length],
+                    [this.app.store.shelves[i].name]: this.app.store.shelves[i]
+                }
+            }
+        }
+        let finalShelves = []
+        for(const length in shelves){
+            let currentLength = []
+            for(const shelf in shelves[length]){
+                currentLength.push(shelves[length][shelf])
+
+            }
+            finalShelves.push({ [length]: currentLength })
+        }
+
+        console.log(finalShelves)
+
 
     }
 
