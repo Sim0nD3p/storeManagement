@@ -41,6 +41,7 @@
 
 ## TO DO 2021-08-10
 - DEBUGGER ALGORITHME
+- BUG PART NOT PLACED AFTER CREATING SHELF
 - optimize bundle length vs shelf length for small bundle
 - FUCKING BUNDLES - DONE
 - entrer infos liste - DONE

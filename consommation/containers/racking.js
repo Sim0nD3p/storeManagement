@@ -35,6 +35,7 @@ class Racking{
             else if(!s[i+1]){
                 return s[i].baseHeight + s[i].height + GAP
             }
+            else return null
         }
 
         let i = 0;
@@ -50,19 +51,25 @@ class Racking{
                 
             }
             else if(height == 'reach_limit'){
+                console.log('going for reach_limit')
                 if(currentBaseHeight + s.height + GAP + shelf.height <= REACH_LIMIT){
+                    console.log('passed for reach_limit, checking for place')
                     place = checkPlace(i, shelf)
                 }
                 
             }
             else if(height){
+                console.log('going for customHeight')
                 if(currentBaseHeight + s.height + GAP + shelf.height <= height){
+                    console.log('passed for customheight, checking place')
                     place = checkPlace(i, shelf)
                 }
             }
             i++
         }
 
+        console.log('this is place from searchPlace RACKING')
+        console.log(place)
         return place
 
     }

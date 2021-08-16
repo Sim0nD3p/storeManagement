@@ -47,7 +47,16 @@ class ShelfManager{
      * @returns index of the chosen shelf type
      */
     choseShelf = (prop, length, weight, priority, type, qte, tag) => {
+
         term.column(5); term(`chosing shelf based on ${prop}\n`)
+        
+
+        let targetType;     //bac, bun, cus, bUs
+        if(type == 'bac'){ targetType = ['mixed', 'bac', 'cus'] }
+        else if(type == 'bun'){ targetType = ['bundle', 'mixed'] }
+        else if(type == 'cUs'){ targetType = ['mixed', 'cUs'] }
+        //else { targetType = ['mixed'] }
+
         let options = this.app.store.racking.map((rack, index) => {
             let totalPriority = 0;
             let nbPriority = 0;
@@ -55,13 +64,13 @@ class ShelfManager{
             totalPriority = isNaN(totalPriority / nbPriority) ? 0 : totalPriority / nbPriority
             return [rack.name, totalPriority, rack.height, rack.length, rack.contentType, rack.tag]
         })
+        options = options.filter((a) => a[5] == tag)
 
         if (priority) {
             if (priority !== 0) {
                 options = options.sort((a, b) => { return Math.abs(a[1] - priority) / a[1] - Math.abs(b[1] - priority) / b[1] })
             } else { options = options.sort((a, b) => { return a[1] - b[1] }) }
-
-        }
+        } else { options = options.sort((a, b) => { return a[1] - b[1] }) }
         if(prop == 'length'){
             term.column(5); term(`target length is ${length}\n`);
             term.column(5); term(`options are:`); console.log(options)
@@ -98,6 +107,8 @@ class ShelfManager{
             //options = options.filter((a) => a[4] == type);  //filter type
             term.column(5); term(`target priority is ${priority}\n`)
             term.column(5); term('options are:'); //console.log(options)
+
+
 
             
             
@@ -137,10 +148,6 @@ class ShelfManager{
             //console.log(potential)
             term.column(5); term(`this is the unused shelves\n`)
             console.log(this.unusedShelves)
-            if(targetIndex == -1){
-                targetIndex = this.unusedShelves.findIndex((a) => a.qte > 0)
-
-            }
             //^^^ NEED TO BE REMOVED ^^^
             return targetIndex
         }
@@ -156,9 +163,37 @@ class ShelfManager{
                 options = options.filter((a) => a !== null)
                 return options
             }
+            console.log(targetType)
+            options = options.filter((a) => targetType.indexOf(a[4]) !== -1)
+            console.log('OG options')
+
+            let results = options.map((rackingOption, index) => {
+                let shelfSample = {
+                    height: 600,
+                    type: 'mixed'
+                }
+                return this.app.store.rackManager.getRacking(rackingOption[0]).searchPlace(shelfSample, BASE_HEIGHT_PRIORITY_LIMIT)
+
+            })
 
 
+            if(results.findIndex((a) => a !== null) !== -1){
 
+            }
+            term.yellow('\nTHIS IS TEST\n')
+
+
+            console.log(options)
+            term.yellow('CHOSE SHELF HEIGHT')
+            console.log(newRackOptions())
+            
+            
+            if(targetIndex == -1){
+                targetIndex = this.unusedShelves.findIndex((a) => a.qte > 0)
+                return targetIndex
+    
+            }
+            /* 
             //[rack.name, totalPriority, rack.height, rack.length, rack.contentType, rack.tag]
             options = options.map((rack, index) => {        //filters type and tag
                 if(rack[5] == tag){
@@ -212,6 +247,8 @@ class ShelfManager{
                 targetIndex = this.unusedShelves.findIndex((a) => a.qte > 0) == -1 ? 0 : this.unusedShelves.findIndex((a) => a.qte > 0)
             }
             return targetIndex
+
+             */
 
         }
     }
@@ -442,7 +479,9 @@ class ShelfManager{
     
 
     /**
-     * 
+     * Meme type de contenu (bundle, bac, bundleUsine || mixed)
+     * Meme tag
+     * placement via searchPlace (no BACK for bundle per conception)
      * @param {*} part 
      * @param {*} categorisation 
      * @returns [shelf, front, back]
@@ -458,9 +497,8 @@ class ShelfManager{
                 let placement = [shelf.searchPlace(part, FRONT) !== false ? true : false, shelf.searchPlace(part, BACK) !== false ? true : false]
                 if (placement[0] !== false || placement[1] !== false) {
                     return [shelf, placement[0], placement[1]]
-                }
-                else return null
-            } else { return null }
+                } else return null
+            } else return null
         })
     }
 }
