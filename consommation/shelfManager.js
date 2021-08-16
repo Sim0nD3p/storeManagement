@@ -11,6 +11,9 @@ const FRONT = 'FRONT';
 const BACK = 'BACK'
 const BASE_HEIGHT_PRIORITY_LIMIT = 1500
 
+
+const SAMPLE_HEIGHT_SHELF = 650;
+
 class ShelfManager{
     constructor(app){
         this.app = app;
@@ -160,12 +163,21 @@ class ShelfManager{
             options = options.map((rack, index) => {        //filters type and tag
                 if(rack[5] == tag){
                     if(rack[4] == type || rack[4] == 'mixed'){
-                        return rack
+                        
+                        let shelfSample = {
+                            height: SAMPLE_HEIGHT_SHELF,
+                            type: type,
+                        }
+                        if(this.app.store.rackManager.getRacking(rack[0]).searchPlace(shelfSample, 'reach_limit') !== false){
+                            return rack
+                        } else return null
                     } else return null
                 } else return null
             })
             options = options.filter((a) => a !== null)
             options = options.sort((a, b) => a[2] - b[2])
+            console.log(`this is options`)
+            console.log(options)
 
             let potential = options.map((rack, index) => {      //filters qte and get index
                 let potIndex = -1

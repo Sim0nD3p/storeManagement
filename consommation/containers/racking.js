@@ -1,4 +1,4 @@
-const REACH_LIMIT = 2500;
+const REACH_LIMIT = 3500;
 const PRIORITY_LIMIT = 1600
 const GAP = 100;
 const MAX_HEIGHT = 6000;
@@ -25,13 +25,55 @@ class Racking{
         return s.baseHeight + s.height
     }
 
+    searchPlace = (shelf, height) => {
+        let place;
+        const checkPlace = (i, shelf) => {
+            let s = this.shelves;
+            if(s[i+1] && s[i].baseHeight + s[i].height + shelf.height + 2 * GAP <= s[i+1].baseHeight){
+                return s[i].baseHeight + s[i].height + GAP
+            }
+            else if(!s[i+1]){
+                return s[i].baseHeight + s[i].height + GAP
+            }
+        }
+
+        let i = 0;
+        let currentBaseHeight = 0;
+        while(currentBaseHeight < MAX_HEIGHT && i < this.shelves.length && place == undefined){
+            let s = this.shelves[i]
+            currentBaseHeight = s.baseHeight;
+            if(!height || shelf.type == 'bundle'){
+                if(currentBaseHeight + s.height + GAP + shelf.height <= MAX_HEIGHT){
+                    place = checkPlace(i, shelf)
+                }
+                
+                
+            }
+            else if(height == 'reach_limit'){
+                if(currentBaseHeight + s.height + GAP + shelf.height <= REACH_LIMIT){
+                    place = checkPlace(i, shelf)
+                }
+                
+            }
+            else if(height){
+                if(currentBaseHeight + s.height + GAP + shelf.height <= height){
+                    place = checkPlace(i, shelf)
+                }
+            }
+            i++
+        }
+
+        return place
+
+    }
+
     /**
      * 
      * @param {shelf} shelf 
      * @param {*} priority 
      * @returns baseHeight
      */
-    searchPlace = (shelf, priority) => {
+    searchPlace_old = (shelf, priority) => {
 
         let place;
 

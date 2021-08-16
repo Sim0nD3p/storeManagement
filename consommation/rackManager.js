@@ -202,7 +202,8 @@ class RackManager{
             term.column(5); term(`options are: \n`)
             options.map(option => { term.column(10); term(`${option[0]}, ${option[1]}\n`)})
             for(let i = 0; i < potentialRacks.length; i++){
-                let place = potentialRacks[i].searchPlace(shelf)
+
+                let place = potentialRacks[i].searchPlace(shelf, 'reach_limit')
                 if(!isNaN(place) && rackType == potentialRacks[i].contentType){
                     baseHeight = place
                     targetRack = this.getRacking(potentialRacks[i].name)
@@ -239,6 +240,7 @@ class RackManager{
     }
 
     optimizeRacking(){
+        //makes sure that all shelves are placed in racking
         for(let i = 0; i < this.app.store.shelves.length; i++){
             if(this.app.store.shelves[i].baseHeight == undefined){
                 this.placeNewShelf(this.app.store.shelves[i])
@@ -246,27 +248,51 @@ class RackManager{
         }
 
 
-        let shelves = {}
+        //gets all shelves, organized by length
+        let initShelvesObj = {}
         for(let i = 0; i < this.app.store.shelves.length; i++){
-            shelves = {
-                ...shelves,
+            initShelvesObj = {
+                ...initShelvesObj,
                 [this.app.store.shelves[i].length]: {
-                    ...shelves[this.app.store.shelves[i].length],
+                    ...initShelvesObj[this.app.store.shelves[i].length],
                     [this.app.store.shelves[i].name]: this.app.store.shelves[i]
                 }
             }
         }
-        let finalShelves = []
-        for(const length in shelves){
-            let currentLength = []
-            for(const shelf in shelves[length]){
-                currentLength.push(shelves[length][shelf])
+
+        /* 
+        {
+            length : [],
+            length2: []
+        }
+ */
+
+        let shelves = {}
+        for(const length in initShelvesObj){
+            let currentLength = [];
+            for(const shelf in initShelvesObj[length]){
+                currentLength.push(initShelvesObj[length][shelf])
 
             }
-            finalShelves.push({ [length]: currentLength })
+            shelves = {
+                ...shelves,
+                [length]: currentLength,
+            }
         }
+        
+        let types = Object.keys(initShelvesObj)
 
-        console.log(finalShelves)
+        for(let i = 0; i < types.length; i++){
+            console.log(types[i])
+            shelves[types[i]].map((shelf, index) => {
+                console.log(shelf.name, shelf.priority, shelf.content.length)
+
+            })
+            
+        }
+        //console.log(shelves['4000'])
+
+
 
 
     }
