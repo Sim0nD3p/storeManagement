@@ -40,17 +40,20 @@
 
 
 ## TO DO 2021-08-10
-- BUG PART NOT PLACED AFTER CREATING SHELF
-- Check chose shelf height -> fix bug placeNewShelf()
 - optimizeRacking
+- more control over accessSides
+- racking cornes
+- VOIR rackManager ligne 370
+
+--- DONE ---
+- BUG PART NOT PLACED AFTER CREATING SHELF - DONE
+- Check chose shelf height -> fix bug placeNewShelf() - DONE
 - FUCKING BUNDLES - DONE
+- racking BT - DONE
 - entrer infos liste - DONE
 - custom shelf - DONE
 - racking mains - DONE
-- racking BT - DONE
-- more control over accessSides
-- racking cornes
-- optimize racking function
+
 
 
 - shelf TS-59 (only 13-16 parts have the TS tag)

@@ -11,9 +11,10 @@ function clearScreen() {
 }
 
 class containerObject{
-    constructor(name, position, dimensions, heightNb, container, consomMensMoy){
+    constructor(name, position, dimensions, heightNb, container, consomMensMoy, accessPoint){
         this.name = name;
         this.height = heightNb
+        this.accessPoint = accessPoint;
         this.totalHeight = container.height * heightNb;
         this.weight = container.weight * heightNb;
         this.consommation = consomMensMoy;
@@ -63,6 +64,7 @@ class Shelf{
         this.capacity = shelfData.rating / 2.2046;  //1 kg == 2.2046 lbs
         this.length = shelfData.length;
         this.weight = 0; //masse kg
+        this.accessRatio = 0; //FRONT/(FRONT + BACK)
         
         this.content = []
         this.height = 0
@@ -787,11 +789,20 @@ class Shelf{
     
 
     //position={front, width}   dimensions={front, width}
-    putInShelf = (position, dimensions, heightNb, item, part) => {
+    /**
+     * 
+     * @param {*} position 
+     * @param {*} dimensions 
+     * @param {*} heightNb 
+     * @param {*} item 
+     * @param {*} part 
+     * @param {*} accessPoint 
+     */
+    putInShelf = (position, dimensions, heightNb, item, part, accessPoint) => {
         term.green(`placed ${item.name} in ${this.name}\n`)
         if(!heightNb){ heightNb = 1 }
         
-        this.content.push(new containerObject(item.name, position, dimensions, heightNb, item, part.consommation.mensuelleMoy))
+        this.content.push(new containerObject(item.name, position, dimensions, heightNb, item, part.consommation.mensuelleMoy, accessPoint))
         this.priority = this.getPriorityIndex();
         for(let x = position.front; x < position.front + dimensions.front; x++){
             for(let y = position.width; y < position.width + dimensions.width; y++){
@@ -803,9 +814,28 @@ class Shelf{
         }
         this.weight = this.setWeight()
         this.height = this.setHeight();
+        this.accessRatio = this.getAccessRatio()
 
 
     }
+
+    getAccessRatio = () => {
+        let counter = this.content.map((cont, index) => {
+            if (cont.accessPoint == FRONT && cont.position.width == 0) {
+                return FRONT
+            }
+            else if (cont.accessPoint == BACK && cont.position.width + cont.dimensions.width == this.width) {
+                return BACK
+            }
+            else return null
+        })
+        counter = counter.filter((a) => a !== null)
+        let countFront = counter.filter((a) => a == FRONT).length
+        let countBack = counter.filter((a) => a == BACK).length
+        if(countFront !== 0){ return countBack / countFront }
+        else return 0
+    }
+
     setHeight(){
         let array = this.content.map(content => content.totalHeight ? content.totalHeight : 0)
         array = array.sort((a, b) => { return b - a})

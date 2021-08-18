@@ -12,7 +12,6 @@ const BACK = 'BACK'
 const BASE_HEIGHT_PRIORITY_LIMIT = 1500;
 const REACH_LIMIT = 2500;
 
-
 const SAMPLE_HEIGHT_SHELF = 650;
 
 class ShelfManager{
@@ -178,7 +177,7 @@ class ShelfManager{
                 newRackOpt = newRackOpt.sort((a, b) => b.qte - a.qte)
                 targetIndex = this.unusedShelves.findIndex((a) => a == newRackOpt[0])
                 if(targetIndex == -1){
-                    targetIndex = this.unusedShelves.findIndex((a) => a.length > 0)
+                    targetIndex = this.unusedShelves.findIndex((a) => a.length > 0)     //TO CHANGE QTE
                 }
                 
             }
@@ -329,12 +328,10 @@ class ShelfManager{
         term.cyan(`\ncreated ${finalShelf.name}, length ${finalShelf.length}\n`)
         return finalShelf
     }
+   
 
-    fillShelf(shelf, container){
-
-    }
     /**
-     * 
+     * Finds the optimal shelf among potentialShelves
      * @param {*array} shelves - array of potential shelves 
      * @param {*object} item - item to place
      * @returns [shelf, accessPoint]
@@ -353,6 +350,7 @@ class ShelfManager{
         else { heightNeeded = item.storage[0].height }
 
         let array = potentialShelves.map((shelf, index) => {
+            //[accessPoint, ecart, height]
             if(shelf !== null){
                 //which access point to chose: front if possible else back
                 let placement = [shelf[1], shelf[2]];   //[FRONT, BACK] (bool)

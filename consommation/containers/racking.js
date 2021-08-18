@@ -1,3 +1,5 @@
+const term = require("terminal-kit").terminal;
+
 const REACH_LIMIT = 3500;
 const PRIORITY_LIMIT = 1600
 const GAP = 100;
@@ -25,8 +27,17 @@ class Racking{
         return s.baseHeight + s.height
     }
 
+
+    /**
+     * 
+     * @param {*shelf Object} shelf 
+     * @param {Number || String (reach_limit)} height - height limit
+     * @returns place (baseHeight)
+     */
     searchPlace = (shelf, height) => {
-        let place;
+        let logToConsole = 3;
+        logToConsole >= 3 ? this.shelves.map(s => console.log(s.baseHeight, s.height)) : null
+        let place = undefined
         const checkPlace = (i, shelf) => {
             let s = this.shelves;
             if(s[i+1] && s[i].baseHeight + s[i].height + shelf.height + 2 * GAP <= s[i+1].baseHeight){
@@ -35,34 +46,37 @@ class Racking{
             else if(!s[i+1]){
                 return s[i].baseHeight + s[i].height + GAP
             }
-            else return false
         }
 
-        let i = 0;
-        let currentBaseHeight = 0;
-        while(currentBaseHeight < MAX_HEIGHT && i < this.shelves.length && place == undefined){
-            let s = this.shelves[i]
-            currentBaseHeight = s.baseHeight;
-            if(!height || shelf.type == 'bundle'){
-                if(currentBaseHeight + s.height + GAP + shelf.height <= MAX_HEIGHT){
-                    place = checkPlace(i, shelf)
+        if(this.shelves.length > 0){
+            let i = 0;
+            let currentBaseHeight = 0;
+            while(currentBaseHeight < MAX_HEIGHT && i < this.shelves.length && place == undefined){
+                let s = this.shelves[i]
+                currentBaseHeight = s.baseHeight;
+                if(!height || shelf.type == 'bundle'){
+                    if(currentBaseHeight + s.height + GAP + shelf.height <= MAX_HEIGHT){
+                        place = checkPlace(i, shelf)
+                    }
+                    
+                    
                 }
-                
-                
-            }
-            else if(height == 'reach_limit'){
-                if(currentBaseHeight + s.height + GAP + shelf.height <= REACH_LIMIT){
-                    place = checkPlace(i, shelf)
+                else if(height == 'reach_limit'){
+                    if(currentBaseHeight + s.height + GAP + shelf.height <= REACH_LIMIT){
+                        place = checkPlace(i, shelf)
+                    }
+                    
                 }
-                
-            }
-            else if(height){
-                if(currentBaseHeight + s.height + GAP + shelf.height <= height){
-                    place = checkPlace(i, shelf)
+                else if(height){
+                    if(currentBaseHeight + s.height + GAP + shelf.height <= height){
+                        place = checkPlace(i, shelf)
+                    }
                 }
+                i++
             }
-            i++
         }
+        else { place = 0 }
+        if(place == undefined){ place = false }
 
         return place
 
@@ -137,30 +151,9 @@ class Racking{
         return place
     }
     addShelf = (shelf, baseHeight) => {
-        //shelf.baseHeight = this.getBaseHeight()
-
-
         shelf.baseHeight = baseHeight
-        //console.log(`shelf.height ${shelf.height}`)
-        /* 
-        for(let i = 0; i < this.space.length; i++){
-            if(this.space[i] == null){
-                let isFitting = true;
-                for(let j = i; j < i + shelf.height; j++){ if(this.space[j] !== null){ isFitting = false } }
-                if(isFitting == true){
-                    for(let j = i; j < i + shelf.height; j++){
-                        console.log(shelf.name)
-                        this.space[j] = shelf.name
-                    }
-                }
-            }
-        }
-        console.log(this.space)
- */
-
         this.shelves.push(shelf)
         this.height = this.getTotalHeight();
-
     }
 }
 

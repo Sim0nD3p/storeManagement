@@ -165,6 +165,7 @@ class DispayStore {
                     console.log(shelf.content)
                     console.log('\n\n')
                     console.log(`Shelf priority index is ${shelf.priority}`)
+                    console.log(shelf.getAccessRatio())
 
 
                 }
@@ -215,10 +216,21 @@ class DispayStore {
 
     displayRacking(){
         for(let i = 0; i < this.app.store.racking.length; i++){
-            term(`\n${this.app.store.racking[i].name} - ${this.app.store.racking[i].height} x ${this.app.store.racking[i].length}\n`)
+            term.column(0); term(`${this.app.store.racking[i].name}`)
+            term.column(25); term(`${this.app.store.racking[i].type}`)
+            term.column(35); term(`${this.app.store.racking[i].length}`)
+            term.column(40); term(`${this.app.store.racking[i].height}`)
+            term.column(55); term(`${this.app.store.racking[i].priority}\n`)
             for(let j = 0; j < this.app.store.racking[i].shelves.length; j++){
-                term.right(5); term(`${this.app.store.racking[i].shelves[j].name} - ${this.app.store.racking[i].shelves[j].priority} - ${this.app.store.racking[i].shelves[j].baseHeight}\n`)
+                term.column(10); term(`${this.app.store.racking[i].shelves[j].name}`)
+                term.column(25); term(`${this.app.store.racking[i].shelves[j].type}`)
+                term.column(55); term(`${this.app.store.racking[i].shelves[j].getAccessRatio()}`) 
+                term.column(45); term(`${Math.ceil(this.app.store.racking[i].shelves[j].baseHeight)}`)
+                term.column(35); term(`${Math.ceil(this.app.store.racking[i].shelves[j].priority)}`)
+                term('\n')
+
             }
+            term('\n')
         }
 
     }
