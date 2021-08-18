@@ -73,16 +73,18 @@ class Shelf{
     }
 
 
-    searchPlace = (item, accessSide) => {
+    searchPlace = (item, accessSide, logToConsole) => {
+        if(!logToConsole){ logToConsole = 1 }
+
         let result;
         let generalType = item.storage[0].type.substring(0, 3);
         let containerCount = item.storage.length;
         let containersPlacement;
         let orientationArray = [];
         let totalItemWeight = 0;
-        for(let i = 0; i < item.storage.length; i++){ totalItemWeight += item.storage[i].weight }
-
-        if(this.weight + totalItemWeight <= this.capacity){
+        for(let i = 0; i < item.storage.length; i++){ isNaN(item.storage[i].weight) ? null : totalItemWeight += item.storage[i].weight }
+        
+        if(this.weight + totalItemWeight <= this.capacity || isNaN(this.totalItemWeight)){
             if (generalType == 'bac') {
                 for (let i = 0; i < (containerCount / 2) + 1; i++) {
                     let option = [];
@@ -92,25 +94,29 @@ class Shelf{
                     }
                     orientationArray.push(option)
                 }
-                result = this.searchPlaceForBac(item, orientationArray, accessSide)
+                result = this.searchPlaceForBac(item, orientationArray, accessSide, logToConsole)
             }
             else if (generalType == 'bun' || generalType == 'pal') {
                 let option = []
                 for (let i = 0; i < containerCount; i++) { option.push(HORIZONTAL) }
                 orientationArray.push(option);
-                result = this.searchPlaceForBundle(item)
+                result = this.searchPlaceForBundle(item, logToConsole)
             }
             else if (generalType == 'cus') {
                 orientationArray = [[VERTICAL]];
-                result = this.searchPlaceForBac(item, orientationArray, accessSide)
+                result = this.searchPlaceForBac(item, orientationArray, accessSide, logToConsole)
             }
         }
-        else return false
+        else {
+            console.log('weight constraint')
+            return false
+
+        }
         return result
 
     }
     //returns: position, containersPlacement
-    searchPlaceForBundle = (item) =>{
+    searchPlaceForBundle = (item, logToConsole) =>{
         
         /**
          * 
@@ -269,11 +275,12 @@ class Shelf{
      * @param {array} orientationOptions 
      * @returns 
      */
-    searchPlaceForBac(item, orientationOptions, accessSide){
+    searchPlaceForBac(item, orientationOptions, accessSide, logToConsole){
         //On calcule l'espace necéssaire en fonction de l'utilisation des bac seulement. Les boites fournisseur qui seront utilisées sont plus petites que les bac.
 
         //storage might be multiple things
         //palette, bundle, bac, multiple bac
+        
 
         
 
@@ -656,14 +663,29 @@ class Shelf{
 
         if(accessSide == FRONT){
             let spaceArray = space(true);
+
             let blocs = makeBlocs(spaceArray);
             let columns = initialColumnOptions(orientationOptions, blocs, item);
             let finalCol = genFinalCol(columns);
             let optionSpecs = getBestOption(finalCol);
             let bestBloc = optimizeBloc(blocs, optionSpecs)
+            logToConsole >= 3 ? console.log(`spaceArray:`) : null
+            logToConsole >= 3 ? console.log(spaceArray) : null
+            logToConsole >= 3 ? console.log(`blocs`) : null
+            logToConsole >= 3 ? console.log(blocs) : null
+            logToConsole >= 3 ? console.log('columns') : null
+            logToConsole >= 3 ? console.log(columns) : null
+            logToConsole >= 3 ? console.log('finalCol') : null
+            logToConsole >= 3 ? console.log(finalCol) : null
+            logToConsole >= 3 ? console.log('optionSpecs') : null
+            logToConsole >= 3 ? console.log(optionSpecs) : null
+            logToConsole >= 3 ? console.log('bestBloc') : null
+            logToConsole >= 3 ? console.log(bestBloc) : null
             if(bestBloc == false){ return false }
             else{
                 let data = getPositionCoord(optionSpecs[0], bestBloc, accessSide)
+                logToConsole >= 3 ? console.log(data) : null
+                logToConsole >= 3 ? console.log('return data') : null
                 return data
             }
         }
@@ -674,9 +696,23 @@ class Shelf{
             let finalCol = genFinalCol(columns);
             let optionSpecs = getBestOption(finalCol);
             let bestBloc = optimizeBloc(blocs, optionSpecs)
+            logToConsole >= 3 ? console.log(`spaceArray:`) : null
+            logToConsole >= 3 ? console.log(spaceArray) : null
+            logToConsole >= 3 ? console.log(`blocs`) : null
+            logToConsole >= 3 ? console.log(blocs) : null
+            logToConsole >= 3 ? console.log('columns') : null
+            logToConsole >= 3 ? console.log(columns) : null
+            logToConsole >= 3 ? console.log('finalCol') : null
+            logToConsole >= 3 ? console.log(finalCol) : null
+            logToConsole >= 3 ? console.log('optionSpecs') : null
+            logToConsole >= 3 ? console.log(optionSpecs) : null
+            logToConsole >= 3 ? console.log('bestBloc') : null
+            logToConsole >= 3 ? console.log(bestBloc) : null
             if(bestBloc == false){ return false }
             else{
                 let data = getPositionCoord(optionSpecs[0], bestBloc, accessSide)
+                logToConsole >= 3 ? console.log(data) : null
+                logToConsole >= 3 ? console.log('return data') : null
                 return data
             }
 

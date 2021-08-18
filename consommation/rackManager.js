@@ -161,6 +161,7 @@ class RackManager{
         return moyenne
     }
     placeNewShelf(shelf) {
+        let logToConsole = 3;
         let rackType = shelf.type == 'bac' ? 'mixed' : shelf.type;
         //console.log(`shelf.type ${shelf.type}`)
         //let shelfPriority = this.predictNewShelfPriority(partsToPlace.map(part => part.categorisation.consoMens))
@@ -397,6 +398,8 @@ class RackManager{
                     }
                     else{
                         term.red('error - part not placed\n')
+                        shelf.searchPlace(partList[i], accessPoint, 3)
+
                         failedParts.push(partList[i])
 
                     }

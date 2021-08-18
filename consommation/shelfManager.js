@@ -52,7 +52,7 @@ class ShelfManager{
 
         let targetType;     //bac, bun, cus, bUs
         if(type == 'bac'){ targetType = ['mixed', 'bac', 'cus'] }
-        else if(type == 'bun'){ targetType = ['bundle', 'mixed'] }
+        else if(type == 'bun' || type == 'bundle'){ targetType = ['bundle', 'mixed'] }
         else if(type == 'cUs'){ targetType = ['mixed', 'cUs'] }
         //else { targetType = ['mixed'] }
         
@@ -74,7 +74,7 @@ class ShelfManager{
         logToConsole >= 1 ? term.cyan(`chosing shelf based on ${prop}, targetType is [ ^y${targetType}^:^c ]\n`) : null
 
         logToConsole >= 2 ? term.cyan(`options are: \n`) : null
-        logToConsole >= 2 ? console.log(options) : null
+        logToConsole >= 2 ? options.map(o => term.column(5).cyan(`[${o[0]}, ${o[1]}, ${o[2]}, ${o[3]}, ${o[4]}, ${o[5]}]\n`)) : null
 
 
         if(prop == 'length'){
