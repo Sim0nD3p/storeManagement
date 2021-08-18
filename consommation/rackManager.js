@@ -161,7 +161,6 @@ class RackManager{
         return moyenne
     }
     placeNewShelf(shelf) {
-        console.log(`placeNewShelf ${shelf.tag}`)
         let rackType = shelf.type == 'bac' ? 'mixed' : shelf.type;
         //console.log(`shelf.type ${shelf.type}`)
         //let shelfPriority = this.predictNewShelfPriority(partsToPlace.map(part => part.categorisation.consoMens))
@@ -181,7 +180,6 @@ class RackManager{
         //console.log(potentialRacks)
 
         if(potentialRacks.findIndex((a) => a !== null) == -1){  //si aucun potential rack => create new rack
-            term.column(5); term(`no options available for length ${shelf.length}\n`)
             let rack = new Racking(`racking_${this.app.store.racking.length + 1}`, shelf.length, rackType, shelf.tag)
             this.app.store.racking.push(rack)
             targetRack = rack
@@ -192,15 +190,9 @@ class RackManager{
             //console.log(potentialRacks)
 
 
-            let rackName;
-            term.column(5); term('potential racking are:\n')
-            potentialRacks.map(rack => { term.column(10); term(`${rack.name}, ${rack.length}, ${rack.height}, ${rack.contentType}, ${rack.tag}\n`) })
-
             let options = potentialRacks.map((rack, index) => {
                 return [rack.name, rack.searchPlace(shelf)]
             })
-            term.column(5); term(`options are: \n`)
-            options.map(option => { term.column(10); term(`${option[0]}, ${option[1]}\n`)})
             for(let i = 0; i < potentialRacks.length; i++){
 
                 let place = potentialRacks[i].searchPlace(shelf, 'reach_limit')
@@ -235,7 +227,6 @@ class RackManager{
         //targetRack.getBlocs(shelf)
         
         targetRack.addShelf(shelf, baseHeight)
-        term(`\nshelf added to racking (${targetRack.name}, ${targetRack.length})\n`)
 
     }
 
@@ -338,12 +329,11 @@ class RackManager{
                 let u = 0;
                 while (lostShelf == null & u < this.app.store.shelves.length){
                     if(this.app.store.shelves[u].isShelfFrontFull() > 0.50 && this.app.store.shelves[u].baseHeight == undefined){
-                        term(`\nplacing shelf (${this.app.store.shelves[u].name}), length: ${this.app.store.shelves[u].length}\n`)
                         this.placeNewShelf(this.app.store.shelves[u], tag)
                     }
                     u++
                 }
-                term('\n----- CREATING SHELF -----\n')
+                term.cyan('\n----- CREATING SHELF -----\n')
                 newShelf = true;
                 shelf = this.requestNewShelf(partList, i, tag);  //returns new shelf
 

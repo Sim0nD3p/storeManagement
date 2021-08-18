@@ -741,7 +741,7 @@ class Shelf{
         }
         return occupiedSpace / this.space.length
     }
-    setWeight = () => {
+    setWeight(){
         let totalWeight = 0;
         for(let i = 0; i < this.content.length; i++){
             totalWeight += this.content[i].weight

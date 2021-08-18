@@ -578,7 +578,8 @@ class App {
             'Vérifier entreposage des pièces',
             'getData 2021-08-06 (DEV ONLY)',
             'Fix "-LA" history',
-            'Bundle specs'                   
+            'Bundle specs',
+            'Consommation moyenne magasin'            
         ]
         term.singleColumnMenu(menuItems, { cancelable: true, keyBindings: { CTRL_Z: 'escape', ENTER: 'submit', UP: 'previous', DOWN: 'next' } }, (error, response) => {
             if (response !== undefined) {
@@ -807,6 +808,29 @@ class App {
                         } else return index
                     })
 
+                    let totalConsom = [];
+                    let nbPartConsom = 0;
+                    baseRef.map((part, index) => {
+                        if(part && part.consommation){
+                            if(!isNaN(part.consommation.mensuelleMoy) && part.consommation.mensuelleMoy !== 0){
+                                totalConsom.push(part.consommation.mensuelleMoy);
+                            }
+                            else { totalConsom.push(0) }
+                        }
+                    })
+                    totalConsom = totalConsom.sort((a, b) => b - a)
+                    totalConsom = totalConsom.filter((a) => a !== 0)
+                    
+                    console.log(totalConsom)
+                    let mediane;
+                    if(totalConsom % 2 == 0){
+                        mediane = (totalConsom[Math.floor(totalConsom.length / 2)] + totalConsom[Math.ceil(totalConsom.length / 2)]) / 2
+                    }
+                    else{
+                        mediane = totalConsom[Math.ceil(totalConsom.length / 2)]
+                    }
+                    console.log(`consommation mensuelle mediane du magasin: ${mediane}`)
+
                     //not in baseRef
                     let failed = baseRef.map((part, index) => {
                         if(typeof part == 'number'){ return this.store.PFEP[part] }
@@ -904,6 +928,18 @@ class App {
                              
                         }
                     })
+                    let shelfData = {}
+                    this.store.shelves.map((shelf, index) => {
+                        let s = {
+                            ...shelf,
+                            space: null
+                        }
+                        shelfData = {
+                            ...shelfData,
+                            [shelf.name]: s
+                        }
+                    })
+                    exportData.exportJSON(shelfData, 'shelves', '../SORTIE')
                     term(`\n\nLe PFEP contient ${this.store.PFEP.length} pièces\n`);
                     term(`^y${baseRef.length}^: pièces ont été retenues, ^y${failed.length}^: rejetées \n\n`)
                     

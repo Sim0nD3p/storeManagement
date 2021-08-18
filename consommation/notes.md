@@ -40,9 +40,9 @@
 
 
 ## TO DO 2021-08-10
-- DEBUGGER ALGORITHME
 - BUG PART NOT PLACED AFTER CREATING SHELF
-- optimize bundle length vs shelf length for small bundle
+- Check chose shelf height -> fix bug placeNewShelf()
+- optimizeRacking
 - FUCKING BUNDLES - DONE
 - entrer infos liste - DONE
 - custom shelf - DONE
