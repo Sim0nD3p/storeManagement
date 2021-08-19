@@ -38,6 +38,10 @@
 - have same length shelf for same things
 
 
+# QUICK ALGO CHANGES
+- matchPartToShelf || findPotentialShelf => only allow back if spaceRatio is over certain amount
+
+
 
 ## TO DO 2021-08-10
 - optimizeRacking

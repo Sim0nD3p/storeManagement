@@ -11,6 +11,7 @@ const FRONT = 'FRONT';
 const BACK = 'BACK'
 const BASE_HEIGHT_PRIORITY_LIMIT = 1500;
 const REACH_LIMIT = 2500;
+const ACCESS_RATIO = 0.50
 
 const SAMPLE_HEIGHT_SHELF = 650;
 
@@ -368,7 +369,7 @@ class ShelfManager{
         //targetShelf = [shelf, accessPoint, ecart, spareHeight]
         if(isNaN(item.consommation.mensuelleMoy) == false){
             for(let i = 0; i < array.length; i++){
-                if(array[i] !== null){
+                if(array[i] !== null){                   //[shelf, accessPoint, ecart, spareHeight]
                     if(targetShelf == null){ targetShelf = [potentialShelves[i][0], array[i][0], array[i][1], array[i][2]] }
                         //ecart > ecart
                     if(targetShelf[2] > array[i][1]){
@@ -421,6 +422,7 @@ class ShelfManager{
         return this.app.store.shelves.map((shelf, index) => {
             if (targetType.indexOf(shelf.type.substring(0, 3)) !== -1 && shelf.tag == tag) {
                 let placement = [shelf.searchPlace(part, FRONT) !== false ? true : false, shelf.searchPlace(part, BACK) !== false ? true : false]
+                //if(part.consommation && part.consommation.mensuelleMoy >= this.app.store.medianMonthlyConsom()){ placement[1] = false }
                 if (placement[0] !== false || placement[1] !== false) {
                     return [shelf, placement[0], placement[1]]
                 } else return null

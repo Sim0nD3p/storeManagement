@@ -215,6 +215,7 @@ class DispayStore {
     }
 
     displayRacking(){
+        this.app.clearScreen();
         for(let i = 0; i < this.app.store.racking.length; i++){
             term.column(0); term(`${this.app.store.racking[i].name}`)
             term.column(25); term(`${this.app.store.racking[i].type}`)
@@ -224,9 +225,10 @@ class DispayStore {
             for(let j = 0; j < this.app.store.racking[i].shelves.length; j++){
                 term.column(10); term(`${this.app.store.racking[i].shelves[j].name}`)
                 term.column(25); term(`${this.app.store.racking[i].shelves[j].type}`)
-                term.column(55); term(`${this.app.store.racking[i].shelves[j].getAccessRatio()}`) 
-                term.column(45); term(`${Math.ceil(this.app.store.racking[i].shelves[j].baseHeight)}`)
                 term.column(35); term(`${Math.ceil(this.app.store.racking[i].shelves[j].priority)}`)
+                term.column(45); term(`${Math.ceil(this.app.store.racking[i].shelves[j].baseHeight)}`)
+                term.column(55); term(`${this.app.store.racking[i].shelves[j].getAccessRatio()}`) 
+                term.column(75); term(`${this.app.store.racking[i].shelves[j].getSpaceRatio()}`)
                 term('\n')
 
             }

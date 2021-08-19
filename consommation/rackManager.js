@@ -4,7 +4,7 @@ const term = require('terminal-kit').terminal
 //const { emitCallback } = require('terminal-kit/ScreenBufferHD');
 const FRONT = 'FRONT';
 const BACK = 'BACK';
-const ACCESS_RATIO = 0.75;  //ratio countBack/countFront
+const ACCESS_RATIO = 0.50;  //ratio countBack/countFront
 
 /* ROLES
 trouver racking de la bonne largeur ou en creer un nouveau
@@ -327,115 +327,86 @@ class RackManager {
                 } else return null
             })
         }
+        
         //makes list of problematic container
-
-
-        const makeInstructions = (prob) => {
-            let array = []; //[newShelf, part, containerObject, oldShelfIndex]
+        const initialPartsToAdd = (prob) => {
+            let array = []; //[parts]
             prob.map((s, index) => {       //loop shelves
                 if (s !== null && s.length > 0) {
                     s.map((cont, contIndex) => {     //loop problematic containers
-                        let part = this.app.store.getItemFromPFEP(cont.name.split('_')[1])
-                        let categorisation = {
-                            consoMens: part.consommation ? part.consommation.mensuelleMoy : undefined,
-                            classe: part.class ? part.class : undefined,
-                            type: part.storage[0].type
+                        let code = cont.name.split('_')[1];
+                        if(array.findIndex((a) => a.code == code) == -1){
+                            array.push(this.app.store.getItemFromPFEP(code))
                         }
-                        let potentialShelves = this.shelfManager.findPotentialShelf(part, categorisation, tag).filter((a) => a !== null);
-    
-                        potentialShelves = potentialShelves.map((a, index) => {      //narrow options for potential shelves
-                            if (a[0].getAccessRatio() > ACCESS_RATIO || a[1] == true) { return a }
-                            else return null
-                        }).filter((a) => a !== null)
-    
-                        if (potentialShelves.length > 0) {
-                            let shelf = this.shelfManager.matchPartToShelf(potentialShelves, part)
-                            //[newShelf, part, containerObject, oldShelfIndex]
-                            array.push([shelf, part, cont, index])
-                        }
-                        else array.push([null, part, cont, index])
-                        //potentialShelves = potentialShelves.filter((a) => a[0].getAccessRatio() > ACCESS_RATIO || a[0] == true)
-                        //let pot = this.shelfManager.matchPartToShelf(potentialShelves, part)
                     })
                 }
             })
             return array
         }
         
-        let ins = makeInstructions(prob())
-        console.log(ins[0])
-        let instructions = makeInstructions(prob());    //[newShelf, part, containerObject, oldShelfIndex]
-
-        /*
-        NOTES 2021-08-18
-        potentialShelves is not checked after each placement so the shelf given by matchPartToShelf in instructions might not work.
-        we need to check potentialShelves and matchPartToShelf in the loop below.
-
-
-        */
-
-        let partsAdded = []
-        for(let i = 0; i < instructions.length; i++){
-            let part = instructions[i][1];
-            if(partsAdded.indexOf(part.code) == -1){
-                partsAdded.push(part.code)
-                let shelf = instructions[i][0][0];
-                let place = shelf.searchPlace(part, instructions[i][0][1])
-                console.log(place)
-                if(place !== false){
-                    for(let j = 0; j < place.length; j++){
-                        //shelf.putInShelf(place[j][0], place[j][1], place[j][2], partList[i].storage[j], partList[i], accessPoint)
-                        shelf.putInShelf(place[j][0], place[j][1], place[j][2], part.storage[j], part, instructions[i][0][1])
+        const placeParts = (partsToPlace, accessRatio, spaceRatio) => {
+            //[part, cont, index]
+            let partsAdded = []
+            for(let i = 0; i < partsToPlace.length; i++){
+                let part = partsToPlace[i];
+                if(partsAdded.indexOf(part.code) == -1){
+                    let categorisation = {
+                        consoMens: part.consommation ? part.consommation.mensuelleMoy : undefined,
+                        classe: part.class ? part.class : undefined,
+                        type: part.storage[0].type
+                    }
+                    let potentialShelves = this.shelfManager.findPotentialShelf(part, categorisation, tag).filter((a) => a !== null);
+                    console.log(`potential shelves: ${potentialShelves.length}`)
+                    potentialShelves = potentialShelves.map((a, index) => {      //narrow options for potential shelves
+                        if (a[0].getAccessRatio() > accessRatio || a[1] == true || a[0].getSpaceRatio() < spaceRatio) { return a }
+                        else if(a[2] == true && a[0].getSpaceRatio() < spaceRatio){ return a }
+                        else return null
+                    }).filter((a) => a !== null).sort((a, b) => part.consommation ? Math.abs(a[0].priority - part.consommation.mensuelleMoy) - Math.abs(b[0].priority - part.consommation.mensuelleMoy) : a - b)
+                    if(potentialShelves.length > 0){
+                        let shelf = potentialShelves[0][0];
+                        let placement = [potentialShelves[0][1], potentialShelves[0][2]]
+                        let sample = [FRONT, BACK]            
+                        let accessPoint = sample[placement.indexOf(true)]
+                        let place = shelf.searchPlace(part, accessPoint)
+                        if(place !== false){
+                            partsAdded.push(part)
+                            this.app.store.getPartsShelf(part).removeFromShelf(part);
+                            for(let j = 0; j < place.length; j++){
+                                shelf.putInShelf(place[j][0], place[j][1], place[j][2], part.storage[j], part, accessPoint)
+                            }
+                        }
+                        else {
+                            console.log('PROBLEM PLACING PART')
+                        }
+                    }
+                    else {
+                        console.log('NO POTENTIAL SHELF')
                     }
                 }
             }
-            console.log('-------------------------------------------------------')
-            console.log(this.app.store.shelves[instructions[i][3]].content.length)
-            console.log('--')
-            //console.log(this.app.store.shelves[instructions[i][3].content.map(s => console.log(s.name))])
-            //let index = this.app.store.shelves[instructions[i][3]].content.indexOf(instructions[2])
-            //console.log(`index ${index}`)
-
+            return partsAdded    
         }
-
-
-        /* 
-        for(let i = 0; i < partList.length; i++){
-
-
-
-            -----
-
-            /*  let accessPoint = shelf[1];
-                         shelf = shelf[0]
-                         let place = shelf.searchPlace(part, accessPoint)
-                         if(place !== false){
-                             for(let j = 0; j < place.length; j++){
-                              //shelf.putInShelf(place[j][0], place[j][1], place[j][2], partList[i].storage[j], partList[i], accessPoint)
-                                 shelf.putInShelf(place[j][0], place[j][1], place[j][2], part.storage[j], part, accessPoint)
-                                 console.log(this.app.store.shelves[index].name)
-                                 console.log(shelf.name)
-                              }
-                              if(this.app.store.shelves[index].content.indexOf(cont) !== -1){
-                                  this.app.store.shelves[index].content.splice(this.app.store.shelves[index].content.indexOf(cont), 1)
-                              }
-                         }
-                         else { console.log('ERROR PLACE == FALSE') }
-                         console.log(place) 
-
-
-
-
-            console.log('-----------------------')
-            console.log(`PART: ${partList[i].code}`)
-            console.log(partList[i].consommation.mensuelleMoy, partList[i].class, partList[i].storage[0].type)
-            potentialShelves.map((p, index) => { console.log(p[0].name, p[0].priority, p[0].type, p[0].getAccessRatio())})
-
-            -----
-
-
-        } */
-
+                
+        const getFailedParts = (partsToAdd, partsAdded) => {
+            return partsToAdd.map((part, index) => {
+                if (partsAdded.indexOf(part) == -1) { return part }
+                else return null
+            }).filter((a) => a !== null)
+        }
+        
+        
+        let accessRatio = ACCESS_RATIO;
+        let spaceRatio = 0.5;
+        let i = 0;
+        let partsToPlace = initialPartsToAdd(prob())
+        while(partsToPlace.length > 0 && i < 10){
+            let partsAdded = placeParts(partsToPlace, ACCESS_RATIO, 0.5);
+            partsToPlace = getFailedParts(partsToPlace, partsAdded)
+            console.log(`failedParts: ${partsToPlace.length}, accessRatio: ${accessRatio}, spaceRatio: ${spaceRatio}`)
+            spaceRatio = spaceRatio + 0.10;
+            accessRatio = accessRatio - 0.10;
+            i++
+        }
 
 
     }

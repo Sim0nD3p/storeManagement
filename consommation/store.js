@@ -9,6 +9,7 @@ const Bundle = require('./containers/bundle');
 const StoreManager = require('./storeManager');
 const Palette = require('./containers/palette');
 const RackManager = require('./rackManager');
+const { METHODS } = require('http');
 
 
 const MINIMUM_BUNDLE_LENGTH = 950;
@@ -211,6 +212,32 @@ class Store{
         }
 
         return index;
+    }
+
+
+    medianMonthlyConsom = () => {
+        let total = []
+        let nb = 0;
+        for(let i = 0; i < this.PFEP.length; i++){
+            let p = this.PFEP[i]
+            if(p.consommation && !isNaN(p.consommation.mensuelleMoy)){
+                if(p.consommation.mensuelleMoy !== 0){
+                    total.push(p.consommation.mensuelleMoy)
+                }
+            }
+        }
+        total = total.sort((a, b) => b - a)
+        if(total.length % 2 == 0){ return (total[Math.floor(total.length / 2) - 1] + total[Math.floor(total.length / 2)]) / 2 }
+        else { return total[Math.floor(total.length / 2)] }
+
+    }
+
+    getPartsShelf = (part) => {
+        let targetShelf = null
+        for(let i = 0; i < this.shelves.length; i++){
+            if(this.shelves[i].content.findIndex((a) => a.name.split('_')[1] == part.code) !== -1){ targetShelf = this.shelves[i] }
+        }
+        return targetShelf
     }
 
 

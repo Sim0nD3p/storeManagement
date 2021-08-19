@@ -771,6 +771,19 @@ class Shelf{
         })
         return shelfConsom / array.length
     }
+    
+    getSpaceRatio = () => {
+        let total = 0;
+        let something = 0;
+        for(let x = 0; x < this.space.length; x++){
+            for(let y = 0; y < this.space[x].length; y++){
+                if(this.space[x][y] !== null){ something++ }
+                total++
+            }
+        }
+        return something / total
+    }
+    
 
     isShelfFrontFull = () => {
         let occupiedSpace = 0;
@@ -799,7 +812,7 @@ class Shelf{
      * @param {*} accessPoint 
      */
     putInShelf = (position, dimensions, heightNb, item, part, accessPoint) => {
-        term.green(`placed ${item.name} in ${this.name}\n`)
+        term.green(`placed ${item.name} (${part.consommation ? part.consommation.mensuelleMoy : null}) in ${this.name} (${this.priority })\n`)
         if(!heightNb){ heightNb = 1 }
         
         this.content.push(new containerObject(item.name, position, dimensions, heightNb, item, part.consommation.mensuelleMoy, accessPoint))
@@ -817,6 +830,23 @@ class Shelf{
         this.accessRatio = this.getAccessRatio()
 
 
+    }
+
+    removeFromShelf = (part) => {
+        let indexes = this.content.map((cont, index) => {
+            if (cont.name.split('_')[1] == part.code) { return index }
+            else return null
+        }).filter((a) => a !== null)
+
+        for(let i = 0; i < indexes.length; i++){ this.content.splice(indexes[i], 1) }
+
+        for(let x = 0; x < this.space.length; x++){
+            for(let y = 0; y < this.space[x].length; y++){
+                if(this.space[x][y] !== null && this.space[x][y].name.split('_')[1] == part.code){
+                    this.space[x][y] = null
+                }
+            }
+        }
     }
 
     getAccessRatio = () => {
