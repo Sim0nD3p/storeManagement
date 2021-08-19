@@ -6,11 +6,10 @@ const term = require('terminal-kit').terminal
 const { performance } = require('perf_hooks')
 const containerData = require('./containers/containerData');
 const Bac = require('./containers/bac');
-const { runInThisContext } = require('vm');
 const FRONT = 'FRONT';
 const BACK = 'BACK'
 const BASE_HEIGHT_PRIORITY_LIMIT = 1500;
-const REACH_LIMIT = 2500;
+const REACH_LIMIT = 3500;   //also in racking.js
 const ACCESS_RATIO = 0.50
 
 const SAMPLE_HEIGHT_SHELF = 650;
@@ -178,7 +177,8 @@ class ShelfManager{
                 newRackOpt = newRackOpt.sort((a, b) => b.qte - a.qte)
                 targetIndex = this.unusedShelves.findIndex((a) => a == newRackOpt[0])
                 if(targetIndex == -1){
-                    targetIndex = this.unusedShelves.findIndex((a) => a.length > 0)     //TO CHANGE QTE
+                    let u = this.unusedShelves.sort((a, b) => b.qte - a.qte)
+                    targetIndex = this.unusedShelves.findIndex((a) => a == u[0])
                 }
                 
             }

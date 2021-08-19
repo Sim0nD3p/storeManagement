@@ -46,6 +46,7 @@
 ## TO DO 2021-08-10
 - optimizeRacking
 - more control over accessSides
+- RACK MANAGER ligner 457^^
 - racking cornes
 - VOIR rackManager ligne 370
 

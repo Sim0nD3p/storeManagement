@@ -828,6 +828,8 @@ class Shelf{
         this.weight = this.setWeight()
         this.height = this.setHeight();
         this.accessRatio = this.getAccessRatio()
+        if(this.getAccessRatio() == 0){ this.isDoubleSided = false }
+        else if(this.getAccessRatio() !== 0){ this.isDoubleSided = true }
 
 
     }
@@ -847,6 +849,11 @@ class Shelf{
                 }
             }
         }
+        this.weight = this.setWeight()
+        this.height = this.setHeight();
+        this.accessRatio = this.getAccessRatio()
+        if(this.getAccessRatio() == 0){ this.isDoubleSided = false }
+        else if(this.getAccessRatio() !== 0){ this.isDoubleSided = true }
     }
 
     getAccessRatio = () => {
@@ -863,7 +870,7 @@ class Shelf{
         let countFront = counter.filter((a) => a == FRONT).length
         let countBack = counter.filter((a) => a == BACK).length
         if(countFront !== 0){ return countBack / countFront }
-        else return 0
+        else return null    //shouldn't happen, we call the funciton after we put something in shelf
     }
 
     setHeight(){
