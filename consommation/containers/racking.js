@@ -17,14 +17,26 @@ class Racking{
         this.contentType = type;    //mixed, bac, bundle
         //this.priorityZone = [0, 1600]
         //this.space = new Array(10000).fill(null)
+        this.contentSides = [null, null]
         this.height = 0
         this.priority;
         this.class;
     }
 
-    getTotalHeight(){
+    getTotalHeight = () => {
         let s = this.shelves[this.shelves.length - 1]
         return s.baseHeight + s.height
+    }
+    checkContentSides = (shelf) => {
+        let possForDouble = [['bac', 'bac'], ['bac', null], [null, 'bac'], [null, null]]
+        if(shelf.isDoubleSided == true){
+            if(possForDouble.findIndex((a) => a.toString() == this.contentSides.toString()) == -1){ return false }
+            else return true
+        }
+        else if(shelf.isDoubleSided !== true){
+            if(this.contentSides.indexOf(shelf.type) == -1 && this.contentSides.indexOf(null) == -1){ return false }
+            else return true
+        }
     }
 
 
@@ -35,7 +47,7 @@ class Racking{
      * @returns place (baseHeight)
      */
     searchPlace = (shelf, height) => {
-        let logToConsole = 3;
+        let logToConsole = 1;
         logToConsole >= 3 ? this.shelves.map(s => console.log(s.baseHeight, s.height)) : null
         let place = undefined
         const checkPlace = (i, shelf) => {
@@ -48,38 +60,59 @@ class Racking{
             }
         }
 
-        if(this.shelves.length > 0){
-            let i = 0;
-            let currentBaseHeight = 0;
-            while(currentBaseHeight < MAX_HEIGHT && i < this.shelves.length && place == undefined){
-                let s = this.shelves[i]
-                currentBaseHeight = s.baseHeight;
-                if(!height || shelf.type == 'bundle'){
-                    if(currentBaseHeight + s.height + GAP + shelf.height <= MAX_HEIGHT){
-                        place = checkPlace(i, shelf)
+        
+
+        if(this.checkContentSides(shelf) == true){
+            if (this.shelves.length > 0) {
+                let i = 0;
+                let currentBaseHeight = 0;
+                while (currentBaseHeight < MAX_HEIGHT && i < this.shelves.length && place == undefined) {
+                    let s = this.shelves[i]
+                    currentBaseHeight = s.baseHeight;
+                    if (!height || shelf.type == 'bundle') {
+                        if (currentBaseHeight + s.height + GAP + shelf.height <= MAX_HEIGHT) {
+                            place = checkPlace(i, shelf)
+                        }
+    
+    
                     }
-                    
-                    
-                }
-                else if(height == 'reach_limit'){
-                    if(currentBaseHeight + s.height + GAP + shelf.height <= REACH_LIMIT){
-                        place = checkPlace(i, shelf)
+                    else if (height == 'reach_limit') {
+                        if (currentBaseHeight + s.height + GAP + shelf.height <= REACH_LIMIT) {
+                            place = checkPlace(i, shelf)
+                        }
+    
                     }
-                    
-                }
-                else if(height){
-                    if(currentBaseHeight + s.height + GAP + shelf.height <= height){
-                        place = checkPlace(i, shelf)
+                    else if (height) {
+                        if (currentBaseHeight + s.height + GAP + shelf.height <= height) {
+                            place = checkPlace(i, shelf)
+                        }
                     }
+                    i++
                 }
-                i++
-            }
-        }
-        else { place = 0 }
+            } else place = 0
+            
+        } else return false
+
+
+
         if(place == undefined){ place = false }
 
         return place
 
+    }
+
+    checkAccessPoints = () => {
+        if(this.shelves.filter((a) => a.isDoubleSided == true).length > 0) return true
+        else return false
+    }
+    getContentSides = (shelf) => {
+        if(this.checkContentSides(shelf) == true){
+            if(shelf.isDoubleSided == true){ this.contentSides = ['bac', 'bac'] }
+            else if(this.contentSides.indexOf(shelf.type) == -1 && this.contentSides.indexOf(null) !== -1){
+                this.contentSides[this.contentSides.indexOf(null)] = shelf.type
+            }
+
+        }
     }
 
     /**
@@ -151,9 +184,25 @@ class Racking{
         return place
     }
     addShelf = (shelf, baseHeight) => {
+
         shelf.baseHeight = baseHeight
         this.shelves.push(shelf)
         this.height = this.getTotalHeight();
+        this.accessPoints = this.checkAccessPoints()
+
+        this.getContentSides(shelf)
+        const placeShelf = (shelf, baseHeight) => {
+        }
+/* 
+        if(shelf.isDoubleSided == true && (this.contentSides ))
+        if(this.contentSides.indexOf(shelf.type) !== -1){
+            placeShelf();
+            
+        }
+        else if(this.contentSides.indexOf(null) !== -1){
+            this.contentSides[this.contentSides.indexOf(null)] = shelf.type
+            placeShelf();
+        } */
     }
 }
 

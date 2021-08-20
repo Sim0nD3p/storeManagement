@@ -295,213 +295,171 @@ class RackManager {
             }
             return finalObj
         }
-        let shelves = getShelves();
-        let types = Object.keys(shelves)
 
-        for(let i = 0; i < types.length; i++){
-            let currentShelves = shelves[types[i]]
-            console.log(types[i], currentShelves.length)
-            currentShelves = currentShelves.sort((a, b) => {
-                if(a.isDoubleSided == true && b.isDoubleSided == true){ return 0 }
-                else if(a.isDoubleSided == true && b.isDoubleSided == false){ return -1 }
-                else return 1
+        const genRacking = (shelves) => {
+            let types = Object.keys(shelves)
+            let racking = []
+            let key = 0
+
+            types.forEach((type) => {
+                key++
+                let currentShelves = shelves[type]
+
+                currentShelves = currentShelves.map((shelf, index) => {
+                    let parts = []
+                    let totalConsom = 0;
+                    shelf.content.forEach((cont, index) => {
+                        if (parts.findIndex((a) => a[0] == cont.name.split('_')[1]) == -1) {
+                            parts.push([cont.name.split('_')[1], cont.consommation])
+                        }
+                    })
+                    parts.forEach(part => totalConsom += part[1])
+                    return {
+                        ...shelf,
+                        totalConsom: totalConsom
+                    }
+                })
+
+                let shelvesToPlace = currentShelves.sort((a, b) => {
+                    if (a.type !== 'bundle' && b.type == 'bundle') return -1
+                    if (a.type == 'bundle' && b.type !== 'bundle') return 1
+
+                    if (a.isDoubleSided == true && b.isDoubleSided == false) return -1
+                    if (a.isDoubleSided == false && b.isDoubleSided == true) return 1
+
+                    if (a.totalConsom > b.totalConsom) return -1
+                    if (a.totalConsom < b.totalConsom) return 1
+
+                    //if(a.tag > b.tag) return -1
+                    //if(a.tag < b.tag) return 1
+                })
+
+                let localRacks = [new Racking(`racking_${key}`, shelvesToPlace[0].length, shelvesToPlace[0].type, shelvesToPlace[0].tag)]
+
+                shelvesToPlace.forEach((shelf, index) => {
+                    let height = shelf.type == 'bundle' ? undefined : 'reach_limit'
+
+                    term(`${shelf.name} isDoubleSided ${shelf.isDoubleSided}`)
+
+                    let rack = localRacks.map((rack, index) => {
+                        if (rack !== null) { return [rack, rack.searchPlace(shelf, height)] }
+                        else return null
+                    }).filter((a) => a !== null && a[1] !== false)
+
+                    if (rack.length > 0) {
+                        rack = rack.sort((a, b) => a[1] - b[1])[0]
+                        term(` rack: ${rack[0].name}, ${rack[1]}\n`)
+                        rack[0].addShelf(shelf, rack[1])
+                    }
+                    else {
+                        key++
+                        let newRack = new Racking(`racking_${key}`, shelf.length, shelf.type, shelf.tag)
+                        let place = newRack.searchPlace(shelf, height)
+                        term(` newRack: ${newRack.name}, ${place}\n`)
+                        if (place !== false) {
+                            newRack.addShelf(shelf, place)
+                            localRacks.push(newRack)
+                        }
+                        else console.log('PROBLEM')
+                    }
+                })
+                racking = racking.concat(localRacks)
             })
-            currentShelves.map(s => console.log(s.name, s.type, s.priority, s.isDoubleSided, s.accessRatio))
-
+            return racking
 
         }
+
+        let shelves = getShelves();
+        let init = genRacking(getShelves());
+
+        const redistributeShelves = (initRacking) => {
+            let racking = [];
+            let types = []
+            initRacking.forEach((rack) => {
+                let type = [rack.length, rack.contentSides]
+                let index = types.findIndex((a) => {
+                    let ref = [a[0], a[1]];
+                    let typ = [rack.length, rack.contentSides]
+                    return ref.toString() == typ.toString()
+                })
+                if(index == -1){
+                    types.push([rack.length, rack.contentSides, [rack]])
+                }
+                else {
+                    types[index][2].push(rack)
+                }
+            })
+            console.log(types)
+
+
+            types.forEach(type => {
+                console.log(`----- TYPE ${type[0]} -----`)
+                let shelves = []
+                let currentRacks = []
+                type[2].forEach(rack => {
+                    shelves = shelves.concat(rack.shelves)
+                    rack.shelves = []
+                    currentRacks.push(rack)
+                })
+
+                shelves = shelves.sort((a, b) => {
+                    if(a.type == 'bundle' && b.type == 'bac') return 1
+                    if(a.type == 'bac' && b.type == 'bundle') return -1
+
+                    if(a.totalConsom > b.totalConsom) return -1
+                    if(a.totalConsom < b.totalConsom) return 1
+                })
+
+                shelves.forEach(s => console.log(s.name, s.type, s.totalConsom))
+                let rackIter = 0;
+                shelves.forEach(shelf => {
+                    rackIter++;
+                    if(rackIter == currentRacks.length){ rackIter = 0}
+                    let height = (shelf.type == 'bundle') ? undefined : undefined
+                    let place = currentRacks[rackIter].searchPlace(shelf, height)
+                    if(place !== false){
+                        currentRacks[rackIter].addShelf(shelf, place);
+                    }
+                    else {
+                        if(rackIter == currentRacks.length - 1){
+                            place = currentRacks[0].searchPlace(shelf, height)
+                            if(place !== false){
+                                currentRacks[0].addShelf(shelf, place)
+                            } else console.log('PROBLEM')
+                        }
+                        else {
+                            place = currentRacks[rackIter + 1].searchPlace(shelf, height)
+                            if(place !== false){
+                                currentRack[rackIter + 1].addShelf(shelf, place)
+                            } else console.log('PROBLEM')
+                        }
+                    }
+
+
+                    
+                })
+                racking = racking.concat(currentRacks)
+                
+            })
+            this.app.store.racking = racking
+        }
+
+        let t = redistributeShelves(init)
+        
+
+        
+
+
+
+
+        this.app.store.racking = init
+        
         
         
 
     }
     cleanUpAccessPoints(tag) {
         //gets list of problematic containers
-
-
-        const getShelves = () => {
-            //gets all shelves, organized by length
-            let initShelvesObj = {}
-            for (let i = 0; i < this.app.store.shelves.length; i++) {
-                initShelvesObj = {
-                    ...initShelvesObj,
-                    [this.app.store.shelves[i].length]: {
-                        ...initShelvesObj[this.app.store.shelves[i].length],
-                        [this.app.store.shelves[i].name]: this.app.store.shelves[i]
-                    }
-                }
-            }
-            let finalObj = {}
-            let types = Object.keys(initShelvesObj)
-            for(let i = 0; i < types.length; i++){
-                let currentTypeArray = []
-                for(const length in initShelvesObj[types[i]]){
-                    currentTypeArray.push(initShelvesObj[types[i]][length])
-                }
-                finalObj = {
-                    ...finalObj,
-                    [types[i]]: currentTypeArray
-                }
-            }
-            return finalObj
-        }
-
-
-        const getProbOptLiftConstraint = () => {
-
-        }
-
-        /*
-        shelf not full
-        shelf group that are not full
-
-
-        */
-       const bestLength = () => {
-           let shelves = getShelves()
-           let types = Object.keys(shelves);
-           console.log(types)
-           types.map((type, index) => {
-               let doubleSidedShelves = shelves[type].filter((a) => a.isDoubleSided == true && a.tag == tag);
-               let singleSidedShelves = shelves[type].filter((a) => a.isDoubleSided == false && a.tag == tag);
-
-
-
-               //mieux d'enlever ou d'ajouter?
-               
-
-               console.log('\n\ntype:'); console.log(type)
-               console.log(doubleSidedShelves.length)
-               console.log(singleSidedShelves.length)
-
-               console.log('-----')
-
-
-           })
-
-       }
-
-        const shelvesOptions = (part, shelves) => {
-            console.log(part)
-            console.log(bestLength())
-            part = this.app.store.getItemFromPFEP(part)
-            let categorisation = {
-                consoMens: part.consommation ? part.consommation.mensuelleMoy : undefined,
-                classe: part.class ? part.class : undefined,
-                type: part.storage[0].type
-            }
-
-
-
-            let potentialShelves = this.shelfManager.findPotentialShelf(part, categorisation, tag).filter((a) => a !== null);
-            let frontFacing = potentialShelves.filter((a) => a[1] !== false)
-            if(frontFacing.length > 0){
-                
-                console.log(frontFacing)
-            }
-            else {
-                rearFacing = potentialShelves.filter((a) => a[2] !== false)
-                if(rearFacing.length > 0){
-                    console.log(rearFacing)
-                }
-
-            }
-            console.log(potentialShelves.length)
-
-            let doubleSidedShelves = this.app.store.shelves.filter((a) => a.isDoubleSided == true && a.tag == tag);
-            let singleSidedShelves = this.app.store.shelves.filter((a) => a.isDoubleSided == false && a.tag == tag);
-            singleSidedShelves.map((shelf, index) => {
-                if(Math.abs(part.priority - shelf.priority)/shelf.priority <= 0.80){
-                }
-                //check place FRONT
-                //check if transformation would help
-            })
-            doubleSidedShelves.map((shelf, index) => {
-                //check
-            })
-
-
-            
-
-        }
-
-        
-
-        let shelves = getShelves()
-        let types = Object.keys(shelves)
-        for(let i = 0; i < types.length; i++){
-            let totalHeight = 0;
-            let doubleSidedShelves = shelves[types[i]].filter((a) => a.isDoubleSided == true && a.tag == tag);
-            let singleSidedShelves = shelves[types[i]].filter((a) => a.isDoubleSided == false && a.tag == tag);
-
-            doubleSidedShelves.map((shelf, index) => totalHeight += shelf.height);    //gets total height of double sided shelves
-            let heightToBot = totalHeight % REACH_LIMIT;   //height to take off to have full racking
-            let heightToTop = REACH_LIMIT - (totalHeigt % REACH_LIMIT)
-            console.log(heightToBot)
-            let shelfPool = doubleSidedShelves.sort((a, b) => a.accessRatio - b.accessRatio)  //shelves with low accessRatio to convert
-            let shelfToConvert = []
-            let shelfIndex = 0;
-            let currentHeight = 0;
-            while(currentHeight < heightToBot && shelfIndex < shelfPool.length){   //getting shelves to convert
-                currentHeight += shelfPool[shelfIndex].height
-                shelfToConvert.push(shelfPool[shelfIndex])
-                shelfIndex++
-            }
-
-            console.log(`shelves to remove ${shelfToConvert.length}`)
-            let partsToRemove = shelfToConvert.map((shelf, index) => {
-                let targetParts = shelf.content.filter((a) => a.accessPoint == BACK)
-                return targetParts.map(part => part.name.split('_')[1])
-
-            })
-            /*
-            on veut convertir les shelf de maniere a avoir des groupes (OU PRESQUE) jusqua REACH_LIMIT pour les doubleSided
-
-            1. pour chaque type (shelf length) on check
-                - cmb d'étagères on a besoin de convertir en singleSided pour eliminer le surplus de doubleSided (jusqu'a REACH_LIMIT)
-                - cmb d'étagères on a besoin de convertir en double sided pour completer un REACH_LIMIT
-                        **on peux faire compter des single sided pour des doubleSided (pas optimisé)
-
-
-            2. potentialShelves => nous dit qulles etageres sont possible de mettre la piece
-
-            classer les shelf selon UP/DOWN (est-ce qu'on atteint REACH_LIMIT vers le haut ou vers le bas?)
-
-            3. Parmi potentialShelves, on trouve s'il est preferable
-                - d'envoyer la piece sur une shelf deja doubleSided(priority, length) => diminue nb pieces sur shelf en cours mais augmente sur une autre 
-                - d'envoyer la piece sur une etagere singleSided afin qu'elle atteigne REACH_LIMIT
-            3. On narrow down les options afin de
-                conditions:
-                - searchPlace
-                - priority
-                - doesnt fuckup shelf accessPoint
-
-
-            */
-
-            console.log(partsToRemove)
-            partsToRemove.forEach((typeParts) => {
-                typeParts.map((part, index) => {
-                    console.log(shelvesOptions(part, shelves))
-
-                })
-
-            })
-
-            
-
-
-            console.log('this is shelf to convert')
-            console.log(partsToRemove.length)
-            //shelfToConvert.map(a => console.log(a.name, a.height, a.accessRatio, a.priority))
-
-            console.log('-------\n\n\n')
-            
-            
-        }
-
-
-        
-
 
         const accessRatioProb = () => {
             return this.app.store.shelves.map((shelf, index) => {
@@ -579,7 +537,6 @@ class RackManager {
                 else return null
             }).filter((a) => a !== null)
         }
-        
         
         let accessRatio = ACCESS_RATIO;
         let spaceRatio = 0.5;
@@ -724,7 +681,7 @@ class RackManager {
             }
             else console.log('SHELF == NULL')
         }
-        //this.cleanUpAccessPoints(tag)
+        this.cleanUpAccessPoints(tag)
         term(`\n\n\n ${qteToPlace} parts should be placed\n`)
         term.red(`${failedParts.length} part have not been placed in racking\n`)
         console.log(this.shelfManager.unusedShelves)

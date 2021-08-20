@@ -216,26 +216,38 @@ class DispayStore {
 
     displayRacking(){
         this.app.clearScreen();
+        
+        term('\n')
         for(let i = 0; i < this.app.store.racking.length; i++){
-            term.column(0); term(`${this.app.store.racking[i].name}`)
-            term.column(25); term(`${this.app.store.racking[i].type}`)
-            term.column(35); term(`${this.app.store.racking[i].length}`)
-            term.column(40); term(`${this.app.store.racking[i].height}`)
-            term.column(55); term(`${this.app.store.racking[i].priority}\n`)
-            for(let j = 0; j < this.app.store.racking[i].shelves.length; j++){
-                term.column(10); term(`${this.app.store.racking[i].shelves[j].name}`)
-                term.column(25); term(`${this.app.store.racking[i].shelves[j].type}`)
-                term.column(35); term(`${Math.ceil(this.app.store.racking[i].shelves[j].priority)}`)
-                term.column(45); term(`${Math.ceil(this.app.store.racking[i].shelves[j].baseHeight)}`)
-                term.column(55); term(`${this.app.store.racking[i].shelves[j].getAccessRatio()}`) 
-                term.column(75); term(`${this.app.store.racking[i].shelves[j].getSpaceRatio()}`)
-                term('\n')
-
-            }
+            term.column(0); term(`${this.app.store.racking[i].name} [${this.app.store.racking[i].contentSides[0]}, ${this.app.store.racking[i].contentSides[1]}]`)
+            term.column(35); term(`length: ${this.app.store.racking[i].length}`)
+            term.column(55); term(`height: ${this.app.store.racking[i].height}`)
+            //term.column(55); term(`${this.app.store.racking[i].}\n`)
+            term('\n------------------------------------------------------------------------------------------\n')
+            //term('\n')
+            let spacing = [10, 20, 30, 50, 65, 80]
+            term.column(spacing[0]); term(`name`)
+            term.column(spacing[1]); term(`type`)
+            term.column(spacing[2]); term(`priority (shelf | avePart)`)
+            term.column(spacing[3]); term(`baseHeight`)
+            term.column(spacing[4]); term(`accessRatio`)
+            term.column(spacing[5]); term(`spaceRatio`)
             term('\n')
+            for(let j = 0; j < this.app.store.racking[i].shelves.length; j++){
+                term.column(spacing[0]); term(`${this.app.store.racking[i].shelves[j].name}`)
+                term.column(spacing[1]); term(`${this.app.store.racking[i].shelves[j].type}`)
+                term.column(spacing[2]); term(`${Math.ceil(this.app.store.racking[i].shelves[j].totalConsom)} | ${Math.ceil(this.app.store.racking[i].shelves[j].priority)}`)
+                term.column(spacing[3]); term(`${Math.ceil(this.app.store.racking[i].shelves[j].baseHeight)}`)
+                term.column(spacing[4]); term(`${this.app.store.racking[i].shelves[j].getAccessRatio()}`) 
+                term.column(spacing[5]); term(`${this.app.store.racking[i].shelves[j].getSpaceRatio()}`)
+                term('\n')
+                
+            }
+            term('\n========================================================================================\n\n')
         }
 
     }
+
     getAllShelves(){
         this.app.clearScreen();
         let allowSwitch = true

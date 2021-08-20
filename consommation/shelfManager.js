@@ -422,7 +422,7 @@ class ShelfManager{
         return this.app.store.shelves.map((shelf, index) => {
             if (targetType.indexOf(shelf.type.substring(0, 3)) !== -1 && shelf.tag == tag) {
                 let placement = [shelf.searchPlace(part, FRONT) !== false ? true : false, shelf.searchPlace(part, BACK) !== false ? true : false]
-                //if(part.consommation && part.consommation.mensuelleMoy >= this.app.store.medianMonthlyConsom()){ placement[1] = false }
+                //if(shelf.spaceRatio >= this.app.store.medianMonthlyConsom()){ placement[1] = false }
                 if (placement[0] !== false || placement[1] !== false) {
                     return [shelf, placement[0], placement[1]]
                 } else return null

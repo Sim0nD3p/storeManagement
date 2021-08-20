@@ -828,6 +828,7 @@ class Shelf{
         this.weight = this.setWeight()
         this.height = this.setHeight();
         this.accessRatio = this.getAccessRatio()
+        this.spaceRatio = this.getSpaceRatio()
         if(this.getAccessRatio() == 0){ this.isDoubleSided = false }
         else if(this.getAccessRatio() !== 0){ this.isDoubleSided = true }
 
