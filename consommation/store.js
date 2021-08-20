@@ -118,13 +118,9 @@ class Store{
                 containers = this.storeManager.makeCustomContainer(part, customType, qte);
                 break;
             }
-            case 'bundleUsine': {
-                if(part.specs.length < MINIMUM_BUNDLE_LENGTH){
-
-                }
-                else {
-                }
-                containers = this.storeManager.makeCustomContainer(part, 'bundleUsin', qte)
+            case 'bUs': {
+                console.log('BUSSS')
+                containers = this.storeManager.makeCustomContainer(part, 'bUs', qte)
 
                 break;
             }

@@ -1,4 +1,6 @@
 const shelves = require('./shelves')
+
+const length = require('./shelves').map(s => s.length)
 /**
  * CustomShelf for custom storage, when items dont fit on a standard shelf but still take place in racking
  */
@@ -9,6 +11,13 @@ class customShelf{
         this.priority;
         this.content;
     }
+
+    putInShelf = () => {
+
+    }
+    getShelf(){
+        
+    }
     getLength(){
         let options = shelves.map((shelf, index) => {
             
@@ -17,3 +26,5 @@ class customShelf{
         return length
     }
 }
+
+module.exports = customShelf;

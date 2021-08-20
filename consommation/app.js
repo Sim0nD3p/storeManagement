@@ -691,7 +691,7 @@ class App {
                     for(const code in storageData){
                         this.store.getItemFromPFEP(code.toString()).emballage.TF.type = storageData[code].container
                         this.store.getItemFromPFEP(code.toString()).emballage.TF.nbPieces = isNaN(Number(storageData[code].nbPieces)) ? storageData[code].nbPieces : Number(storageData[code].nbPieces);
-                        if(storageData[code].container == 'bundleUsine'){
+                        if(storageData[code].container == 'bUs'){
                             this.store.getItemFromPFEP(code.toString()).qteMax = storageData[code].nbPieces
                         }
                     }
@@ -728,6 +728,9 @@ class App {
                         if(this.store.PFEP[i].emballage.TF.type == 'etagereMain'){
                             this.store.PFEP[i].emballage.TF.type = 'customContainer'
                         }
+                        if(this.store.PFEP[i].emballage.TF.type == 'bundle_BT'){
+                            this.store.PFEP[i].emballage.TF.type == 'bUs'
+                        }
                         if(this.store.PFEP[i].code.includes('SEO')){
                             console.log(this.store.PFEP[i].code)
                             this.store.PFEP[i].emballage.TF.type = 'bac2';
@@ -744,7 +747,9 @@ class App {
                             isNaN(this.store.PFEP[i].qteMax) ? this.store.PFEP[i].qteMax : Math.ceil(this.store.PFEP[i].qteMax)
                         )
 
+                        console.log(this.store.PFEP[i].emballage.TF.type)
                         console.log(`${this.store.PFEP[i].code} has ${containers.length} containers`)
+                        console.log('----------')
                     }
 
 

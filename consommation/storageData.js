@@ -51,7 +51,7 @@ const storageData = {
     //tube usine, long
     //----------------------------------------------------------
     "BA1B-2975A64": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: 10,
         storage: false
     },
@@ -646,19 +646,19 @@ const storageData = {
         checkup: true
     },
     "SEA220-003288": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false,
         drop: true
     },
     "SEA220-003291": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false,
         drop: true
     },
     "SEA220-003292": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false,
         drop: true
@@ -1034,7 +1034,7 @@ const storageData = {
         storage: true
     },
     "SEP205-004385": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: 10,
         storage: false
     },
@@ -1124,7 +1124,7 @@ const storageData = {
         storage: true
     },
     "SEP210-004311": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -1145,7 +1145,7 @@ const storageData = {
         checkup: true
     },
     "SEP210-004345": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: 100,
         storage: false
     },
@@ -1214,12 +1214,12 @@ const storageData = {
         storage: true
     },
     "SEP250-004354": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: 200,
         storage: false
     },
     "SEP250-004360": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: 100,
         storage: false
     },
@@ -1294,7 +1294,7 @@ const storageData = {
         storage: true
     },
     "SEP2516": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: 40,
         storage: false
     },
@@ -1309,7 +1309,7 @@ const storageData = {
         storage: false
     },
     "SEP2522": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: 15,
         storage: false
     },
@@ -1344,7 +1344,7 @@ const storageData = {
         storage: true
     },
     "SEP2543": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: 10,
         storage: false
     },
@@ -1495,12 +1495,12 @@ const storageData = {
         storage: true
     },
     "SEP270-005059": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
     "SEP270-005062": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -1600,7 +1600,7 @@ const storageData = {
         storage: false
     },
     "SEP3005": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: 40,
         storage: false
     },
@@ -1710,7 +1710,7 @@ const storageData = {
         storage: false
     },
     "SEP3276": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: 100,
         storage: false
     },
@@ -1835,7 +1835,7 @@ const storageData = {
         storage: true
     },
     "SEP3471": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -1845,7 +1845,7 @@ const storageData = {
         storage: true
     },
     "SEP3476": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -1880,7 +1880,7 @@ const storageData = {
         storage: true
     },
     "SEP3525": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -1905,7 +1905,7 @@ const storageData = {
         storage: false
     },
     "SEP3537": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -2025,7 +2025,7 @@ const storageData = {
         storage: true
     },
     "SEP3603": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: 25,
         storage: false
     },
@@ -2060,17 +2060,17 @@ const storageData = {
         storage: true
     },
     "SEP3747": {
-        container: "bundle_BT",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
     "SEP3761": {
-        container: "bundle_BT",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
     "SEP3761M6": {
-        container: "bundle_BT",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -2165,7 +2165,7 @@ const storageData = {
         storage: false
     },
     "SEP3793": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -2310,7 +2310,7 @@ const storageData = {
         storage: false
     },
     "SEP3871": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -2530,7 +2530,7 @@ const storageData = {
         storage: true
     },
     "SEP4056": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -2650,17 +2650,17 @@ const storageData = {
         storage: true
     },
     "SEP4114": {
-        container: "bundle_BT",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
     "SEP4114M6": {
-        container: "bundle_BT",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
     "SEP4114M6A": {
-        container: "bundle_BT",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -2680,7 +2680,7 @@ const storageData = {
         storage: true
     },
     "SEP4121": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -2735,7 +2735,7 @@ const storageData = {
         storage: true
     },
     "SEP4183": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -2790,17 +2790,17 @@ const storageData = {
         storage: true
     },
     "SEP4212-M3": {
-        container: "bundle_BT",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
     "SEP4213": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: 20,
         storage: false
     },
     "SEP4251": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -2810,7 +2810,7 @@ const storageData = {
         storage: true
     },
     "SEP4263": {
-        container: "bundle_BT",
+        container: "bUs",
         nbPieces: "",
         storage: false
     },
@@ -2860,12 +2860,12 @@ const storageData = {
         storage: true
     },
     "SEP4333-D": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: 20,
         storage: false
     },
     "SEP4333-G": {
-        container: "bundleUsine",
+        container: "bUs",
         nbPieces: 20,
         storage: false
     },

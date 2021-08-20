@@ -110,11 +110,22 @@ function bundleStorage(item, qte){
    return container
 }
 
+function bundleBT(item, qte){
+    let dimensions = {
+        length: item.specs.length,
+        height: 500,
+        width: 10 * item.specs.width
+    }
+    return dimensions
+
+
+}
+
 
 class CustomContainer{
     constructor(name, type, part, qte){
         this.name = name;
-        this.type = 'customContainer';
+        this.type = 'cus';
         this.contentType = type;
         this.itemcode = part.itemcode;
         this.itemSpecs = part.specs;
@@ -133,8 +144,15 @@ class CustomContainer{
             dimensions = handStorage(item, qte)
             console.log(dimensions)
         }
-        else if(type = 'bundleUsin'){
-            dimensions = bundleStorage(item, qte);
+        else if(type == 'bUs'){
+            if(item.family == 'Barre transversale'){
+                dimensions = bundleBT(item, qte)
+                console.log('\n\n\n\n\n------BT!!!-----\n\n\n')
+            }
+            else {
+                dimensions = bundleStorage(item, qte);
+
+            }
             console.log(dimensions)
         }
         else {

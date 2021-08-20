@@ -6,6 +6,7 @@ const term = require('terminal-kit').terminal
 const { performance } = require('perf_hooks')
 const containerData = require('./containers/containerData');
 const Bac = require('./containers/bac');
+const CustomShelf = require('./containers/customShelf');
 const FRONT = 'FRONT';
 const BACK = 'BACK'
 const BASE_HEIGHT_PRIORITY_LIMIT = 1500;
@@ -22,6 +23,7 @@ class ShelfManager{
             bundle: 0,
             container: 0,
             bundleUsin: 0,
+            customShelf: 0
         }
     }
     checkAvailability(part, shelf, returnFull){
@@ -53,6 +55,7 @@ class ShelfManager{
         if(type == 'bac'){ targetType = ['mixed', 'bac', 'cus'] }
         else if(type == 'bun' || type == 'bundle'){ targetType = ['bundle', 'mixed'] }
         else if(type == 'cUs'){ targetType = ['mixed', 'cUs'] }
+        else if(type == 'bUs'){ targetType = ['bUs', 'mixed']}
         //else { targetType = ['mixed'] }
         
         let options = this.app.store.racking.map((rack, index) => {
@@ -85,12 +88,17 @@ class ShelfManager{
                 if(qte > 4 && shelf.length > 2 * 1.10 * length && shelf.qte > 0){ return [shelf.length - 2 * length, index, 2] }
                 else if(shelf.length > length && shelf.qte > 0){ return [shelf.length - length, index, 2, 1] }
                 else return null
-            })
+            }).filter(a => a !== null);
+            console.log(`potential.length ${potential.length}`)
             
-            potential = potential.filter(a => a !== null);                  //filters non compatible shelves
             potential = potential.sort((a, b) => b[2] - a[2]);              //sort lengthNb
             potential = potential.filter((a) => a !== potential[0][2]);     //filters lengthNb to only keep the highest
             potential = potential.sort((a, b) => a[1] - b[1])                  //filter spare length to have the most tight shelf in index 0
+            console.log('this is potential line 95')
+            console.log(potential)
+            if(potential.length == 0){
+                return this.unusedShelves.map((a, index) => { return {...a, index: index} }).sort((a, b) => b.qte - a.qte)[0].index;
+            }
             return potential[0][1]; //the most tight shelf
         }
         else if(prop == `priority`){
@@ -277,12 +285,34 @@ class ShelfManager{
                     return lengthArray[0]
                 })
                 let shelfIndex = this.choseShelf('length', maxLengthArray.sort((a, b) => b - a)[0], null, null, 'bUs', partsToPlace[0].part.storage.length, tag)
+                console.log('creating bUs shelf')
+                console.log(this.unusedShelves[shelfIndex])
 
-                
+
+
+                let s = {
+                    length:2750,
+                    rating:2500,
+                    qte:999,
+                }
+
+                let potential = this.app.store.racking.map((rack, index) => {
+                    if(rack.contentSides.indexOf('bUs') || rack.contentSides.indexOf(null)){ return rack }
+                    else return null
+                }).filter((a) => a !== null)
+                potential.forEach(s => console.log(s.name, s.length, s.height, s.priority, s.contentSides))
+
+
+
+
+
+
                 let shelfData = this.unusedShelves[shelfIndex]
                 //this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1;
-                let shelf = new Shelf(`bundleUsin_${this.shelfQte.bundleUsin}`, shelfData, 'bUs', tag)
+                let shelf = new Shelf(`bUs_${this.shelfQte.bundleUsin}`, shelfData, 'bUs', tag)
+                //let shelf = new CustomShelf(`customShelf_${this.shelfQte.customShelf}`, )
                 this.shelfQte.bundleUsin++
+                //this.shelfQte.bundleUsin++
                 finalShelf = shelf
 
 
@@ -414,9 +444,13 @@ class ShelfManager{
      * @returns [shelf, front, back]
      */
     findPotentialShelf = (part, categorisation, tag) => {
-        let targetType = [categorisation.type.substring(0, 3)]
+        let targetType = [part.storage[0].type.substring(0, 3)]
         if(targetType == 'bun'){ targetType = ['bun'] }
-        else if(targetType == 'bac' || targetType == 'cus'){ targetType = ['bac', 'cus'] }
+        else if(targetType == 'bac'){ targetType = ['bac'] }
+        else if(targetType == 'cus'){
+            if(part.family == 'Main'){ targetType = ['bac']}
+            else { targetType = ['bUs']}
+        }
         else if(targetType == 'bUs'){ targetType = ['bUs']}
 
         return this.app.store.shelves.map((shelf, index) => {

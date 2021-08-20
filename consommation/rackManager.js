@@ -109,30 +109,53 @@ class RackManager {
         let typeNeeded = [partList[index].storage[0].type.substring(0, 3)]
         let nextPartType = partList[index].storage[0].type.substring(0, 3)
         if (nextPartType == 'bun') { typeNeeded = ['bun'] }
-        else if (nextPartType == 'bac' || nextPartType == 'cus') { typeNeeded = ['bac', 'cus'] }
+        else if (nextPartType == 'bac') { typeNeeded = ['bac'] }
+        else if(nextPartType == 'cus'){
+            if(partList[index].storage[0].contentType == 'Main'){ typeNeeded = ['bac'] }
+            else if(partList[index].storage[0].contentType == 'bUs'){ typeNeeded = ['bUs'] }
+        }
 
 
         //let typeNeeded = partList[index].storage[0].type.substring(0, 3);   //bac, bun, pal (types de contenants)
 
 
         let partsToPlace = [];
-        while (partsToPlace.length < 25) {
-            if (partList[index + partsToPlace.length]) {
-                if (typeNeeded.indexOf(partList[index + partsToPlace.length].storage[0].type.substring(0, 3)) !== -1) {
-                    let categorisation = {
-                        consoMens: partList[index + partsToPlace.length].consommation ? partList[index + partsToPlace.length].consommation.mensuelleMoy : undefined,
-                        classe: partList[index + partsToPlace.length].class ? partList[index + partsToPlace.length].class : undefined,
-                        type: typeNeeded[0],
-                        //type: partList[index + partsToPlace.length].storage[0].type
+
+        if(nextPartType !== 'cus'){
+            console.log('calisse')
+            console.log(nextPartType)
+            while (partsToPlace.length < 25) {
+                if (partList[index + partsToPlace.length]) {
+                    if (typeNeeded.indexOf(partList[index + partsToPlace.length].storage[0].type.substring(0, 3)) !== -1) {
+                        let categorisation = {
+                            consoMens: partList[index + partsToPlace.length].consommation ? partList[index + partsToPlace.length].consommation.mensuelleMoy : undefined,
+                            classe: partList[index + partsToPlace.length].class ? partList[index + partsToPlace.length].class : undefined,
+                            type: typeNeeded[0],
+                            //type: partList[index + partsToPlace.length].storage[0].type
+                        }
+                        partsToPlace.push({ part: partList[index + partsToPlace.length], categorisation: categorisation })
                     }
-                    partsToPlace.push({ part: partList[index + partsToPlace.length], categorisation: categorisation })
-                }
-                else {
-                    index++
-                }
-            } else break
+                    else {
+                        index++
+                    }
+                } else break
+            }
+            
         }
+        else {
+            let categorisation = {
+                consoMens: partList[index + partsToPlace.length].consommation ? partList[index + partsToPlace.length].consommation.mensuelleMoy : undefined,
+                classe: partList[index + partsToPlace.length].class ? partList[index + partsToPlace.length].class : undefined,
+                type: typeNeeded[0],
+            }
+            partsToPlace.push({ part: partList[index], categorisation: categorisation })
+        }
+
+
+
+        
         //console.log('end of requestNewShelf')
+        console.log(`this is partsToPLace.legth ${partsToPlace.length}`)
         let newShelf = this.shelfManager.createShelf(partsToPlace, tag); //returns new Shelf
         //console.log(result.content)
 
@@ -422,6 +445,7 @@ class RackManager {
                     }
                     else {
                         if(rackIter == currentRacks.length - 1){
+                        
                             place = currentRacks[0].searchPlace(shelf, height)
                             if(place !== false){
                                 currentRacks[0].addShelf(shelf, place)
