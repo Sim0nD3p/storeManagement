@@ -628,10 +628,14 @@ class App {
                         if (this.store.PFEP[i].specs) {
                             for (const spec in this.store.PFEP[i].specs) {
                                 if (this.store.PFEP[i].specs[spec]) {
-
-                                    this.store.PFEP[i].specs[spec] = this.store.PFEP[i].specs[spec].replace(',', '.');
-                                    if (isNaN(Number(this.store.PFEP[i].specs[spec])) == false) { this.store.PFEP[i].specs[spec] = Number(this.store.PFEP[i].specs[spec]) }
+                                    console.log(spec)
+                                    if(typeof this.store.PFEP[i].specs[spec] == 'string'){
+                                        this.store.PFEP[i].specs[spec] = this.store.PFEP[i].specs[spec].replace(',', '.');
+                                        if (isNaN(Number(this.store.PFEP[i].specs[spec])) == false) { this.store.PFEP[i].specs[spec] = Number(this.store.PFEP[i].specs[spec]) }
+                                        else { this.store.PFEP[i].specs[spec] = Number(this.store.PFEP[i].specs[spec])}
+                                    }
                                     console.log(this.store.PFEP[i].specs[spec]);
+                                
                                 }
                             }
                         }

@@ -105,7 +105,8 @@ class Shelf{
                 result = this.searchPlaceForBundle(item, logToConsole)
             }
             else if (generalType == 'cus') {
-                orientationArray = [[VERTICAL]];
+                //orientationArray = [[VERTICAL]];
+                orientationArray = [[VERTICAL], [HORIZONTAL]];
                 result = this.searchPlaceForBac(item, orientationArray, accessSide, logToConsole)
             }
         }
@@ -376,6 +377,13 @@ class Shelf{
          * @returns columns options for the placement of the containers nedded for the part to place
          */
         const initialColumnOptions = (orientationOptions, blocs, item) => {
+            logToConsole >= 3 ? console.log('item storage') : null
+            logToConsole >= 3 ? console.log(item.storage[0]) : null
+            logToConsole >= 3 ? console.log('orientation options') : null;
+            logToConsole >= 3 ? console.log(orientationOptions) : null;
+
+
+
             let columns = [];   //col: column, arrangement dans le sens width (array)
             for(let i = 0; i < blocs.length; i++){
                 if(blocs[i][0] !== 0){
@@ -507,10 +515,13 @@ class Shelf{
             let conflictIndex = finalCol.map((opt, index) => {
                 //iterates options^^
                 let conflictedCol = []  // {bool} - false if no conflict(all the containers take the same front space in the column), checks if containers in a column are all in the same orientation
+                logToConsole >= 3 ? console.log('opt') : null 
+                logToConsole >= 3 ? console.log(opt) : null 
                 for (let col = 0; col < opt.length; col++) {    //columns
                     let containerWidth;
                     for (let container = 0; container < opt[col].length; container++) {     //containers
-                        if (container === 0) { containerWidth = opt[col][container][1] }    //initial width for comparaison
+                        //if (container === 0) { containerWidth = opt[col][container][1]; conflictedCol[col] = false }    //initial width for comparaison
+                        if (container === 0) { containerWidth = opt[col][container][1]; }    //initial width for comparaison
                         else {
                             if (opt[col][container][1] == containerWidth) { conflictedCol[col] = false }    //if next container takes the same front space, conflict = false
                             else conflictedCol[col] = true      //true: one of the container in the column takes more front space
@@ -519,12 +530,16 @@ class Shelf{
                 }
 
 
+                logToConsole >= 3 ? console.log('conflictedCol') : null
+                logToConsole >= 3 ? console.log(conflictedCol) : null
                 if(conflictedCol.indexOf(true) == -1){  //if all the containers take the same front space 
                     return false
                 }
                 else return true    //if some container takes more front space
     
             })
+            logToConsole >= 3 ? console.log('conflictIndex') : null
+            logToConsole >= 3 ? console.log(conflictIndex) : null
             
             //get width of bac group
             if(conflictIndex.indexOf(false) !== -1){
@@ -681,6 +696,7 @@ class Shelf{
             logToConsole >= 3 ? console.log(finalCol) : null
             logToConsole >= 3 ? console.log('optionSpecs') : null
             logToConsole >= 3 ? console.log(optionSpecs) : null
+            logToConsole >= 3 ? console.log(optionSpecs[0]) : null
             logToConsole >= 3 ? console.log('bestBloc') : null
             logToConsole >= 3 ? console.log(bestBloc) : null
             if(bestBloc == false){ return false }
