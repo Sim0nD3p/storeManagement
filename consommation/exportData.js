@@ -9,12 +9,12 @@ class ExportData{
     }
 
 
-    exportJSON(data, fileName, path){
+    async exportJSON(data, fileName, path){
         if(!path){ path = this.defaultPath }
         let JSONstring = JSON.stringify(data);
         fs.writeFile(path + '/' + fileName + '.json', JSONstring, (err) => {
             if(err){ console.log('erreur ', err) }
-            else{ console.log('Le fichier a été exporté')}
+            else{ return 'Le fichier a été exporté avec succès'}
         })
 
 

@@ -13,7 +13,15 @@
 - implement store, item pour organiser les choses
 
 
-- Classification pour avoir le bac dans lequel chaque piece est placee
+
+
+
+## WHERE I AM
+- apres avoir list part, on reprend a initRacking (rackManager)
+    - categoriser les parts ASS | MP
+    - rackManager (line 80)
+
+
 
 # BAC ET NOMBRE DE PIECES:
  - classe C, 1 seul bac (si faible consommation)

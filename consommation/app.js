@@ -84,6 +84,7 @@ class App {
         else if (this.lastScreen.screen == 'maintenance') { this.maintenance(); this.lastScreen.screen = 'home' }
         else if (this.lastScreen.screen == 'afficherMagasin') { this.afficherMagasin() }
         else if(this.lastScreen.screen == 'modifierEntreposage'){ this.fichePiece.modifierEntreposage(this.lastScreen.content) }
+        else if(this.lastScreen.screen == 'storeGenerator'){ this.store.storeManager.storeGenerator() }
         else {
             this.home()
         }
@@ -440,6 +441,7 @@ class App {
             'Créer nouvelle pièce',     //9
             'Créer nouveaux fournisseur',   //10
             'Rechercher fournisseur',       //11
+            'Générer magasin',
 
             'Test',
         ]
@@ -497,7 +499,7 @@ class App {
             else if (response.selectedIndex === 12) {
                 console.log('THIS IS THE TESTING SECTION');
                 this.lastScreen.screen = 'home'
-                this.store.generateRacking();
+                this.store.storeManager.storeGenerator()
 
                 //let shelf = this.store.storeManager.shelfManager.createShelf('test', 4000, 2450)
                 //shelf.checkAvailability(this.store.getItemFromPFEP('SEP3411').storage)

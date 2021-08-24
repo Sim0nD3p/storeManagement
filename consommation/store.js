@@ -130,7 +130,7 @@ class Store{
         return containers
     }
 
-    generateRacking(){
+    genStore(){
         let racking = this.rackManager.initRacking(this.PFEP)
     }
 
