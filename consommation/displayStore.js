@@ -28,7 +28,7 @@ const formatNbPieceBac = (array) => {
     return string
 }
 
-class DispayStore {
+class DispayStore{
     constructor(app) {
         this.app = app;
 
@@ -222,6 +222,7 @@ class DispayStore {
             term.column(0); term(`${this.app.store.racking[i].name} [${this.app.store.racking[i].contentSides[0]}, ${this.app.store.racking[i].contentSides[1]}]`)
             term.column(35); term(`length: ${this.app.store.racking[i].length}`)
             term.column(55); term(`height: ${this.app.store.racking[i].height}`)
+            term.column(75); term(`tag ${this.app.store.racking[i].tag}`)
             //term.column(55); term(`${this.app.store.racking[i].}\n`)
             term('\n------------------------------------------------------------------------------------------\n')
             //term('\n')
