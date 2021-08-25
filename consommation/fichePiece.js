@@ -227,6 +227,7 @@ class FichePiece{
         let menuItems = [
             `Description: ${item.description}`,         //0
             `Famille: ${item.family}`,                  //1
+            `Tag: ${item.tag}`,                                      
             `Classe d'utilisation: ${item.class}`,      //2
             `Utilité: ${item.utilite}`,                 //3
             `Profondeur: ${item.specs.length}`,         //4
@@ -260,17 +261,17 @@ class FichePiece{
                     let index = string.indexOf(':');
                     return string.slice(0, index + 1)
                 }
-                if(response.selectedIndex >= 19 + item.supplier.length){
+                if(response.selectedIndex >= 20 + item.supplier.length){
                     if(response.selectedIndex == menuItems.length - 1){
                         this.addSupplier(item);
                     }
                     else {
                         term.right(1); term(getField());
-                        this.changeSupplier(item, response.selectedIndex - 20)
+                        this.changeSupplier(item, response.selectedIndex - 21)
                     }
 
                 }
-                else if(response.selectedIndex === 17){
+                else if(response.selectedIndex === 18){
                     this.changeContainer(item);
 
                 }
@@ -279,23 +280,24 @@ class FichePiece{
                         switch (response.selectedIndex) {
                             case 0: { item.description = input; this.modifierDetails(item); break; }
                             case 1: { item.family = input; this.modifierDetails(item); break; }
-                            case 2: { item.class = input; this.modifierDetails(item); break; }
-                            case 3: { item.utilite = input; this.modifierDetails(item); break; }
-                            case 4: { item.specs.length = input; this.modifierDetails(item); break; }
-                            case 5: { item.specs.width = input; this.modifierDetails(item); break; }
-                            case 6: { item.specs.height = input; this.modifierDetails(item); break; }
-                            case 7: { item.specs.weight = input; this.modifierDetails(item); break; }
-                            case 8: { item.consommation.annuelle = input; this.modifierDetails(item); break; }
-                            case 9: { item.consommation.mensuelleMoy = input; this.modifierDetails(item); break; }
-                            case 10: { item.consommation.mensuelleMax = input; this.modifierDetails(item); break; }
-                            case 11: { item.consommation.commandeType = input; this.modifierDetails(item); break; }
-                            case 12: { item.consommation.freqReappro = input; this.modifierDetails(item); break; }
-                            case 13: { item.stockSecurite = input; this.modifierDetails(item); break; }
-                            case 14: { item.qteMax = Number(input); this.modifierDetails(item); break; }
-                            case 15: { item.emballage.fournisseur.type = input; this.modifierDetails(item); break; }
-                            case 16: { item.emballage.fournisseur.nbPieces = input; this.modifierDetails(item); break; }
-                            case 17: { item.emballage.TF.type = input; this.modifierDetails(item); break; }
-                            case 18: { item.emballage.TF.nbPieces = input; this.modifierDetails(item); break; }
+                            case 2: { item.tag = input; this.modifierDetails(item); break; }
+                            case 3: { item.class = input; this.modifierDetails(item); break; }
+                            case 4: { item.utilite = input; this.modifierDetails(item); break; }
+                            case 5: { item.specs.length = input; this.modifierDetails(item); break; }
+                            case 6: { item.specs.width = input; this.modifierDetails(item); break; }
+                            case 7: { item.specs.height = input; this.modifierDetails(item); break; }
+                            case 8: { item.specs.weight = input; this.modifierDetails(item); break; }
+                            case 9: { item.consommation.annuelle = input; this.modifierDetails(item); break; }
+                            case 10: { item.consommation.mensuelleMoy = input; this.modifierDetails(item); break; }
+                            case 11: { item.consommation.mensuelleMax = input; this.modifierDetails(item); break; }
+                            case 12: { item.consommation.commandeType = input; this.modifierDetails(item); break; }
+                            case 13: { item.consommation.freqReappro = input; this.modifierDetails(item); break; }
+                            case 14: { item.stockSecurite = input; this.modifierDetails(item); break; }
+                            case 15: { item.qteMax = Number(input); this.modifierDetails(item); break; }
+                            case 16: { item.emballage.fournisseur.type = input; this.modifierDetails(item); break; }
+                            case 17: { item.emballage.fournisseur.nbPieces = input; this.modifierDetails(item); break; }
+                            case 18: { item.emballage.TF.type = input; this.modifierDetails(item); break; }
+                            case 19: { item.emballage.TF.nbPieces = input; this.modifierDetails(item); break; }
                             //case 18: { item.stockSecurite = Number(input); this.modifierDetails(item); break; }
                             }
                     })
@@ -392,6 +394,7 @@ class FichePiece{
             term(`\n^+Pièce^:: ${item.code}\n`);
             term(`^+Description^:: ${item.description ? item.description : 'ND'}\n`);
             term(`^+Famille^:: ${item.family ? item.family : 'ND'}\n`);
+            term(`^+Tag^:: ${item.tag ? item.tag : 'ND'}\n`);
             term(`^+Classe d'utilisation^:: ${item.class ? item.class : 'ND'}\n`);
             term(`^+Utilité:^: ${item.utilite ? item.utilite : 'ND'}\n`)
             term(`^+Spécifications:\n`);

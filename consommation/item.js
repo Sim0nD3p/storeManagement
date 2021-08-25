@@ -17,6 +17,7 @@ class Item{
             this.history = data.history;
             this.description = data.description;
             this.family = data.family;
+            this.tag = data.tag ? data.tag : undefined;
             this.supplier = [];
             this.utilite = data.utilite;
             this.class = data.class;

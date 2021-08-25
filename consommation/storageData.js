@@ -30,9 +30,6 @@ const storageData = {
         nbPieces: "singleBac",
         storage: true
     },
-    "": {
-        storage: false
-    },
     "ARM-SA3": {
         container: "TABLETTE RACKING TE",
         nbPieces: "180",

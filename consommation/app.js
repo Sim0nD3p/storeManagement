@@ -84,7 +84,7 @@ class App {
         else if (this.lastScreen.screen == 'maintenance') { this.maintenance(); this.lastScreen.screen = 'home' }
         else if (this.lastScreen.screen == 'afficherMagasin') { this.afficherMagasin() }
         else if(this.lastScreen.screen == 'modifierEntreposage'){ this.fichePiece.modifierEntreposage(this.lastScreen.content) }
-        else if(this.lastScreen.screen == 'storeGenerator'){ this.store.storeManager.storeGenerator() }
+        else if(this.lastScreen.screen == 'storeManagerMenu'){ this.store.storeManager.storeManagerMenu() }
         else {
             this.home()
         }
@@ -499,7 +499,7 @@ class App {
             else if (response.selectedIndex === 12) {
                 console.log('THIS IS THE TESTING SECTION');
                 this.lastScreen.screen = 'home'
-                this.store.storeManager.storeGenerator()
+                this.store.storeManager.storeManagerMenu()
 
                 //let shelf = this.store.storeManager.shelfManager.createShelf('test', 4000, 2450)
                 //shelf.checkAvailability(this.store.getItemFromPFEP('SEP3411').storage)
@@ -581,7 +581,8 @@ class App {
             'getData 2021-08-06 (DEV ONLY)',
             'Fix "-LA" history',
             'Bundle specs',
-            'Consommation moyenne magasin'            
+            'Consommation moyenne magasin',
+            'apply tags',       
         ]
         term.singleColumnMenu(menuItems, { cancelable: true, keyBindings: { CTRL_Z: 'escape', ENTER: 'submit', UP: 'previous', DOWN: 'next' } }, (error, response) => {
             if (response !== undefined) {
@@ -695,6 +696,7 @@ class App {
                         } else return index
                     })
                     for(const code in storageData){
+                        console.log(code)
                         this.store.getItemFromPFEP(code.toString()).emballage.TF.type = storageData[code].container
                         this.store.getItemFromPFEP(code.toString()).emballage.TF.nbPieces = isNaN(Number(storageData[code].nbPieces)) ? storageData[code].nbPieces : Number(storageData[code].nbPieces);
                         if(storageData[code].container == 'bUs'){
@@ -1067,6 +1069,23 @@ class App {
                         else return `error on profile ${profile[0]}`
                     })
                     console.log(array)
+
+                }
+                else if(response.selectedIndex == 14){
+                    console.log('TAG')
+                    let toRemove = 0
+                    console.log(this.store.PFEP.length)
+                    for(let i = 0; i < this.store.PFEP.length; i++){
+                        if(!this.store.PFEP[i].code){
+                            this.store.PFEP.splice(i, 1)
+                            toRemove++
+                            break;
+                        }
+                    }
+
+                    console.log(toRemove)
+                    console.log(this.store.PFEP.length)
+
 
                 }
             }

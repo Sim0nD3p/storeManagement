@@ -35,35 +35,39 @@ class RackManager{
         return this.app.store.racking[rackIndex]
     }
 
-    getPriorityList(array){
-        let assemblages = [];   //new Array(array.length).fill(undefined);
-        let MP = [];    //new Array(array.length).fill(undefined);
-        for(let i = 0; i < array.length; i++){
-            if(array[i].type == 'MP'){ MP.push(array[i]) }
-            else if(array[i].type == 'assemblage'){ assemblages.push(array[i]) }
-        }
-
-        assemblages = assemblages.filter(ass => ass !== undefined);
-        MP = MP.filter(mp => mp !== undefined);
-
-        //SHOULD GET BETTER SORTING ALGORITHM
-        //ajouter utilisation des pieces pour proximite picking
-        MP = MP.sort(function(a, b){ return b.consoMens - a.consoMens })
-        assemblages = assemblages.sort(function(a, b){ return a.class > b.class ? 1 : -1 })
-
-        return { MP: MP, assemblages: assemblages}
-    }
-
-    filterParts(PFEP){
-        PFEP = PFEP.map((item, index) => {
-            if(item.class){
-                if(!item.class.includes('barr')){ return item }
-            } else return item
+    /**
+     * Returns object with arrays of parts by tag
+     * @param {*Array} partList - PFEP like array
+     * @returns object {...tag: [arrayOfParts]}
+     */
+    splitPartsByTag = (partList) => {
+        let sorted = {}
+        partList.forEach((part, index) => {
+            if(sorted[part.tag]){
+                let array = sorted[part.tag];
+                array.push(part)
+                sorted = { ...sorted, [part.tag]: array }
+            }
+            else {
+                sorted = { ...sorted, [part.tag]: [part] }
+            }
         })
-        return PFEP.filter(item => item !== undefined)
+        return sorted
     }
 
-    initRacking(PFEP) {
+    getPriorityList = (partList) => {
+        let sorted = partList.sort((a, b) => {
+            //if(a.class && b.class){
+                if(!a.consommation.mensuelleMoy && !b.consommation.mensuelleMoy){
+                    if(a.class < b.class) return -1
+                    if(a.class > b.class) return 1
+                }
+                return b.consommation.mensuelleMoy - a.consommation.mensuelleMoy
+        })
+        return sorted
+    }
+
+    initRacking_old(PFEP) {
         PFEP = this.filterParts(PFEP);  //enleve les pieces avec le tag barre de stephane, could go eventually
         let array = PFEP.map((item, index) => {
             if(item.storage.length > 0){
@@ -118,6 +122,7 @@ class RackManager{
         let partsToPlace = [];
         while(partsToPlace.length < 25){
             if(partList[index + partsToPlace.length]){
+                console.log(partList[index + partsToPlace.length])
                 if(typeNeeded.indexOf(partList[index + partsToPlace.length].storage[0].type.substring(0, 3)) !== -1){
                     let categorisation = {
                         consoMens: partList[index + partsToPlace.length].consommation ? partList[index + partsToPlace.length].consommation.mensuelleMoy : undefined,

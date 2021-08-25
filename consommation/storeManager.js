@@ -20,7 +20,6 @@ class StoreManager {
 
     }
 
-
     /**
      * filter go get parts that goes in store
      * A enlever
@@ -53,14 +52,51 @@ class StoreManager {
 
     }
     filterPFEP(PFEP){
-        return PFEP.filter((a) => !a.family)
+        return PFEP.filter((a) => a.class && a.class.includes('barr'))
+    }
+    storeManagerMenu = () => {
+        this.app.clearScreen();
+        if(this.app.store.shelves.length == 0){
+            this.app.lastScreen.screen = 'storeManagerMenu'
+            this.storeGenerator();
+        }
     }
     storeGenerator = () => {
         this.app.clearScreen();
-        //this.app.lastScreen.screen = 'storeGenerator'
         term.bold("Création d'un magasin de pièces\n")
         let list = this.partSelector(this.app.store.PFEP)
-        list.then((a) => console.log(a.length)).catch((a) => console.log(a))
+        list.then((partList) => {
+            console.log(partList.length)
+            let split = this.app.store.rackManager.splitPartsByTag(partList)
+            let tags = Object.keys(split)
+            let noContainer = [];
+            tags.forEach(tag => {
+                let sorted = this.app.store.rackManager.getPriorityList(split[tag])
+                noContainer.push(sorted.filter((a) => a.storage.length == 0))
+                sorted = sorted.filter((a) => a.storage.length > 0)
+                this.app.store.rackManager.placeInRacking(sorted, tag)
+                
+            })
+            noContainer.forEach(a => console.log(a.length))
+            term(`Les pièces sont séparées selon ${tags.length} tags dans les racking: ${tags}\n`)
+             //option pour voir liste de priorité
+
+
+             
+             /*
+            sorted.map(a => {
+            term.column(0); term(a.code);
+            term.column(15); term(Math.ceil(a.consommation.mensuelleMoy));
+            term.column(25); term(a.class)
+            term('\n')
+            })
+            */
+
+
+            //this.filterPFEP(this.app.store.PFEP).map(a => console.log(a.code, a.description, a.class, a.family))
+
+        }).catch((e) => console.log(e))
+
 
     } 
     addPartsToList = (list, potential) => {
@@ -89,8 +125,8 @@ class StoreManager {
 
                         let dataRetenues = {}; let dataRejetees = {};
                         storeFilter[0].forEach((a) => { dataRetenues = { ...dataRetenues, [a.code]: a } }); exportData.exportJSON(dataRetenues, 'piecesRetenues', '../SORTIE');
-
                         storeFilter[1].forEach((a) => { dataRejetees = { ...dataRejetees, [a.code]: a } }); exportData.exportJSON(dataRejetees, 'piecesRejetees', '../SORTIE');
+
                         let potentialAddition = storeFilter[1].filter((a) => a.storage.length > 0)
                         term(`\nParmis les pièces rejetées, ^y${potentialAddition.length}^: pièces ont des contenants et peuvent être placées dans le magasin\n`)
 
