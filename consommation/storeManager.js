@@ -57,87 +57,95 @@ class StoreManager {
     }
     storeGenerator = () => {
         this.app.clearScreen();
-        this.app.lastScreen.screen = 'storeGenerator'
+        //this.app.lastScreen.screen = 'storeGenerator'
         term.bold("Création d'un magasin de pièces\n")
-        let t = this.filterPFEP(this.app.store.PFEP)
-        this.filterPFEP(this.app.store.PFEP).map(a => console.log(a.code))
-        this.partSelector(this.app.store.PFEP).then((part) => {
-            console.log(part.length)
-
-        })
-
+        let list = this.partSelector(this.app.store.PFEP)
+        list.then((a) => console.log(a.length)).catch((a) => console.log(a))
 
     } 
     addPartsToList = (list, potential) => {
         console.log('FEATURE IN DEV')
         return list
     }
-    partSelector = async (PFEP) => {
-        
-        async function getMinOrderQte() {
-            term(`Entrer le nombre minimal de commande fournisseur pour considérer une pièce:`)
-            let input = await term.inputField(
-                { cancelable: true, keyBindings: { ENTER: 'submit', CTRL_Z: 'cancel', BACKSPACE: 'backDelete' } },
-            ).promise
-            if (!isNaN(input)) { term.eraseLine().column(0); return input }
-        }
 
-        async function getOptionsFailedParts(){
-            term(`\nQue voulez vous faire avec les pièces rejetées avec contentant?`)
-            let items = ['ajouter toutes les pièces', 'continuer sans ajouter les pièces', 'sélection manuelle des pièces à ajouter']
-            let input = await term.singleLineMenu(
-                items,
-                {cancelable: true, keyBindings:{LEFT: 'previous', RIGHT:'next', ENTER: 'submit', CTRL_Z: 'escape'}}
-            ).promise
-            if(input){
-                term.deleteLine(2).column(0)
-                return input.selectedIndex
-            }
-        }
-
-        const screen = async (input) => {
-            let minOrderQte = await getMinOrderQte()
-            let storeFilter = this.getStoreList(this.app.store.PFEP, minOrderQte)
-            term(`Le PFEP contient ^y${this.app.store.PFEP.length}^: pièces\n`)
-            term.column(5); term(`^y${storeFilter[0].length}^: pièces ont été retenues\n`)
-            term.column(5); term(`^y${storeFilter[1].length}^: pièces ont été rejetées\n`)
-            term(`Les listes de pièces retenues et rejetées sont exportées sous les noms [piecesRetenues] et [piecesRejetees]\n`)
-
-            let dataRetenues = {}; let dataRejetees = {};
-            storeFilter[0].forEach((a) => { dataRetenues = { ...dataRetenues, [a.code]: a } }); exportData.exportJSON(dataRetenues, 'piecesRetenues', '../SORTIE');
-            storeFilter[1].forEach((a) => { dataRejetees = { ...dataRejetees, [a.code]: a } }); exportData.exportJSON(dataRejetees, 'piecesRejetees', '../SORTIE');            
-            
-            let potentialAddition = storeFilter[1].filter((a) => a.storage.length > 0)
-
-            term(`\nParmis les pièces rejetées, ^y${potentialAddition.length}^: pièces ont des contenants et peuvent être placées dans le magasin\n`)
-
-            let index = await getOptionsFailedParts()
-            if(index == 0){
-                storeFilter[0] = storeFilter[0].concat(storeFilter[1])
-                storeFilter[0] = storeFilter[0].sort((a, b) => {
-                    if(a.code < b.code) return -1
-                    if(a.code > b.code) return 1
+    partSelector = (PFEP) => {
+        return new Promise((exportList, exportError) => {
+            let finalList; let rejectedFinal;
+            term(`Entrer le nombre minimal de commande fournisseur pour considérer une pièce:\n`)
+            let minOrderQte = term.inputField({ cancelable: true, keyBindings: { ENTER: 'submit', CTRL_Z: 'cancel', BACKSPACE: 'backDelete' } }).promise
+            minOrderQte.then((qte) => {
+                term.eraseArea(0, 2, term.width, 10); term.moveTo(0, 2);
+                return new Promise((resolve, reject) => {
+                    if (qte !== undefined && !isNaN(qte)) { resolve(qte) }
+                    else reject('qte is not a number')
                 })
-                return await storeFilter[0]
-            }
-            else if(index == 1){
-                return await storeFilter[0]
+                    .then((qte) => {
+                        //code to get initial partList, then chosing option
+                        let storeFilter = this.getStoreList(PFEP, qte)
+                        term(`Le PFEP contient ^y${PFEP.length}^: pièces\n`)
+                        term.column(5); term(`^y${storeFilter[0].length}^: pièces ont été retenues\n`)
+                        term.column(5); term(`^y${storeFilter[1].length}^: pièces ont été rejetées\n`)
+                        term(`Les listes de pièces retenues et rejetées sont exportées sous les noms [piecesRetenues] et [piecesRejetees]\n`)
 
-            }
-            else if(index == 2){
-                console.log('FEATURE IN DEV - EXIT PROGRAM')
-            }
+                        let dataRetenues = {}; let dataRejetees = {};
+                        storeFilter[0].forEach((a) => { dataRetenues = { ...dataRetenues, [a.code]: a } }); exportData.exportJSON(dataRetenues, 'piecesRetenues', '../SORTIE');
 
-        }
-        let list = screen()
+                        storeFilter[1].forEach((a) => { dataRejetees = { ...dataRejetees, [a.code]: a } }); exportData.exportJSON(dataRejetees, 'piecesRejetees', '../SORTIE');
+                        let potentialAddition = storeFilter[1].filter((a) => a.storage.length > 0)
+                        term(`\nParmis les pièces rejetées, ^y${potentialAddition.length}^: pièces ont des contenants et peuvent être placées dans le magasin\n`)
 
-        return list
-       
+                        let items = ['ajouter toutes les pièces', 'continuer sans ajouter les pièces', 'sélection manuelle des pièces à ajouter']
+                        let option = term.singleLineMenu(items, { cancelable: true, keyBindings: { LEFT: 'previous', RIGHT: 'next', ENTER: 'submit', CTRL_Z: 'escape' } }).promise
+                        option.then((opt) => {
+                            return new Promise((resolve, reject) => {
+                                if (opt.selectedIndex !== undefined) { resolve(opt) }
+                                else reject('error - not option selected')
+                            }).then((selectedOption) => {
+                                //code for merging partLists
+                                if (selectedOption.selectedIndex == 0) {
+                                    storeFilter[0] = storeFilter[0].concat(potentialAddition)
+                                    storeFilter[0] = storeFilter[0].sort((a, b) => { if (a.code < b.code) return -1; if (a.code > b.code) return 1 })
+                                    finalList = storeFilter[0];
+                                    rejectedFinal = storeFilter[1].filter((a) => a.storage.length == 0)
+                                }
+                                else if (selectedOption.selectedIndex == 1) {
+                                    finalList = storeFilter[0]
+                                    rejectedFinal = storeFilter[1]
+                                }
+                                else if (selectedOption.selectedIndex == 2) {
+                                    console.log('\n\nFEATURE IN DEV - EXIT THE PROGRAM')
+                                }
 
+                                if (finalList) {
+                                    term.eraseArea(0, 2, term.width, 20); term.moveTo(0, 2);
+                                    term(`La liste de pièce pour le magasin comporte maintenant ^y${finalList.length}^: pièces\n`)
+                                    term(`Les listes de pièces retenues et rejetées sont exportées sous les noms [piecesRetenues] et [piecesRejetees]\n`)
 
+                                    let dataFinalList = {}; let dataRejected = {};
+                                    finalList.forEach((a) => { dataFinalList = { ...dataFinalList, [a.code]: a } }); exportData.exportJSON(dataFinalList, 'piecesRetenues', '../SORTIE');
+                                    rejectedFinal.forEach((a) => { dataRejected = { ...dataRejected, [a.code]: a } }); exportData.exportJSON(dataRejected, 'piecesRejetees', '../SORTIE');
 
-
+                                }
+                                let confirm = term.singleLineMenu(['Continuer', 'Annuler'], { cancelable: true, keyBindings: { LEFT: 'previous', RIGHT: 'next', ENTER: 'submit', CTRL_Z: 'escape' } }).promise
+                                confirm.then((confirmation) => {
+                                    return new Promise((resolve, reject) => {
+                                        if (confirmation.selectedIndex == 0) { resolve(true) }
+                                        else { reject(false) }
+                                    }).then((confirmationBool) => {
+                                        term.eraseArea(0, 2, term.width, 20); term.moveTo(0, 2);
+                                        exportList(finalList)
+                                    }).catch((confirmationBool) => {
+                                        term.eraseArea(0, 2, term.width, 20); term.moveTo(0, 2);
+                                        exportError(`L'opération a été annulée\n`)
+                                    })
+                                }).catch((e) => { console.log(e) })
+                            }).catch((e) => { console.log('catch'); console.log(e) })
+                        }).catch((e) => { console.log(e) })
+                    }).catch((error) => { console.log(error) })
+            })
+        })
     }
+
     bundleManager(item, qte) {
         let partsLeft = qte;
         let bundleCount = 0;
