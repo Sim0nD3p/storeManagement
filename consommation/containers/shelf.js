@@ -109,6 +109,10 @@ class Shelf{
                 orientationArray = [[VERTICAL], [HORIZONTAL]];
                 result = this.searchPlaceForBac(item, orientationArray, accessSide, logToConsole)
             }
+            else if(generalType == 'bUs'){
+                orientationArray = [[VERTICAL], [HORIZONTAL]];
+                result = this.searchPlaceForBUS(item, orientationArray, logToConsole);
+            }
         }
         else {
             console.log('weight constraint')
@@ -117,6 +121,93 @@ class Shelf{
         }
         return result
 
+    }
+
+    searchPlaceForBUS = (item, orientationArray, logToConsole) => {
+        const space = () => {
+            let array = [];
+            this.space.forEach(length => {
+                let w = 0;
+                while(length[w] == null){
+                    w++;
+                    if(w >= this.width){ break }
+                }
+                array.push(w)
+            })
+            return array
+        }
+        const makeBlocs = (spaceArray) => {
+            let blocs = [];
+            let currentBloc = [spaceArray[0] * 10, 10];   //[depth, width]
+            for(let i = 1; i < spaceArray.length; i++){
+                if(spaceArray[i]*10 == currentBloc[0]){
+                    currentBloc[1] += 10
+                }
+                else {
+                    blocs.push(currentBloc);
+                    currentBloc = [spaceArray[i] * 10, 10]
+                }
+            }
+            blocs.push(currentBloc)
+            return blocs
+
+        }
+        const getContainerDimensions = (container) => {
+            let contDimensions = [container.width, container.length]
+            //sort so that if it can fit in other orientation it does it
+            //maybe add arg/props besauce all bUs will take all the shelf' depth
+            contDimensions = contDimensions.sort((a, b) => b - a);  //sens de la largeur
+            return contDimensions
+        }
+
+        const findPosition = (blocs, containerDimensions) => {
+            let positions = blocs.map((bloc, index) => {
+                if(bloc[1] > containerDimensions[0] && bloc[0] > containerDimensions[1]){
+                    let position = 0;
+                    for(let i = 0; i < index; i++){
+                        position += blocs[i][1]
+                    }
+                    return position
+                } else return null
+            })
+            console.log(positions)
+            positions = positions.filter((a) => a !== null)
+            return positions
+        }
+
+        const getCoord = (positionsArray, containerDimensions) => {
+            let dimensions = {
+                front: Math.ceil(containerDimensions[0] / 10),
+                width: Math.ceil(containerDimensions[1] / 10)
+            }
+            let position = {
+                front: Math.ceil(positionsArray[0] / 10),
+                width: 0
+            }
+
+            return [[position, dimensions, 1]]
+
+        }
+
+
+        //---------- END OF FUNCTION DECLARATION ----------
+        let spaceArray = space();
+        let blocs = makeBlocs(spaceArray);
+        let containerDimensions = getContainerDimensions(item.storage[0])
+        let position = findPosition(blocs, containerDimensions)
+        console.log('this is blocs')
+        console.log(blocs)
+        console.log('this is containerDimensions')
+        console.log(containerDimensions)
+        console.log('this is position')
+        console.log(position)
+        if(position.length > 0){
+            let coord = getCoord(position, containerDimensions)
+            console.log('this is coord')
+            console.log(coord)
+            return coord
+        }
+        else return false
     }
     //returns: position, containersPlacement
     searchPlaceForBundle = (item, logToConsole) =>{

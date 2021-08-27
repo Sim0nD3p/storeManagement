@@ -91,6 +91,7 @@ class Store{
      * @param {*object} part - part object from PFEP
      * @param {*number} qte - qte to place
      * @param {*} data 
+     * @returns 
      */
     storeManagerDesk(type, part, qte, data) {
         let containers = []
@@ -111,22 +112,28 @@ class Store{
                 containers = this.storeManager.paletteManager(part, qte, data);
                 break;
             }
-            case 'customContainer': {
+            case 'cus': {
                 let customType;
-                if(part.family == 'Main'){ customType = 'main' }
-                else { customType = part.family }
+                if(part.family == 'Main'){ customType = 'bac' }
+                if(part.family && part.family.includes('usin')){ customType = 'bUs'}
+                else { customType = 'bac' }
+                //customType should be either bac, bUs, bundle, palette
                 containers = this.storeManager.makeCustomContainer(part, customType, qte);
+                containers = containers.filter((a) => a.length !== null && a.width !== null && a.height !== null)
                 break;
             }
             case 'bUs': {
-                console.log('BUSSS')
-                containers = this.storeManager.makeCustomContainer(part, 'bUs', qte)
+                containers = this.storeManager.makeBUs(part, type, qte);
 
                 break;
             }
         }
+        containers = containers.filter(a => a !== undefined && a !== null)
         this.containers = this.containers.concat(containers);
-        this.getItemFromPFEP(part.code).storage = containers;
+
+        if(containers.length > 0){
+            this.getItemFromPFEP(part.code).storage = containers;
+        }
         return containers
     }
 

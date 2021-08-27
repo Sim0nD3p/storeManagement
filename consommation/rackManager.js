@@ -122,7 +122,6 @@ class RackManager{
         let partsToPlace = [];
         while(partsToPlace.length < 25){
             if(partList[index + partsToPlace.length]){
-                console.log(partList[index + partsToPlace.length])
                 if(typeNeeded.indexOf(partList[index + partsToPlace.length].storage[0].type.substring(0, 3)) !== -1){
                     let categorisation = {
                         consoMens: partList[index + partsToPlace.length].consommation ? partList[index + partsToPlace.length].consommation.mensuelleMoy : undefined,
@@ -190,6 +189,10 @@ class RackManager{
         for(let i = 0; i < this.app.store.racking.length; i++){
             this.app.store.racking[i].searchPlace
         }
+        
+        potentialRacks = potentialRacks.filter((a) => a !== null)
+        this.app.log += `\track options are:\n`
+        potentialRacks.forEach(rack => this.app.log += `\t${rack.name}, ${rack.type}, ${rack.length}, ${rack.tag}\n`)
 
         //console.log('potentialRacks')
         //console.log(potentialRacks)
@@ -239,8 +242,8 @@ class RackManager{
                 this.app.store.racking.push(rack)                
             }
         }
-        //targetRack.getBlocs(shelf)
-        
+        //targetRack.getBlocs(shelf)       
+        this.app.log += `\tPLACED ${shelf.name} in ${targetRack.name}\n` 
         targetRack.addShelf(shelf, baseHeight)
 
     }
@@ -306,6 +309,7 @@ class RackManager{
     placeInRacking(partList, tag){
         //let mains = ['SEP2506', 'SEP2507', 'SEP2521']
         let qteToPlace = partList.length
+        this.app.log += `\tinitializing placeInRacking with tag: ${tag}\n`
         
        // partList = ['SEP3978', 'SEP260-0G4456', 'SEP3979', 'SEP4059', 'SEP2504', 'SEP3807-LA', 'SEP3782', 'SEP2506', 'SEP2507', 'SEP2521'];
         
@@ -320,6 +324,8 @@ class RackManager{
         //partList = partList.map((part, index) => { return this.app.store.getItemFromPFEP(part.code) })
         for(let i = 0; i < partList.length; i++){
             term(`\n---------- NEW PART ----------\n`)
+            this.app.log += `\n\n---------- ${partList[i].code} ----------\n`
+            this.app.log += `${partList[i].storage.length} containers (${partList[i].storage[0].name.split('_')[0]}, ${partList[i].storage[0].length}, ${partList[i].storage[0].width}, ${Math.ceil(partList[i].storage[0].height)}) - priority: ${Math.ceil(partList[i].consommation.mensuelleMoy)}\n`
             term(`${partList[i].code} - ${partList[i].storage.length} containers (${partList[i].storage[0].name.split('_')[0]}, ${partList[i].storage[0].length}, ${partList[i].storage[0].width}, ${partList[i].storage[0].height}) - priority: ${Math.ceil(partList[i].consommation.mensuelleMoy)}\n`)
             //console.log('----- placing in racking -----\n')
             let categorisation = {
@@ -336,7 +342,7 @@ class RackManager{
             
 
             //thats fine
-            
+            this.app.log += `${this.app.store.shelves.length} shelves in store, ${potentialShelves.filter(a => a !== null).length} potential shelves\n`
             term(`${this.app.store.shelves.length} shelves in store, ${potentialShelves.filter(a => a !== null).length} potential shelves\n`)
 
             if(potentialShelves.findIndex((shelf) => shelf !== null) == -1){
@@ -349,6 +355,7 @@ class RackManager{
                     u++
                 }
                 term.cyan('\n----- CREATING SHELF -----\n')
+                this.app.log += `----- CREATING SHELF -----\n`
                 newShelf = true;
                 shelf = this.requestNewShelf(partList, i, tag);  //returns new shelf
 
@@ -357,7 +364,10 @@ class RackManager{
 
             else {
                 //potentialShelves.map(shelf => {if(shelf !== null){console.log(shelf[1], shelf[2])}})
+                potentialShelves = potentialShelves.filter((a) => a !== null)
+                potentialShelves.forEach(s => this.app.log += `\t${s[0].name}, ${s[0].length}, ${s[0].type}, ${s[1]}, ${s[2]}\n`)
                 shelf = this.shelfManager.matchPartToShelf(potentialShelves, partList[i]);
+                this.app.log += `placing part in ${shelf[0].name}\n`
                 let test = shelf[0].searchPlace(partList[i], shelf[1])
                 accessPoint = shelf[1];
                 shelf = shelf[0];
@@ -371,6 +381,7 @@ class RackManager{
                 console.log(place)
                 
                 if(place !== false){
+                    this.app.log += `PART SUCCESSFULLY PLACED\n`
                     term.green(`part successfully placed\n`)
                     //console.log(partList[i].storage.length)
                     for(let j = 0; j < place.length; j++){
@@ -380,6 +391,7 @@ class RackManager{
                 }
                 else {
                     console.log('DIDNT WORK ON FIRST TRY')
+                    this.app.log += `part not placed in ${shelf.name}`
                     let part = { ...partList[i] }
                     let containerCount = part.storage.length;
                     let containerNbToPlace = containerCount;

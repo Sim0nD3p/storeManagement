@@ -9,17 +9,16 @@
     - Plusieurs fichiers d'entrée
     
 
-# Shit to do
-- implement store, item pour organiser les choses
+# SHIT TO DO
+- systeme d'adressage
+- changer dimensions customContainer et bUs
 
 
 
 
 
 ## WHERE I AM
-- apres avoir list part, on reprend a initRacking (rackManager)
-    - categoriser les parts ASS | MP
-    - rackManager (line 80)
+- bug that create custom storage(bUs) when part doesnt have dimensions
 
 
 

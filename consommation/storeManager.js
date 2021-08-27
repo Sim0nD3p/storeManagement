@@ -8,6 +8,7 @@ const ShelfManager = require('./shelfManager');
 const CustomContainer = require('./containers/customContainer');
 const term = require('terminal-kit').terminal;
 const ExportData = require('./exportData');
+const bUs = require('./containers/bUs');
 
 const exportData = new ExportData()
 
@@ -16,6 +17,7 @@ const exportData = new ExportData()
 class StoreManager {
     constructor(app) {
         this.app = app;
+        this.storePartList = []
         //this.shelfManager = new ShelfManager(app)
 
     }
@@ -56,19 +58,80 @@ class StoreManager {
     }
     storeManagerMenu = () => {
         this.app.clearScreen();
+        this.app.lastScreen.screen = 'home';
         if(this.app.store.shelves.length == 0){
-            this.app.lastScreen.screen = 'storeManagerMenu'
+            //this.app.lastScreen.screen = 'storeManagerMenu'
             this.storeGenerator();
         }
+        else {
+            term.bold(`Gestion du magasin`);
+            let items = [
+                'Vérification magasin'
+            ]
+            let menu = term.singleColumnMenu(
+                items,
+                {cancelable: true, keyBindings: { ENTER: 'submit', DOWN: 'next', UP: 'previous', CTRL_Z:'escape'}},
+            ).promise
+            menu.then((res) => {
+                if(res.selectedIndex == 0){ this.storeVerification() }
+            }).catch((e) => console.log(e))
+
+        }
+    }
+    storeVerification = () => {
+        this.app.lastScreen.screen = 'storeManagerMenu'
+        this.app.clearScreen();
+        term.bold(`Vérification du magasin\n`)
+        term(`Le PFEP contient ^y${this.app.store.PFEP.length}^: pièces\n`)
+        term(`^y${this.storePartList.length}^: pièces ont été sélectionnées pour être mise en magasin\n`)
+        
+        let shelvesPartList = []
+        this.app.store.shelves.forEach((shelf, index) => {
+            shelf.content.map((item, index) => {
+                if(shelvesPartList.indexOf(item.name.split('_')[1]) == -1){
+                    shelvesPartList.push(item.name.split('_')[1])
+                }
+            })
+        })
+
+        let rackingPartList = [];
+        let shelvesInRacking = [];
+        this.app.store.racking.forEach((racking, index) => {
+            racking.shelves.map((shelf, index) => {
+                shelvesInRacking.push(shelf)
+                shelf.content.map((item, index) => {
+                    if(rackingPartList.indexOf(item.name.split('_')[1]) == -1){
+                        rackingPartList.push(item.name.split('_')[1])
+                    }
+                })
+            })
+        })
+        let failedShelves = this.app.store.shelves.map(shelf => {
+            if(shelvesInRacking.findIndex((a) => a.name == shelf.name) == -1){ return shelf }
+            else return null
+        }).filter((a) => a !== null)
+        failedShelves.forEach(s => console.log(s.name))
+
+        term(`Le magasin comprend ^y${this.app.store.shelves.length}^: shelves\n`)
+        term(`Les racking comprennent ^y${shelvesInRacking.length}^: shelves\n`)
+        term(`\n`)
+        term(`^y${shelvesPartList.length}^: pièces sont dans les étagères\n`)
+        term(`^Y${rackingPartList.length}^: pièces sont dans les racking\n`)
+
+
     }
     storeGenerator = () => {
         this.app.clearScreen();
         term.bold("Création d'un magasin de pièces\n")
         let list = this.partSelector(this.app.store.PFEP)
         list.then((partList) => {
+            this.app.log += '----- initializing store creation -----\n'
+            this.app.log += `${partList.length} parts should be placed in racking\n`
+            this.storePartList = partList;
             console.log(partList.length)
             let split = this.app.store.rackManager.splitPartsByTag(partList)
             let tags = Object.keys(split)
+            this.app.log += `tag categories are ${tags}\n`
             let noContainer = [];
             tags.forEach(tag => {
                 let sorted = this.app.store.rackManager.getPriorityList(split[tag])
@@ -94,6 +157,8 @@ class StoreManager {
 
 
             //this.filterPFEP(this.app.store.PFEP).map(a => console.log(a.code, a.description, a.class, a.family))
+
+            exportData.exportTxt(this.app.log, 'log', '../SORTIE')
 
         }).catch((e) => console.log(e))
 
@@ -234,18 +299,29 @@ class StoreManager {
      * @returns Array of single customContainer
      */
     makeCustomContainer(item, type, qte){
-        let container
+        let container;
         let partsLeft = qte;
-        if(!isNaN(partsLeft)){
-            let name = 'customContainer_' + item.code + '_0';
-            container = new CustomContainer(name, type, item, partsLeft)
-        }
-        else{
-            partsLeft = 50; //WE DEFINE qteMax WHEN IT IS UNDEFINED!!! NOT OPTIMAL
-            let name = 'customContainer_' + item.code + '_0';
-            container = new CustomContainer(name, type, item, partsLeft)
-        }
+        if(!isNaN(item.specs.height) && !isNaN(item.specs.width) && !isNaN(item.specs.length) && item.specs.length * item.specs.width * item.specs.height !== 0){
+            if(!isNaN(partsLeft)){
+                let name = 'customContainer_' + item.code + '_0';
+                container = new CustomContainer(name, type, item, partsLeft)
+            }
+            else{
+                partsLeft = 50; //WE DEFINE qteMax WHEN IT IS UNDEFINED!!! NOT OPTIMAL
+                let name = 'customContainer_' + item.code + '_0';
+                container = new CustomContainer(name, type, item, partsLeft)
+            }
+        } else return null
         return [container]
+    }
+
+    makeBUs(item, type, qte){
+        let container;
+        let partsLeft = qte;
+        let name = 'bUs_' + item.code + '_0';
+        if(isNaN(partsLeft)){ partsLeft = 50 }
+        container = new bUs(name, item, partsLeft, type)
+        return [container] 
     }
 
     paletteManager(item, qte, data){

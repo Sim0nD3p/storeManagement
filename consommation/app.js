@@ -56,6 +56,7 @@ class App {
         this.currentScreen = '';
         this.partTable = new partTable(this)
         this.displayStore = new DisplayStore(this);
+        this.log = ''
 
     }
 
@@ -734,11 +735,11 @@ class App {
 
                     for(let i = 0; i < this.store.PFEP.length; i++){
                         if(this.store.PFEP[i].emballage.TF.type == 'etagereMain'){
-                            this.store.PFEP[i].emballage.TF.type = 'customContainer'
+                            this.store.PFEP[i].emballage.TF.type = 'cus'
                         }
-                        if(this.store.PFEP[i].emballage.TF.type == 'bundle_BT'){
-                            this.store.PFEP[i].emballage.TF.type == 'bUs'
-                        }
+                        /* if(this.store.PFEP[i].emballage.TF.type == 'bundle_BT'){
+                            this.store.PFEP[i].emballage.TF.type == 'cus'
+                        } */
                         if(this.store.PFEP[i].code.includes('SEO')){
                             console.log(this.store.PFEP[i].code)
                             this.store.PFEP[i].emballage.TF.type = 'bac2';
@@ -750,7 +751,7 @@ class App {
 
                     for(let i = 0; i < this.store.PFEP.length; i++){
                         let containers = this.store.storeManagerDesk(
-                            this.store.PFEP[i].emballage.TF.type,
+                            this.store.PFEP[i].emballage.TF.type,   //should be bac1, bac1, bundle, cus, bUs
                             this.store.PFEP[i],
                             isNaN(this.store.PFEP[i].qteMax) ? this.store.PFEP[i].qteMax : Math.ceil(this.store.PFEP[i].qteMax)
                         )

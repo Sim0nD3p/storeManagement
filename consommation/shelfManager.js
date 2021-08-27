@@ -73,9 +73,12 @@ class ShelfManager{
             } else { options = options.sort((a, b) => { return a[1] - b[1] }) }
         } else { options = options.sort((a, b) => { return a[1] - b[1] }) }
 
+        this.app.log += `\tchosing shelf based on ${prop}, targetType: ${targetType}\n`
         logToConsole >= 1 ? term.cyan(`chosing shelf based on ${prop}, targetType is [ ^y${targetType}^:^c ]\n`) : null
 
+        this.app.log += `\toptions are: \n`
         logToConsole >= 2 ? term.cyan(`options are: \n`) : null
+        options.map(o => this.app.log += `\t[${o[0]}, ${o[1]}, ${o[2]}, ${o[3]}, ${o[4]}, ${o[5]}]\n`)
         logToConsole >= 2 ? options.map(o => term.column(5).cyan(`[${o[0]}, ${o[1]}, ${o[2]}, ${o[3]}, ${o[4]}, ${o[5]}]\n`)) : null
 
 
@@ -191,8 +194,9 @@ class ShelfManager{
                 
             }
 
+            this.app.log += `\tavailable length: ${this.unusedShelves.map(s => {if(s.qte > 0){return `| ${s.length} |`}}).filter((a) => a)}\n`
             logToConsole >= 2 ? term.cyan(`available lengths are: `) : null
-            logToConsole >= 2 ? this.unusedShelves.map(s => {s.qte > 0  ? term.yellow(`| ${s.length} |`) : null }) : null
+            logToConsole >= 2 ? this.unusedShelves.map(s => {s.qte > 0  ? term.yellow(`${s.length}`) : null }) : null
             //logToConsole >= 1 ? term.cyan(`\nchose shelf length ${this.unusedShelves[targetIndex].length}\n`) : null
             return targetIndex
         }
@@ -302,11 +306,6 @@ class ShelfManager{
                 }).filter((a) => a !== null)
                 potential.forEach(s => console.log(s.name, s.length, s.height, s.priority, s.contentSides))
 
-
-
-
-
-
                 let shelfData = this.unusedShelves[shelfIndex]
                 //this.unusedShelves[shelfIndex].qte = this.unusedShelves[shelfIndex].qte - 1;
                 let shelf = new Shelf(`bUs_${this.shelfQte.bundleUsin}`, shelfData, 'bUs', tag)
@@ -314,11 +313,6 @@ class ShelfManager{
                 this.shelfQte.bundleUsin++
                 //this.shelfQte.bundleUsin++
                 finalShelf = shelf
-
-
-                break;
-
-
                 break;
             }
             case 'cus': {
@@ -356,6 +350,7 @@ class ShelfManager{
         }
         this.app.store.shelves.push(finalShelf)
         //term.column(5);
+        this.app.log += `\tcreated ${finalShelf.name}, length ${finalShelf.length}\n`
         term.cyan(`\ncreated ${finalShelf.name}, length ${finalShelf.length}\n`)
         return finalShelf
     }
@@ -447,12 +442,12 @@ class ShelfManager{
         let targetType = [part.storage[0].type.substring(0, 3)]
         if(targetType == 'bun'){ targetType = ['bun'] }
         else if(targetType == 'bac'){ targetType = ['bac'] }
+        else if(targetType == 'bUs'){ targetType = ['bUs'] }
         else if(targetType == 'cus'){
-            if(part.family == 'Main'){ targetType = ['bac']}
-            else { targetType = ['bUs']}
+            if(part.storage[0].contentType == 'bac'){ targetType = ['bac'] }
+            else if(part.storage[0].contentType == 'bUs'){ targetType = ['bUs'] }
+            else if(part.storage[0].contentType == 'bundle'){ targetType = ['bun'] }
         }
-        else if(targetType == 'bUs'){ targetType = ['bUs']}
-
         return this.app.store.shelves.map((shelf, index) => {
             if (targetType.indexOf(shelf.type.substring(0, 3)) !== -1 && shelf.tag == tag) {
                 let placement = [shelf.searchPlace(part, FRONT) !== false ? true : false, shelf.searchPlace(part, BACK) !== false ? true : false]
