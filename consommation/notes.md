@@ -31,8 +31,11 @@
 
 
 ## WHERE I AM
-- check why parts are not placed on shelf when they have container
-- why do they not appear in log
+- find storage that have no dimensions
+- adressage
+- modifier adressage
+- priorite fixe sur racking
+
 
 
 # BAC ET NOMBRE DE PIECES:
