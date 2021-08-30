@@ -27,17 +27,8 @@ class Racking{
         let s = this.shelves[this.shelves.length - 1]
         return s.baseHeight + s.height
     }
-    checkContentSides = (shelf) => {
-        let possForDouble = [['bac', 'bac'], ['bac', null], [null, 'bac'], [null, null]]
-        if(shelf.isDoubleSided == true){
-            if(possForDouble.findIndex((a) => a.toString() == this.contentSides.toString()) == -1){ return false }
-            else return true
-        }
-        else if(shelf.isDoubleSided !== true){
-            if(this.contentSides.indexOf(shelf.type) == -1 && this.contentSides.indexOf(null) == -1){ return false }
-            else return true
-        }
-    }
+
+   
 
 
     /**
@@ -52,18 +43,18 @@ class Racking{
         let place = undefined
         const checkPlace = (i, shelf) => {
             let s = this.shelves;
-            if(s[i+1] && s[i].baseHeight + s[i].height + shelf.height + 2 * GAP <= s[i+1].baseHeight){
+            if(s[i+1] && s[i].baseHeight + s[i].height + shelf.height + 2 * GAP <= s[i+1].baseHeight){  //s'il y a shelf plus haut
                 return s[i].baseHeight + s[i].height + GAP
             }
-            else if(!s[i+1]){
-                return s[i].baseHeight + s[i].height + GAP
+            else if(!s[i+1]){   //s'il y a pas de shelf plus haut
+                return s[i].baseHeight + s[i].height + GAP;
             }
         }
 
         
 
-        if(this.checkContentSides(shelf) == true){
-            if (this.shelves.length > 0) {
+        if(this.checkShelfComp(shelf) == true){
+            if (this.shelves.length > 0) {  //nombre de shelf actuellement dans racking
                 let i = 0;
                 let currentBaseHeight = 0;
                 while (currentBaseHeight < MAX_HEIGHT && i < this.shelves.length && place == undefined) {
@@ -100,12 +91,82 @@ class Racking{
         return place
 
     }
+    getType = (shelf) => {
+        switch(shelf.type){
+            case 'bac': return ['bac', 'cus']
+            case 'cus': return ['cus', 'bac']
+            case 'bundle': return ['bundle', 'bUs']
+            case 'bUs': return ['bUs', 'bun']
+            default: return ['bac']
+        }
+    }
 
-    checkAccessPoints = () => {
+    /**
+     * Checks contentSides, array of content accessed from both sides
+     * @returns array of content accessed from sides
+     */
+    getContentSides = () => {
+        let contentSides = [null, null]
+        this.shelves.forEach(shelf => {
+            if(shelf.isDoubleSided){    //si shelf est doubleSided, les 2 cote du rack ont le meme content (shelf prop)
+                contentSides = [shelf.type, shelf.type]
+            }
+            //si shelf type n'est pas encore dans contentSides et il y a un slot de dispo
+            else if (contentSides.findIndex(a => this.getType(shelf).includes(a)) == -1 && contentSides.findIndex(a => a == null) !== -1) {
+                contentSides[contentSides.findIndex(a => a == null)] = shelf.type
+            }
+        })
+        return contentSides
+    }
+
+    /**
+     * Check compatibility of shelf in regards to contentSide ([bac, bac], [bac, bun], etc.)
+     * @param {*Object shelf} shelf 
+     * @returns bool (if shelf is compatible with racking on contentSides level)
+     */
+    checkShelfComp = (shelf) => {
+        let type = this.getType(shelf);
+        if(shelf.isDoubleSided == false){
+            let compatible = false
+            type.forEach(t => { if(this.contentSides.indexOf(t) !== -1){ compatible = true } })
+            if(compatible == true || this.contentSides.indexOf(null) !== -1){
+                return true
+            } else return false
+        } else {
+            let compatibilityArray = [[shelf.type, shelf.type], [shelf.type, null], [null, shelf.type], [null, null]]
+            if(compatibilityArray.findIndex(a => a.toString() == this.contentSides.toString()) !== -1){
+                return true
+            } else return false
+        }
+    } 
+
+
+     /**
+     * if we can add shelf to racking?
+     * @param {*Object shelf} shelf 
+     * @returns bool
+     */
+      checkContentSides_old = (shelf) => {
+        let possForDouble = [['bac', 'bac'], ['bac', null], [null, 'bac'], [null, null], ['bun', null], [null, 'bun'], ['bUs', null], [null, 'bUs']]
+        if(shelf.isDoubleSided == true){
+            if(possForDouble.findIndex((a) => a.toString() == this.contentSides.toString()) == -1){ return false }
+            else return true
+        }
+        else if(shelf.isDoubleSided !== true){
+            if(this.contentSides.indexOf(shelf.type) == -1 && this.contentSides.indexOf(null) == -1){ return false }
+            else return true
+        }
+    }
+
+    /**
+     * 
+     * @returns bool(isDoubleSided)
+     */
+    checkAccessPoints_old = () => {
         if(this.shelves.filter((a) => a.isDoubleSided == true).length > 0) return true
         else return false
     }
-    getContentSides = (shelf) => {
+    getContentSides_old = (shelf) => {
         if(this.checkContentSides(shelf) == true){
             if(shelf.isDoubleSided == true){ this.contentSides = ['bac', 'bac'] }
             else if(this.contentSides.indexOf(shelf.type) == -1 && this.contentSides.indexOf(null) !== -1){
@@ -187,12 +248,11 @@ class Racking{
 
         shelf.baseHeight = baseHeight
         this.shelves.push(shelf)
-        this.height = this.getTotalHeight();
-        this.accessPoints = this.checkAccessPoints()
-
-        this.getContentSides(shelf)
-        const placeShelf = (shelf, baseHeight) => {
-        }
+        this.contentSides = this.getContentSides()
+        
+        
+        
+        this.height = this.getTotalHeight();        
 /* 
         if(shelf.isDoubleSided == true && (this.contentSides ))
         if(this.contentSides.indexOf(shelf.type) !== -1){

@@ -417,72 +417,72 @@ const storageData = {
         storage: true
     },
     "MAIN150A-LA": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "unlimited",
         storage: false
     },
     "MAIN150A-RU": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "MAIN215B-LA": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "unlimited",
         storage: false
     },
     "MAIN215B-RU": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "unlimited",
         storage: false
     },
     "MAIN215C-LA": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "unlimited",
         storage: false
     },
     "MAIN215C-RU": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "MAIN215D-LA": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "MAIN215D-RU": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "MAIN261A-LA": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "MAIN261A-RU": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "MAIN261B-LA": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "MAIN261B-RU": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "MAIN295A-LA": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "MAIN295A-RU": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
@@ -559,8 +559,8 @@ const storageData = {
         storage: false
     },
     "SAC-SEO": {
-        container: "AU DESUS DU RACK A BOULON",
-        nbPieces: "1100",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEA205-004323": {
@@ -856,83 +856,83 @@ const storageData = {
         storage: false
     },
     "SEO-4180": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4190": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4190-M": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4200": {
-        container: "PALETTE",
-        nbPieces: "10 KIT",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4250": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4292": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4300": {
-        container: "",
-        nbPieces: "10 KIT",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4360": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4430": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4470": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4480": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4580": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4590": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4650": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4650-M": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEO-4660": {
-        container: "",
-        nbPieces: "",
+        container: "bac2",
+        nbPieces: "singleBac",
         storage: false
     },
     "SEP110-001002": {
@@ -1170,7 +1170,7 @@ const storageData = {
     },
     //cover porte supper escabeau arriere
     "SEP230-003659": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false,
         checkup: true
@@ -1246,12 +1246,12 @@ const storageData = {
         storage: true
     },
     "SEP2506": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "130",
         storage: false
     },
     "SEP2507": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "130",
         storage: false
     },
@@ -1281,7 +1281,7 @@ const storageData = {
         storage: true
     },
     "SEP2514-LA": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "130",
         storage: false
     },
@@ -1301,7 +1301,7 @@ const storageData = {
         storage: true
     },
     "SEP2521": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "60",
         storage: false
     },
@@ -1321,7 +1321,7 @@ const storageData = {
         storage: true
     },
     "SEP2527": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
@@ -1352,17 +1352,17 @@ const storageData = {
         checkup: true,
     },
     "SEP255-004337": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "SEP255-004338": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "SEP255-004339": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "600",
         storage: false
     },
@@ -1397,7 +1397,7 @@ const storageData = {
         storage: true
     },
     "SEP260-004398": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "600",
         storage: false
     },
@@ -1587,12 +1587,12 @@ const storageData = {
         storage: true
     },
     "SEP3001": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "SEP3002": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
@@ -1602,12 +1602,12 @@ const storageData = {
         storage: false
     },
     "SEP3012": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "SEP3013": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
@@ -1657,7 +1657,7 @@ const storageData = {
         storage: true
     },
     "SEP3154": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
@@ -1742,7 +1742,7 @@ const storageData = {
         storage: false
     },
     "SEP3322": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
@@ -1822,7 +1822,7 @@ const storageData = {
         storage: true
     },
     "SEP3467": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
@@ -2032,7 +2032,7 @@ const storageData = {
         storage: true
     },
     "SEP3608": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
@@ -2087,12 +2087,12 @@ const storageData = {
         storage: true
     },
     "SEP3773": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "SEP3774": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
@@ -2297,12 +2297,12 @@ const storageData = {
         storage: true
     },
     "SEP3865": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
     "SEP3866": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },
@@ -2362,7 +2362,7 @@ const storageData = {
         storage: true
     },
     "SEP3923": {
-        container: "customContainer",
+        container: "cus",
         nbPieces: "",
         storage: false
     },

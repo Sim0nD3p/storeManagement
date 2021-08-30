@@ -442,7 +442,7 @@ class App {
             'Créer nouvelle pièce',     //9
             'Créer nouveaux fournisseur',   //10
             'Rechercher fournisseur',       //11
-            'Générer magasin',
+            'Menu magasin',
 
             'Test',
         ]
@@ -682,87 +682,7 @@ class App {
                 }
                 else if (response.selectedIndex === 6) {
                     //this.categorizeParts()
-                    console.log('CONTENANTS POUR PIECES')
-
-                    let baseRef = this.store.PFEP.map((part, index) => {
-                        if(part !== undefined && part.family !== 'Consommable' && part.family !== 'Collant'){
-                            if(!part.class || part.class.includes('barr') == false){
-                                if(part.consommation.totalOrders.nbOrders > 2){ return part }
-                                else if(part.code.includes('SEA') || part.code.includes('SEO')){ return part }
-                                else if(part.storage.length > 0){ return part }
-                                else if(!part.family || part.family.includes('Assem') || part.family.includes('usin') || part.family.includes('transversale') || part.family.includes('Main')){
-                                    return part
-                                } else return index
-                            } else return index  
-                        } else return index
-                    })
-                    for(const code in storageData){
-                        console.log(code)
-                        this.store.getItemFromPFEP(code.toString()).emballage.TF.type = storageData[code].container
-                        this.store.getItemFromPFEP(code.toString()).emballage.TF.nbPieces = isNaN(Number(storageData[code].nbPieces)) ? storageData[code].nbPieces : Number(storageData[code].nbPieces);
-                        if(storageData[code].container == 'bUs'){
-                            this.store.getItemFromPFEP(code.toString()).qteMax = storageData[code].nbPieces
-                        }
-                    }
-                    
-                    let extrusionUsin = baseRef.map((part, index) => {
-                        if(typeof part !== 'number'){
-                            if(part.family == 'Barre transversale'){ return part }
-                            else return null
-                        } else return null
-                    })
-                    extrusionUsin = extrusionUsin.filter((a) => a !== null)
-                    let bundleUsine = {}
-                    extrusionUsin.map((part) => {
-                        bundleUsine = {
-                            ...bundleUsine,
-                            [part.code]:{
-                                class: part.class,
-                                family: part.family,
-                                specs: `${part.specs.length} x ${part.specs.width} x ${part.specs.height}`,
-                            }
-                        }
-
-                    })
-
-
-                    exportData.exportJSON(bundleUsine, 'bundlesUsine', '../SORTIE')
-
-
-                    
-                    
-
-
-                    for(let i = 0; i < this.store.PFEP.length; i++){
-                        if(this.store.PFEP[i].emballage.TF.type == 'etagereMain'){
-                            this.store.PFEP[i].emballage.TF.type = 'cus'
-                        }
-                        /* if(this.store.PFEP[i].emballage.TF.type == 'bundle_BT'){
-                            this.store.PFEP[i].emballage.TF.type == 'cus'
-                        } */
-                        if(this.store.PFEP[i].code.includes('SEO')){
-                            console.log(this.store.PFEP[i].code)
-                            this.store.PFEP[i].emballage.TF.type = 'bac2';
-                            this.store.PFEP[i].emballage.TF.nbPieces = 'singleBac'
-                            this.store.PFEP[i].qteMax = 'singleBac'
-                        }
-                    }
-
-
-                    for(let i = 0; i < this.store.PFEP.length; i++){
-                        let containers = this.store.storeManagerDesk(
-                            this.store.PFEP[i].emballage.TF.type,   //should be bac1, bac1, bundle, cus, bUs
-                            this.store.PFEP[i],
-                            isNaN(this.store.PFEP[i].qteMax) ? this.store.PFEP[i].qteMax : Math.ceil(this.store.PFEP[i].qteMax)
-                        )
-
-                        console.log(this.store.PFEP[i].emballage.TF.type)
-                        console.log(`${this.store.PFEP[i].code} has ${containers.length} containers`)
-                        console.log('----------')
-                    }
-
-
-
+                    console.log('CONTENANTS POUR PIECES NOW IN MENU MAGASIN')
                 }
                 else if (response.selectedIndex === 7) {
                     let array = [];

@@ -9,6 +9,7 @@ const CustomContainer = require('./containers/customContainer');
 const term = require('terminal-kit').terminal;
 const ExportData = require('./exportData');
 const bUs = require('./containers/bUs');
+const storageData = require('./storageData');
 
 const exportData = new ExportData()
 
@@ -17,7 +18,9 @@ const exportData = new ExportData()
 class StoreManager {
     constructor(app) {
         this.app = app;
-        this.storePartList = []
+        this.storePartList = [];
+        this.finalStoreList = [];
+        this.noContainerList = [];
         //this.shelfManager = new ShelfManager(app)
 
     }
@@ -56,34 +59,60 @@ class StoreManager {
     filterPFEP(PFEP){
         return PFEP.filter((a) => a.class && a.class.includes('barr'))
     }
+
+    assignItemsContainers = () => {
+        for (const code in storageData) {
+            //console.log(code)
+            this.app.store.getItemFromPFEP(code.toString()).emballage.TF.type = storageData[code].container
+            this.app.store.getItemFromPFEP(code.toString()).emballage.TF.nbPieces = isNaN(Number(storageData[code].nbPieces)) ? storageData[code].nbPieces : Number(storageData[code].nbPieces);
+            if (storageData[code].container == 'bUs') {
+                //term.red.bold('\n\n\nEXCEPTION\n\n\nEXCEPTION\n')
+                //this.app.store.getItemFromPFEP(code.toString()).qteMax = storageData[code].nbPieces //IL FAUT REUSSIR A ENLEVER CETTE SKETCHASS MERDE
+            }
+        }
+ 
+        for (let i = 0; i < this.app.store.PFEP.length; i++) {
+            let containers = this.app.store.storeManagerDesk(
+                this.app.store.PFEP[i].emballage.TF.type,   //should be bac1, bac1, bundle, cus, bUs
+                this.app.store.PFEP[i],
+                this.app.store.PFEP[i].qteMax ? Math.ceil(this.app.store.PFEP[i].qteMax) : Math.ceil(this.app.store.PFEP[i].emballage.TF.nbPieces)
+            )
+        }
+
+    }
+
     storeManagerMenu = () => {
         this.app.clearScreen();
         this.app.lastScreen.screen = 'home';
-        if(this.app.store.shelves.length == 0){
-            //this.app.lastScreen.screen = 'storeManagerMenu'
-            this.storeGenerator();
-        }
-        else {
-            term.bold(`Gestion du magasin`);
-            let items = [
-                'Vérification magasin'
-            ]
-            let menu = term.singleColumnMenu(
-                items,
-                {cancelable: true, keyBindings: { ENTER: 'submit', DOWN: 'next', UP: 'previous', CTRL_Z:'escape'}},
-            ).promise
-            menu.then((res) => {
-                if(res.selectedIndex == 0){ this.storeVerification() }
-            }).catch((e) => console.log(e))
+        let menuItems = [
+            'Contenants pièces',
+            'Vérification des contenants',
+            'Générer magasin',
+            'Vérification du magasin',
+            'Adressage IN DEV'
 
-        }
+        ]
+        let menu = term.singleColumnMenu(
+            menuItems,
+            {cancelable: true, keyBindings: { CTRL_Z:'escape', ENTER: 'submit', DOWN: 'next', UP: 'previous', }}            
+        ).promise
+        menu.then((res) => {
+            this.app.lastScreen.screen = 'storeManagerMenu';
+            switch(res.selectedIndex){
+                case 0: this.assignItemsContainers(); break;
+                case 1: this.verifyItemsContainers(); break;
+                case 2: this.storeGenerator(); break;
+                case 3: this.storeVerification(); break;
+                case 4: 
+                default: this.app.home(); break;
+            }
+        }).catch((e) => console.log(e))
+
     }
     storeVerification = () => {
         this.app.lastScreen.screen = 'storeManagerMenu'
         this.app.clearScreen();
         term.bold(`Vérification du magasin\n`)
-        term(`Le PFEP contient ^y${this.app.store.PFEP.length}^: pièces\n`)
-        term(`^y${this.storePartList.length}^: pièces ont été sélectionnées pour être mise en magasin\n`)
         
         let shelvesPartList = []
         this.app.store.shelves.forEach((shelf, index) => {
@@ -106,17 +135,49 @@ class StoreManager {
                 })
             })
         })
+
         let failedShelves = this.app.store.shelves.map(shelf => {
             if(shelvesInRacking.findIndex((a) => a.name == shelf.name) == -1){ return shelf }
             else return null
         }).filter((a) => a !== null)
         failedShelves.forEach(s => console.log(s.name))
 
+
+
+        let piecesNonPlacees = this.finalStoreList.map(part => {
+            if(shelvesPartList.findIndex(a => a == part.code) == -1){
+                return part
+            } else return null
+        }).filter(a => a !== null)
+
+
+        let dataNonPlacees = {}
+        piecesNonPlacees.forEach(part => { dataNonPlacees = { ...dataNonPlacees, [part.code]: part } })
+        
+        let dataNoContainer = {}
+        this.noContainerList.forEach(part => { dataNoContainer = { ...dataNoContainer, [part.code]: part } })
+        
+        exportData.exportJSON(dataNonPlacees, 'piecesNonPlacees', '../SORTIE')
+        exportData.exportJSON(dataNoContainer, 'piecesSansContenant', '../SORTIE')
+        
+        term(`Le PFEP contient ^y${this.app.store.PFEP.length}^: pièces\n`)
+        
+        term(`^y${this.initialStoreList.length}^: pièces ont initialement été sélectionnées pour le magasin\n`)
+        term(`------------------------------\n`)
+        term(`^y${this.finalStoreList.length}^: pièces ont des contenants et ont passé les algorithmes\n`)
+        term(`^y${this.noContainerList.length}^: pièces n'ont pas de contentants et n'ont pas passé les algorithmes\n`)
+        term.column(5); term(`*La liste de pièces sans contenants a été exportée dans le fichier [piecesSansContenant.json]\n`)
+        term(`------------------------------\n`)
+        term(`^y${shelvesPartList.length}^: pièces sont dans les étagères\n`)
+
+        
+        
+
+
         term(`Le magasin comprend ^y${this.app.store.shelves.length}^: shelves\n`)
         term(`Les racking comprennent ^y${shelvesInRacking.length}^: shelves\n`)
         term(`\n`)
-        term(`^y${shelvesPartList.length}^: pièces sont dans les étagères\n`)
-        term(`^Y${rackingPartList.length}^: pièces sont dans les racking\n`)
+        term(`^y${rackingPartList.length}^: pièces sont dans les racking\n`)
 
 
     }
@@ -126,21 +187,29 @@ class StoreManager {
         let list = this.partSelector(this.app.store.PFEP)
         list.then((partList) => {
             this.app.log += '----- initializing store creation -----\n'
-            this.app.log += `${partList.length} parts should be placed in racking\n`
-            this.storePartList = partList;
-            console.log(partList.length)
+            this.app.log += `Initial partlist length: ${partList.length}\n`
+            this.initialStoreList = partList;
             let split = this.app.store.rackManager.splitPartsByTag(partList)
             let tags = Object.keys(split)
+            
+            
             this.app.log += `tag categories are ${tags}\n`
-            let noContainer = [];
             tags.forEach(tag => {
-                let sorted = this.app.store.rackManager.getPriorityList(split[tag])
-                noContainer.push(sorted.filter((a) => a.storage.length == 0))
-                sorted = sorted.filter((a) => a.storage.length > 0)
-                this.app.store.rackManager.placeInRacking(sorted, tag)
+                let sorted = this.app.store.rackManager.getPriorityList(split[tag]);    //sorted tagList
+                this.noContainerList = this.noContainerList.concat(sorted.filter((a) => a.storage.length == 0));    //filter noContainer
+
+                sorted = sorted.filter((a) => a.storage.length > 0);    //filter container
+        
                 
+                this.app.log += `sending ${sorted.length} parts to placeInRacking\n`
+                this.finalStoreList = this.finalStoreList.concat(sorted);   //pushing parts that does algo to go in shelves
+                this.app.store.rackManager.placeInRacking(sorted, tag); //calling place in racking on partList
+                //this.app.store.rackManager.test(sorted, tag);
             })
-            noContainer.forEach(a => console.log(a.length))
+
+            this.app.store.rackManager.optimizeRacking()
+            //noContainer.forEach(a => console.log(a.length))
+            this.app.log += `finalStoreList: ${this.finalStoreList.length}\n`
             term(`Les pièces sont séparées selon ${tags.length} tags dans les racking: ${tags}\n`)
              //option pour voir liste de priorité
 
@@ -182,6 +251,7 @@ class StoreManager {
                 })
                     .then((qte) => {
                         //code to get initial partList, then chosing option
+                        this.minOrderQte = qte;
                         let storeFilter = this.getStoreList(PFEP, qte)
                         term(`Le PFEP contient ^y${PFEP.length}^: pièces\n`)
                         term.column(5); term(`^y${storeFilter[0].length}^: pièces ont été retenues\n`)
@@ -301,7 +371,7 @@ class StoreManager {
     makeCustomContainer(item, type, qte){
         let container;
         let partsLeft = qte;
-        if(!isNaN(item.specs.height) && !isNaN(item.specs.width) && !isNaN(item.specs.length) && item.specs.length * item.specs.width * item.specs.height !== 0){
+        if(!isNaN(item.specs.height) && !isNaN(item.specs.width) && !isNaN(item.specs.length) && Number(item.specs.length) * Number(item.specs.width) * Number(item.specs.height) !== 0){
             if(!isNaN(partsLeft)){
                 let name = 'customContainer_' + item.code + '_0';
                 container = new CustomContainer(name, type, item, partsLeft)
@@ -311,16 +381,19 @@ class StoreManager {
                 let name = 'customContainer_' + item.code + '_0';
                 container = new CustomContainer(name, type, item, partsLeft)
             }
-        } else return null
+        } else return [null]
         return [container]
     }
 
     makeBUs(item, type, qte){
         let container;
         let partsLeft = qte;
-        let name = 'bUs_' + item.code + '_0';
-        if(isNaN(partsLeft)){ partsLeft = 50 }
-        container = new bUs(name, item, partsLeft, type)
+        if(!isNaN(item.specs.height) && !isNaN(item.specs.width) && !isNaN(item.specs.length) && Number(item.specs.length) * Number(item.specs.width) * Number(item.specs.height) !== 0){
+            let name = 'bUs_' + item.code + '_0';
+            if(isNaN(partsLeft)){ partsLeft = 50 }
+            container = new bUs(name, item, partsLeft, type)            
+        } else return [null]
+
         return [container] 
     }
 

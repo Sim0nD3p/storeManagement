@@ -56,7 +56,7 @@ class containerObject{
 class Shelf{
     constructor(name, shelfData, type, tag){
         this.name = name;
-        this.type = type;
+        this.type = type; //what is type? bac, bundle, bus?
         this.tag = tag;
         this.priority;
         this.isDoubleSided = false;
@@ -195,16 +195,8 @@ class Shelf{
         let blocs = makeBlocs(spaceArray);
         let containerDimensions = getContainerDimensions(item.storage[0])
         let position = findPosition(blocs, containerDimensions)
-        console.log('this is blocs')
-        console.log(blocs)
-        console.log('this is containerDimensions')
-        console.log(containerDimensions)
-        console.log('this is position')
-        console.log(position)
         if(position.length > 0){
             let coord = getCoord(position, containerDimensions)
-            console.log('this is coord')
-            console.log(coord)
             return coord
         }
         else return false
@@ -963,6 +955,19 @@ class Shelf{
         if(this.getAccessRatio() == 0){ this.isDoubleSided = false }
         else if(this.getAccessRatio() !== 0){ this.isDoubleSided = true }
     }
+    setTotalConsom = () => {
+        let contList = []
+        this.content.forEach(cont => { if(contList.findIndex(a => a.name.split('_')[1] == cont.name.split('_')[1]) == -1){ contList.push(cont) } });    //list of parts
+        let consom = contList.map(part => {
+            if(!isNaN(part.consommation) && part.consommation !== 0){
+                return part.consommation
+            } else return 0
+        })
+        let totalConsom = 0;
+        consom.forEach(c => totalConsom += c)
+        this.totalConsommation = totalConsom
+        return totalConsom
+    }
 
     getAccessRatio = () => {
         let counter = this.content.map((cont, index) => {
@@ -978,7 +983,7 @@ class Shelf{
         let countFront = counter.filter((a) => a == FRONT).length
         let countBack = counter.filter((a) => a == BACK).length
         if(countFront !== 0){ return countBack / countFront }
-        else return null    //shouldn't happen, we call the funciton after we put something in shelf
+        else return null    //shouldn't happen, we call the function after we put something in shelf
     }
 
     setHeight(){

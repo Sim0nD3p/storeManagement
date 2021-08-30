@@ -119,7 +119,7 @@ class Store{
                 else { customType = 'bac' }
                 //customType should be either bac, bUs, bundle, palette
                 containers = this.storeManager.makeCustomContainer(part, customType, qte);
-                containers = containers.filter((a) => a.length !== null && a.width !== null && a.height !== null)
+                //containers = containers.filter((a) => a.length !== null && a.width !== null && a.height !== null)
                 break;
             }
             case 'bUs': {

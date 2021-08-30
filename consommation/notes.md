@@ -13,13 +13,26 @@
 - systeme d'adressage
 - changer dimensions customContainer et bUs
 
+## MAGASIN
+- menu magasin, voir shelf qte, etc
+- definition adressage
+    - menu pour entrer numero rack manuellement
+    - A, B, C pour shelf
+    - dist x=0
+        ex.: 1A3.2
+- placer pieces sur shelves fixes
+- changer emplacement piece
+- pre assign shelf racking priority, choseShelf would now chose shelf length base on priority
+    - fill highest priority shelf (based on racking priority ans shelf height) then fill second highest priority shelf... etc.
+    - keep shelf.type and racking.type in mind
+
 
 
 
 
 ## WHERE I AM
-- bug that create custom storage(bUs) when part doesnt have dimensions
-
+- check why parts are not placed on shelf when they have container
+- why do they not appear in log
 
 
 # BAC ET NOMBRE DE PIECES:
