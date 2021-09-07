@@ -466,18 +466,15 @@ class RackManager{
                 racking = racking.concat(currentRacks)
                 
             })
-            this.app.store.racking = racking
-        }
-
-        let t = redistributeShelves(init)
-        
+            return racking
+        }        
 
         
 
 
 
 
-        this.app.store.racking = init
+        this.app.store.racking = redistributeShelves(init)
         
         
         

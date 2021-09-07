@@ -82,9 +82,16 @@
 - custom shelf - DONE
 - racking mains - DONE
 
+## FINAL LIST TO FINISH THE PROGRAM
+- verif contenants
+- adressage
+- refaire fichePiece
+- Fix bugs (see list below):
+    - creer piece -> afficher Piece = bug
+    - still calling error when gen containers
+    
 
 
-- shelf TS-59 (only 13-16 parts have the TS tag)
 
 
 

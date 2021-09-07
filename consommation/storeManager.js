@@ -80,6 +80,30 @@ class StoreManager {
         }
 
     }
+    //list => PFEP
+    verifyItemsContainers = () => {
+        let baseContainers = this.app.store.PFEP.map(part => {
+            if(part.storage.length > 0){ return part }
+            else return null
+        }).filter(a => a !== null)
+
+        term(`\n ${baseContainers.length} pieces ont des contenants\n`)
+        term(`aucune autre anaylse n'a ete programmee\n`)
+
+        console.log(baseContainers.length)
+        let filter1 = baseContainers.map(part => {
+            let valid = true;
+            part.storage.forEach(cont => {
+                if(isNaN(cont.height) || isNaN(cont.width) || isNaN(cont.length)){
+                    valid = false
+                }
+            })
+            if(valid == true){ return part }
+            else return null
+        }).filter(a => a !== null)
+        console.log(filter1.length)
+
+    }
 
     storeManagerMenu = () => {
         this.app.clearScreen();
@@ -391,10 +415,13 @@ class StoreManager {
         if(!isNaN(item.specs.height) && !isNaN(item.specs.width) && !isNaN(item.specs.length) && Number(item.specs.length) * Number(item.specs.width) * Number(item.specs.height) !== 0){
             let name = 'bUs_' + item.code + '_0';
             if(isNaN(partsLeft)){ partsLeft = 50 }
-            container = new bUs(name, item, partsLeft, type)            
+            container = new bUs(name, item, partsLeft, type)   
         } else return [null]
-
-        return [container] 
+        
+        if(container.checkValid() == true){
+            console.log(container)         
+            return [container]
+        } else return [null]
     }
 
     paletteManager(item, qte, data){
