@@ -581,7 +581,7 @@ class App {
             'Vérifier entreposage des pièces',
             'getData 2021-08-06 (DEV ONLY)',
             'Fix "-LA" history',
-            'Bundle specs',
+            'Fix barre class',
             'Consommation moyenne magasin',
             'apply tags',       
         ]
@@ -958,38 +958,25 @@ class App {
                     }
                 }
                 else if(response.selectedIndex === 12){
-                    let profiles = []
-                    this.store.PFEP.map((part, index) => {
-                        if(part.family == 'Extrusion' && part.code.includes('EX')){
-                            if(profiles.findIndex((a) => a[0] == part.code.substring(0, 6)) == -1){
-                                profiles.push([part.code.substring(0, 6), index])
-                            }
-                        }
-                    })
-                    console.log(profiles)
-                    console.log(bundleSize[1])
-                    let array = profiles.map((profile, index) => {
-                        if(bundleSize.findIndex((a) => a.code == profile[0]) !== -1){
-                            let tab = bundleSize.findIndex((a) => a.code == profile[0])
-                            let contentData = {
-                                name: `test_${index}`,
-                                code: profile[0],
-                                specs: this.store.PFEP[profile[1]].specs,
-                                qte: 1000
-                            }
-                            let bundle = new Bundle(contentData)
-                            return {
-                                code: bundleSize[tab].code,
-                                width: bundle.width,
-                                widthNb: bundle.widthNb,
-                                heightNb: bundle.heightMaxNb,
-                                height: bundle.height,
-                                item_width_height: `${contentData.specs.width}, ${contentData.specs.height}`
-                            }
-                        }
-                        else return `error on profile ${profile[0]}`
-                    })
-                    console.log(array)
+                    let list = this.store.PFEP.map(part => {
+                        if(part.class && part.class.includes('barr')){
+                            return part
+                        } else return null
+                    }).filter(a => a !== null)
+                    console.log(`PFEP.length: ${this.store.PFEP.length}`)
+                    console.log(`PFEP has ${list.length} part to remove`)
+                    for(let i = 0; i < list.length; i++){
+                        let index = this.store.PFEP.findIndex(a => a == list[i])
+                        console.log(index)
+                        this.store.PFEP.splice(index, 1)
+                    }
+                    console.log(`PFEP.length: ${this.store.PFEP.length}`)
+                    list = this.store.PFEP.map(part => {
+                        if(part.class && part.class.includes('barr')){
+                            return part
+                        } else return null
+                    }).filter(a => a !== null)
+                    console.log(`${list.length} parts left to be removed`)
 
                 }
                 else if(response.selectedIndex == 14){

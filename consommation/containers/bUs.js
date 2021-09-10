@@ -53,7 +53,7 @@ class bUs{
                 dimAnalyzer.find(a => a.name == 'height').spec = dimAnalyzer.find(a => a.name == lowestSpecName).spec;
                 dimAnalyzer.find(a => a.name == lowestSpecName).spec = part.specs.height;
             }
-            console.log(dimAnalyzer)
+            //console.log(dimAnalyzer)
             dimAnalyzer = dimAnalyzer.sort((a, b) => a.give - b.give)
             let orientation = dimAnalyzer.find((a) => a.give > 0 && a.name !== 'height').name; //which spec is perpendicular to FRONT, minimum give but still > 0
             let nbDepth = Math.floor(SHELF_WIDTH / dimAnalyzer.find((a) => a.name == orientation).spec)
@@ -66,7 +66,7 @@ class bUs{
 
                 
                 let maxHeight = Math.min(2 * width, 2 * length)
-                console.log(`nbHeight ${nbHeight}`)
+                //console.log(`nbHeight ${nbHeight}`)
                 if(nbDepth * nbHeight >= nb){
                     width = width
                     length = length
@@ -76,7 +76,7 @@ class bUs{
                     term.red('problem @ bUs.js - \n')
                     term(`nbDepth: ${nbDepth}, nbHeight:${nbHeight}, nb:${nb}, orientation:${orientation}\n`)
                 }
-                console.log(`bUs SPECS: width: ${width}, length: ${length}, height: ${height}`)
+                //console.log(`bUs SPECS: width: ${width}, length: ${length}, height: ${height}`)
             }
             else if(orientation == 'length') {  //if orientation == 'length'
                 let nbLength, nbHeight;
@@ -84,14 +84,14 @@ class bUs{
                 //qteMax = nbDepth * nbLength * nbHeight => nbHeight = 2 * nbLength => qteMax = nbDepth * nbLength * (2 * nbLength)
                 //qteMax / nbDepth = 2 * nbLength^2 => qteMax / (2 * nbDepth) = nbLength^2 => nbLength = sqrt(qteMax / (2 * nbDepth))
                 nbLength = Math.ceil(Math.sqrt(nb / (2 * nbDepth)))
-                console.log(`nb: ${nb}, nbDepth: ${nbDepth}`)
-                console.log(`nbLength: ${nbLength}`)
+                //console.log(`nb: ${nb}, nbDepth: ${nbDepth}`)
+                //console.log(`nbLength: ${nbLength}`)
                 length = nbLength * dimAnalyzer.find(a => a.name !== 'height' && a.name !== orientation).spec     
                 let maxHeight = Math.min(2 * width, 2 * length)
                 nbHeight = Math.ceil(nb / (nbDepth * nbLength))
                 let height = nbHeight * dimAnalyzer.find(a => a.name == 'height').spec
-                console.log(`nbHeight: ${nbHeight}`)
-                console.log(`bUs SPECS: width: ${width}, length: ${length}, height: ${height}`)
+                //console.log(`nbHeight: ${nbHeight}`)
+                //console.log(`bUs SPECS: width: ${width}, length: ${length}, height: ${height}`)
                 if(nbDepth * nbHeight * nbLength >= nb && maxHeight / part.specs.height >= nbHeight){
                     width = width
                     length = length

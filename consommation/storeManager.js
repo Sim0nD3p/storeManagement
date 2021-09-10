@@ -63,8 +63,10 @@ class StoreManager {
     assignItemsContainers = () => {
         for (const code in storageData) {
             //console.log(code)
-            this.app.store.getItemFromPFEP(code.toString()).emballage.TF.type = storageData[code].container
-            this.app.store.getItemFromPFEP(code.toString()).emballage.TF.nbPieces = isNaN(Number(storageData[code].nbPieces)) ? storageData[code].nbPieces : Number(storageData[code].nbPieces);
+            if(this.app.store.getItemFromPFEP(code.toString()) !== -1){
+                this.app.store.getItemFromPFEP(code.toString()).emballage.TF.type = storageData[code].container
+                this.app.store.getItemFromPFEP(code.toString()).emballage.TF.nbPieces = isNaN(Number(storageData[code].nbPieces)) ? storageData[code].nbPieces : Number(storageData[code].nbPieces);
+            }
             if (storageData[code].container == 'bUs') {
                 //term.red.bold('\n\n\nEXCEPTION\n\n\nEXCEPTION\n')
                 //this.app.store.getItemFromPFEP(code.toString()).qteMax = storageData[code].nbPieces //IL FAUT REUSSIR A ENLEVER CETTE SKETCHASS MERDE
@@ -105,6 +107,29 @@ class StoreManager {
 
     }
 
+    manageAdress = () => {
+        this.app.clearScreen()
+        term.bold(`Gestion de l'adressage\n`)
+        if(this.app.store.racking.length == 0){ term(`Aucun racking n'a été trouvé, générer le magasin d'abord\n`) }
+        else  {
+
+            const rackingSelector = (index) => {
+                let rackMenu = term.singleColumnMenu(
+                    this.app.store.racking.map(rack => rack.name),
+                    { selectedIndex: index, cancelable: true, keyBindings: { ENTER: 'submit', CTRL_Z: 'escape', UP: 'previous', DOWN: 'next'}}
+                ).promise
+
+                rackMenu.then((e) => console.log(e)).catch((e) => console.log(e))
+            }
+            console.log(this.app.store.racking.length)
+            rackingSelector()
+            this.app.store.racking.forEach(rack => {
+
+
+            })
+        }
+    }
+
     storeManagerMenu = () => {
         this.app.clearScreen();
         this.app.lastScreen.screen = 'home';
@@ -113,7 +138,7 @@ class StoreManager {
             'Vérification des contenants',
             'Générer magasin',
             'Vérification du magasin',
-            'Adressage IN DEV'
+            'Gérer adressage'
 
         ]
         let menu = term.singleColumnMenu(
@@ -127,7 +152,7 @@ class StoreManager {
                 case 1: this.verifyItemsContainers(); break;
                 case 2: this.storeGenerator(); break;
                 case 3: this.storeVerification(); break;
-                case 4: 
+                case 4: this.manageAdress(); break;
                 default: this.app.home(); break;
             }
         }).catch((e) => console.log(e))
@@ -394,8 +419,11 @@ class StoreManager {
      */
     makeCustomContainer(item, type, qte){
         let container;
-        let partsLeft = qte;
+        let partsLeft = qte
+        //let partsLeft = qte !== 0 ? qte : 50;
         if(!isNaN(item.specs.height) && !isNaN(item.specs.width) && !isNaN(item.specs.length) && Number(item.specs.length) * Number(item.specs.width) * Number(item.specs.height) !== 0){
+
+            console.log(`type: ${type}, partsLeft: ${partsLeft}`)
             if(!isNaN(partsLeft)){
                 let name = 'customContainer_' + item.code + '_0';
                 container = new CustomContainer(name, type, item, partsLeft)
@@ -419,7 +447,6 @@ class StoreManager {
         } else return [null]
         
         if(container.checkValid() == true){
-            console.log(container)         
             return [container]
         } else return [null]
     }

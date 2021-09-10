@@ -825,11 +825,6 @@ const storageData = {
         nbPieces: "singleBac",
         storage: false
     },
-    "SEO-3490-B": {
-        container: "bac2",
-        nbPieces: "singleBac",
-        storage: false
-    },
     "SEO-3830": {
         container: "bac2",
         nbPieces: "singleBac",
@@ -1350,16 +1345,6 @@ const storageData = {
         nbPieces: "",
         storage: false,
         checkup: true,
-    },
-    "SEP255-004337": {
-        container: "cus",
-        nbPieces: "",
-        storage: false
-    },
-    "SEP255-004338": {
-        container: "cus",
-        nbPieces: "",
-        storage: false
     },
     "SEP255-004339": {
         container: "cus",
@@ -2081,11 +2066,6 @@ const storageData = {
         nbPieces: 50,
         storage: true
     },
-    "SEP3765": {
-        container: "bac1",
-        nbPieces: "singleBac",
-        storage: true
-    },
     "SEP3773": {
         container: "cus",
         nbPieces: "",
@@ -2399,11 +2379,6 @@ const storageData = {
     "SEP3946-LA": {
         container: "bac1",
         nbPieces: "175",
-        storage: true
-    },
-    "SEP3948": {
-        container: "bac2",
-        nbPieces: "singleBac",
         storage: true
     },
     "SEP3953": {

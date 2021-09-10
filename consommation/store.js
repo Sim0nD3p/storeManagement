@@ -118,8 +118,11 @@ class Store{
                 if(part.family && part.family.includes('usin')){ customType = 'bUs'}
                 else { customType = 'bac' }
                 //customType should be either bac, bUs, bundle, palette
-                containers = this.storeManager.makeCustomContainer(part, customType, qte);
+                containers = this.storeManager.makeCustomContainer(part, part.family, qte);
                 //containers = containers.filter((a) => a.length !== null && a.width !== null && a.height !== null)
+                if(containers){
+                    console.log(containers)
+                }
                 break;
             }
             case 'bUs': {

@@ -671,6 +671,7 @@ class RackManager{
                 //term(`placing ${partList[i].code} in ${shelf.name}\n`)
                 let place = shelf.searchPlace(partList[i], accessPoint)
                 console.log(place)
+                this.app.log += `\t ${place}\n`
                 
                 if(place !== false){
                     this.app.log += `PART SUCCESSFULLY PLACED\n`

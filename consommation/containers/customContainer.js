@@ -12,10 +12,10 @@ function handStorage(item, qte){
     let currentNb = nbHeight
     while(currentNb < qte && iter < 1000){
         iter++
-        if((nbDepth + 1) * item.specs.length < 3 * nbWidth * item.specs.width){
+        if((nbDepth + 1) * item.specs.length < 3 * nbWidth * item.specs.width && Math.ceil((nbDepth + 1) * item.specs.length) * 1.10 < maxDepth){
             nbDepth++            
         }
-        else if((nbDepth + 1) * item.specs.length > 3 * nbWidth * item.specs.width){
+        else{
             nbWidth++;
             nbDepth = 1
         }
@@ -26,15 +26,16 @@ function handStorage(item, qte){
         //console.log(`length: ${nbDepth * item.specs.length}, width: ${nbWidth * item.specs.width} `)
         //console.log('\n')
     }
+    
 
     if(nbWidth > 1){
-        nbDepth = Math.ceil(qte / (nbHeight * nbWidth))
+        //nbDepth = Math.ceil(qte / (nbHeight * nbWidth))
     }
     if(nbHeight * nbDepth * nbWidth >= qte){        
         return {
-            width: Math.ceil(nbWidth * item.specs.width * 1.05),
+            width: Math.ceil(nbWidth * item.specs.width * 1.0),
             height: nbHeight * thickness + item.specs.height * 2,
-            length: Math.ceil(nbDepth * item.specs.length * 1.05)
+            length: Math.ceil(nbDepth * item.specs.length * 1.0)
         }
     }
     else return {
@@ -140,7 +141,7 @@ class CustomContainer{
     getDimensions(item, type, qte){
         let dimensions;
         console.log(type)
-        if(type == 'main'){
+        if(type == 'Main'){
             dimensions = handStorage(item, qte)
             console.log(dimensions)
         }

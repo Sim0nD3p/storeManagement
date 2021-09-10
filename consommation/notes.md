@@ -83,10 +83,13 @@
 - racking mains - DONE
 
 ## FINAL LIST TO FINISH THE PROGRAM
-- verif contenants
-- adressage
-- refaire fichePiece
-- Fix bugs (see list below):
+- verif contenants - DONE -
+- éliminer contentants sans dimensions (MAIN)
+- adressage - 10h clean - 
+- étagères fixes - 20h clean - 
+- assign containers - 20h clean -
+- refaire fichePiece - 8h clean - 
+- Fix bugs (see list below): - 16h clean -
     - creer piece -> afficher Piece = bug
     - still calling error when gen containers
     
