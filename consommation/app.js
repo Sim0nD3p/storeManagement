@@ -11,9 +11,10 @@ const DataAnalyser = require('./dataAnalyser');
 const Item = require('./item');
 const Industry = require('./industry');
 const infosText = require('./infosText');
-const FichePiece = require('./fichePiece');
+const fichePiece = require('./fichePiece');
 const FicheSupplier = require('./ficheSupplier');
 const { autoComplete } = require('terminal-kit');
+const FichePiece = require('./components/fichePiece');
 const partTable = require('./partTable');
 const containersData = require('./containers/containerData');
 const ExportData = require('./exportData');
@@ -51,11 +52,12 @@ class App {
         this.dataAnalyser = new DataAnalyser(this)
         this.fileManager = new FileManager(this);
         this.lastScreen = 'home'
-        this.fichePiece = new FichePiece(this);
+        this.fichePiece = new fichePiece(this);
         this.ficheSupplier = new FicheSupplier(this)
         this.currentScreen = '';
         this.partTable = new partTable(this)
         this.displayStore = new DisplayStore(this);
+        this.FichePiece = new FichePiece(this)
         this.log = ''
 
     }
@@ -581,7 +583,7 @@ class App {
             'Vérifier entreposage des pièces',
             'getData 2021-08-06 (DEV ONLY)',
             'Fix "-LA" history',
-            'Fix barre class',
+            'test FichePiece',
             'Consommation moyenne magasin',
             'apply tags',       
         ]
@@ -958,25 +960,8 @@ class App {
                     }
                 }
                 else if(response.selectedIndex === 12){
-                    let list = this.store.PFEP.map(part => {
-                        if(part.class && part.class.includes('barr')){
-                            return part
-                        } else return null
-                    }).filter(a => a !== null)
-                    console.log(`PFEP.length: ${this.store.PFEP.length}`)
-                    console.log(`PFEP has ${list.length} part to remove`)
-                    for(let i = 0; i < list.length; i++){
-                        let index = this.store.PFEP.findIndex(a => a == list[i])
-                        console.log(index)
-                        this.store.PFEP.splice(index, 1)
-                    }
-                    console.log(`PFEP.length: ${this.store.PFEP.length}`)
-                    list = this.store.PFEP.map(part => {
-                        if(part.class && part.class.includes('barr')){
-                            return part
-                        } else return null
-                    }).filter(a => a !== null)
-                    console.log(`${list.length} parts left to be removed`)
+                    let part = this.store.getItemFromPFEP('SEP3411')
+                    this.FichePiece.displayPart(part)
 
                 }
                 else if(response.selectedIndex == 14){

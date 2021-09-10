@@ -8,8 +8,12 @@ const ShelfManager = require('./shelfManager');
 const CustomContainer = require('./containers/customContainer');
 const term = require('terminal-kit').terminal;
 const ExportData = require('./exportData');
+const fs = require('fs')
+const shelvesData = require('./containers/shelves');
+const fsPromise = require('fs/promises')
 const bUs = require('./containers/bUs');
 const storageData = require('./storageData');
+const Racking = require('./containers/racking');
 
 const exportData = new ExportData()
 
@@ -138,7 +142,9 @@ class StoreManager {
             'Vérification des contenants',
             'Générer magasin',
             'Vérification du magasin',
-            'Gérer adressage'
+            'Gérer adressage',
+            'Exporter magasin',
+            'Importer magasin',
 
         ]
         let menu = term.singleColumnMenu(
@@ -153,6 +159,8 @@ class StoreManager {
                 case 2: this.storeGenerator(); break;
                 case 3: this.storeVerification(); break;
                 case 4: this.manageAdress(); break;
+                case 5: this.exportStore(); break;
+                case 6: this.importStore(); break;
                 default: this.app.home(); break;
             }
         }).catch((e) => console.log(e))
@@ -230,6 +238,159 @@ class StoreManager {
 
 
     }
+    exportStore = () => {
+        let iter = 0
+        let groupIndex = 0;
+        let index = 0
+
+        let reviewObject = {
+            shelves: this.app.store.shelves.map(shelf => {
+                return {
+                    name: shelf.name,
+                    length: shelf.length,
+                }
+            }),
+            racking: this.app.store.racking.map(rack => {
+                return {
+                    name: rack.name
+                }
+
+            })
+        }
+        exportData.exportJSON(reviewObject, 'storeReviewObject.json', '../SORTIE')
+
+        let currentString = '['
+        term(`^y${this.app.store.shelves.length}^: shelves sont dans le magasin\n`)
+        term(`^y${this.app.store.racking.length}^: racking sont dans le magasin\n`)
+        while(index < this.app.store.shelves.length + 1 && iter < 1000){
+            iter++
+            if(index < this.app.store.shelves.length && this.app.store.shelves[index] !== undefined){
+                if(groupIndex < 4){
+                    console.log(`adding ${this.app.store.shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
+                    currentString += JSON.stringify(this.app.store.shelves[index], null, 4) + ',';
+                    groupIndex++
+                    index++
+                }
+                else if(groupIndex == 4){
+                    console.log(`adding ${this.app.store.shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
+                    currentString += JSON.stringify(this.app.store.shelves[index], null, 4) + ']'
+                    groupIndex++
+                    index++
+                }
+                else if(groupIndex == 5){
+                    console.log(`exporting ${this.app.store.shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
+                    let name = `shelves_${index - groupIndex}_To_${index}`
+                    groupIndex = 0;
+                    fs.writeFile(`../SORTIE/shelves/${name}.json`, currentString, (err) => {
+                        if(err){ console.log('ERROR ', err) }
+                        else { console.log(`${name} exported successfully`) }
+                    })
+                    currentString = '['
+                }
+            }
+            else if(index == this.app.store.shelves.length){
+                iter == 1001;
+                console.log('CALISSSE LAA')
+                if(currentString.endsWith(',')){
+                    currentString = currentString.substring(0, currentString.length - 1)
+                    currentString += ']'
+                }
+                console.log(`exporting ${this.app.store.shelves[index-1].name}, index: ${index}, GI: ${groupIndex}`)
+                let name = `shelves_${index - groupIndex}_To_${index}`
+                fs.writeFile(`../SORTIE/shelves/${name}.json`, currentString, (err) => {
+                    if(err) { console.log('ERROR ' , err) }
+                    else { console.log(`${name} exported successfully`) }
+                })
+                break;
+
+            }
+        }
+        let data = []
+        for(let i = 0; i < this.app.store.racking.length; i++){
+            let rackData = { ...this.app.store.racking[i] }
+            rackData.shelves = rackData.shelves.map(shelf => shelf.name)
+            data.push(rackData)
+        }
+        term(`^y${index}^: shelves ont été exportées\n`)
+        term(`^y${data.length}^: racking ont été exporté\n`)
+        exportData.exportJSON(data, 'racking', '../SORTIE')
+    }
+    importStore = () => {
+        let data = new Promise((resolve, reject) => {
+            let racking = fsPromise.readFile('../SORTIE/racking.json', 'utf8')
+            racking.then((racking) => {
+                racking = JSON.parse(racking)
+
+
+                let files = fsPromise.readdir('../SORTIE/shelves')
+                files.then((res) => {
+                    return new Promise((resolve, reject) => {
+                        let progress = 0;
+                        let shelves = []
+                        for(let i = 0; i < res.length; i++){
+                            let readFile = fsPromise.readFile(`../SORTIE/shelves/${res[i]}`, 'utf8')
+                            readFile.then((string) => {
+                                let json = JSON.parse(string)
+                                progress++
+                                shelves = shelves.concat(json)
+                                console.log(`shelves.length: ${shelves.length}`)
+                                if(progress == res.length){ resolve(shelves) }
+                            }).catch((e) => console.log(e))
+                        }
+                    }).then((shelves) => {
+                        racking = racking.map(rack => {
+                            let shelves_names = rack.shelves
+                            let r = new Racking(rack.name, rack.length, rack.contentType, rack.tag);
+                            r = { ...r, ...rack }
+                            r.shelves = shelves_names.map(shelf_name => {
+                                if (shelves.find(a => a.name == shelf_name) !== undefined) {
+                                    let source = shelves.find(a => a.name == shelf_name)
+                                    let shelfData = {
+                                        length: source.length,
+                                        rating: source.capacity * 2.2046
+                                    }
+                                    let s = new Shelf(source.name, shelfData)
+                                    s = { ...s, ...source }
+                                    return s
+                                }
+                                else { console.log('CORRUPTED FILES!!'); return undefined }
+                            })
+                        })
+
+                        /*
+                        Utiliser le fichier storeReviewObject.json pour eliminer doublons de shelf et racking et s'assurer que tout est présent 
+                        */
+
+                        racking.map(rack => console.log(rack.name, rack.shelves.length))
+                        this.app.store.racking = racking
+                        this.app.store.shelves = shelves
+
+                    }).catch((e) => console.log(e))
+                }).catch((e) => console.log(e))
+
+
+
+
+            }).catch((e) => console.log(e))
+        })
+
+
+/* 
+        fs.readdir('../SORTIE/shelves', (err, files) => { shelvesFiles = files })
+        shelvesFiles.forEach(file => {
+            fs.readFile(`../SORTIE/shelves/${file}`, 'utf8', (err, string) => {
+                if(err) { console.log('ERROR ', err) }
+                else {
+                    let data = JSON.parse(string)
+                    console.log(data)
+                }
+            })
+
+        }) */
+
+
+    }
+
     storeGenerator = () => {
         this.app.clearScreen();
         term.bold("Création d'un magasin de pièces\n")

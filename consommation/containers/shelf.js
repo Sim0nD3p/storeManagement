@@ -61,8 +61,8 @@ class Shelf{
         this.priority;
         this.isDoubleSided = false;
         this.width = 107; //mm
-        this.capacity = shelfData.rating / 2.2046;  //1 kg == 2.2046 lbs
-        this.length = shelfData.length;
+        this.capacity = shelfData ? shelfData.rating / 2.2046 : undefined;  //1 kg == 2.2046 lbs
+        this.length = shelfData ? shelfData.length : undefined;
         this.weight = 0; //masse kg
         this.accessRatio = 0; //FRONT/(FRONT + BACK)
         
