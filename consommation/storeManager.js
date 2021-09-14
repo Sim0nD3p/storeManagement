@@ -111,27 +111,129 @@ class StoreManager {
 
     }
 
-    manageAdress = () => {
-        this.app.clearScreen()
-        term.bold(`Gestion de l'adressage\n`)
-        if(this.app.store.racking.length == 0){ term(`Aucun racking n'a été trouvé, générer le magasin d'abord\n`) }
-        else  {
+    manageAdress = (content) => {
+        let menuItems = this.app.store.racking.map(rack => `${rack.name} - ${rack.address ? rack.address : 'N/D'}`);
+        const displayRackShelves = (racking) => {
 
-            const rackingSelector = (index) => {
-                let rackMenu = term.singleColumnMenu(
-                    this.app.store.racking.map(rack => rack.name),
-                    { selectedIndex: index, cancelable: true, keyBindings: { ENTER: 'submit', CTRL_Z: 'escape', UP: 'previous', DOWN: 'next'}}
-                ).promise
-
-                rackMenu.then((e) => console.log(e)).catch((e) => console.log(e))
+            function createPad(prop, pad){
+                const filler = 'N/D';
+                return prop ? prop.padEnd(pad) : filler.padEnd(pad)
             }
-            console.log(this.app.store.racking.length)
-            rackingSelector()
-            this.app.store.racking.forEach(rack => {
-
-
+            let header = createPad('ID', 15) + createPad('Priorité', 10) + createPad('Type', 10) + createPad('Tag', 5)
+            term.moveTo(2*term.width/3, 3); term.bold.underline('Étagères:\n');
+            term.moveTo(2*term.width/3, 4); term.bold(header); term('\n')
+            let shelvesItems = racking.shelves.map(shelf => {
+                let name = createPad(shelf.name, 15)
+                let priority = createPad(Math.ceil(shelf.priority).toString(), 10)
+                let type = createPad(shelf.type, 10)
+                let tag = createPad(shelf.tag, 5)
+                return name + priority + type + tag
             })
+            let menu = term.singleColumnMenu(shelvesItems, { cancelable: true, leftPadding: '\t\t\t\t\t\t\t\t\t\t\t\t ', keyBindings: { ENTER: 'submit', DOWN: 'next', UP: 'previous', CTRL_Z: 'escape' }}).promise
+            menu.then((e) => {
+                console.log(e)
+            }).catch((e) => console.log(e))
+
         }
+
+        const displayRacking = (racking) => {
+            this.app.clearScreen()
+            this.app.lastScreen = { ...this.app.lastScreen, type: 'initial' }
+            
+            const priority = (racking) => {
+                let priorityArray = racking.shelves.map(shelf => {
+                    if(shelf.priority && !isNaN(shelf.priority)){
+                        return Math.ceil(shelf.priority)
+                    } else return 'ND'
+                })
+                return priorityArray.toString()
+            }
+            //name, length, contentSides, height, tag, priority, shelfCount
+            let marginLeft = term.width/3
+            term.moveTo(marginLeft, 3); term.bold.underline(`Fiche racking:\n`)
+            term.moveTo(marginLeft, 4); term.bold(`ID: `); term(racking.name);
+            term.moveTo(marginLeft, 5); term.bold(`Adresse: `); term(racking.address ? racking.address : 'N/D');
+            term.moveTo(marginLeft, 6); term.bold(`Longueur: `); term(racking.length);
+            term.moveTo(marginLeft, 7); term.bold(`Hauteur: `); term(racking.height);
+            term.moveTo(marginLeft, 8); term.bold('Tag: '); term(racking.tag);
+            term.moveTo(marginLeft, 9); term.bold(`Priorité étagères: `); term(priority(racking))
+            term.moveTo(marginLeft, 10); term.bold(`Contenu côtés: `); term(`${racking.contentSides[0] ? racking.contentSides[0] : 'N/D'}, ${racking.contentSides[1] ? racking.contentSides[1] : 'N/D'}`);
+            term.moveTo(marginLeft, 11); term.bold(`Nombre d'étagères: `); term(racking.shelves.length);
+
+            let setMenu = term.singleColumnMenu(
+                ['Retour', 'Modifier adresse racking', 'Modifier adresses étagères'],
+                { y: 13, leftPadding: '\t\t\t\t\t\t', cancelable: true, keyBindings: { ENTER: 'submit', CTRL_Z: 'escape', UP: 'previous', DOWN: 'next'} }
+            ).promise
+            setMenu.then((res) => {
+                if(res.selectedIndex == 0){ rackingSelector(this.app.lastScreen) }
+                else if(res.selectedIndex == 1){
+                    this.app.enableGoBack = false;
+                    term(`\nEntrer l'adresse du racking: `)
+                    let inputField = term.inputField({cancelable: true, x: term.width/3, keyBindings: { ENTER: 'submit', BACKSPACE: 'backDelete', CTRL_Z: 'escape'}}).promise
+                    inputField.then((res) => {
+                        this.app.enableGoBack = true
+
+                        //AJOUTER IF POUR PAS QUE 2 RACKING AIENT LA MEME ADRESSE
+                        let target = this.app.store.racking.find(a => a.name == racking.name)
+                        if(target !== undefined){ target.address = res }
+                        rackingSelector({ index : this.app.lastScreen.index })
+                    }).catch((e) => console.log(e))
+                }
+                else if(res.selectedIndex == 2){
+                    this.app.lastScreen = {
+                        ...this.app.lastScreen,
+                        type: 'racking',
+                    }
+                    displayRackShelves(racking)
+                }
+            }).catch((e) => console.log(e))
+        }
+        
+        const rackingSelector = (content) => {
+            this.app.clearScreen()
+            this.app.lastScreen = { screen: 'home' }
+            term.bold(`Gestion de l'adressage\n`)
+            term.bold(`ID rack - Adresse`)
+            menuItems = this.app.store.racking.map(rack => `${rack.name} - ${rack.address ? rack.address : 'N/D'}`);
+            let rackMenu = term.singleColumnMenu(
+                menuItems,
+                //arranger menuIndex
+                { cancelable: true, selectedIndex: content.index ? content.index : 0, keyBindings: { ENTER: 'submit', CTRL_Z: 'escape', UP: 'previous', DOWN: 'next'}}
+            ).promise
+
+            rackMenu.then((res) => {
+                this.app.lastScreen = {
+                    screen: 'manageAdress',
+                    type: 'initial',
+                    index: res.selectedIndex,
+                    racking: this.app.store.rackManager.getRacking(res.selectedText.split(' - ')[0])
+                }
+                displayRacking(this.app.store.rackManager.getRacking(res.selectedText.split(' - ')[0]))
+
+                
+            }).catch((e) => console.log(e))
+        }
+
+        /*
+
+        object = {
+            type: racking || shelves ||
+            index: racking index
+            racking: racking object 
+        }
+        */
+
+        if(typeof content == 'object'){
+            if(content.type == 'initial'){
+                rackingSelector(content)
+
+            }
+            else if(content.type == 'racking'){
+                displayRacking(content.racking)
+            }
+
+        }
+        else { rackingSelector(content ? content : 0) }
     }
 
     storeManagerMenu = () => {
@@ -257,7 +359,7 @@ class StoreManager {
 
             })
         }
-        exportData.exportJSON(reviewObject, 'storeReviewObject.json', '../SORTIE')
+        exportData.exportJSON(reviewObject, 'storeReviewObject', '../SORTIE')
 
         let currentString = '['
         term(`^y${this.app.store.shelves.length}^: shelves sont dans le magasin\n`)
@@ -290,11 +392,10 @@ class StoreManager {
             }
             else if(index == this.app.store.shelves.length){
                 iter == 1001;
-                console.log('CALISSSE LAA')
                 if(currentString.endsWith(',')){
                     currentString = currentString.substring(0, currentString.length - 1)
-                    currentString += ']'
                 }
+                currentString += ']'
                 console.log(`exporting ${this.app.store.shelves[index-1].name}, index: ${index}, GI: ${groupIndex}`)
                 let name = `shelves_${index - groupIndex}_To_${index}`
                 fs.writeFile(`../SORTIE/shelves/${name}.json`, currentString, (err) => {
@@ -317,9 +418,9 @@ class StoreManager {
     }
     importStore = () => {
         let data = new Promise((resolve, reject) => {
-            let racking = fsPromise.readFile('../SORTIE/racking.json', 'utf8')
-            racking.then((racking) => {
-                racking = JSON.parse(racking)
+            let rackingCall = fsPromise.readFile('../SORTIE/racking.json', 'utf8')
+            rackingCall.then((res) => {
+                let racking = JSON.parse(res)
 
 
                 let files = fsPromise.readdir('../SORTIE/shelves')
@@ -330,10 +431,13 @@ class StoreManager {
                         for(let i = 0; i < res.length; i++){
                             let readFile = fsPromise.readFile(`../SORTIE/shelves/${res[i]}`, 'utf8')
                             readFile.then((string) => {
-                                let json = JSON.parse(string)
                                 progress++
-                                shelves = shelves.concat(json)
-                                console.log(`shelves.length: ${shelves.length}`)
+                                if(string.length !== 0){
+                                    console.log(res[i], string.length)
+                                    let json = JSON.parse(string)
+                                    shelves = shelves.concat(json)
+                                    console.log(`shelves.length: ${shelves.length}`)
+                                }
                                 if(progress == res.length){ resolve(shelves) }
                             }).catch((e) => console.log(e))
                         }
@@ -355,40 +459,42 @@ class StoreManager {
                                 }
                                 else { console.log('CORRUPTED FILES!!'); return undefined }
                             })
+                            return r
                         })
+                        
+                        let review = fsPromise.readFile('../SORTIE/storeReviewObject.json', 'utf8')
+                        review.then((reviewObject) => {
+                            reviewObject = JSON.parse(reviewObject)
+                            
+                            let check1 = reviewObject.shelves.map(shelf => { //checking shelves array with storeReviewObject
+                                if(shelves.findIndex(a => a.name == shelf.name) !== -1){ return true }
+                                else return false
+                            }).filter(a => a !== false)
 
-                        /*
-                        Utiliser le fichier storeReviewObject.json pour eliminer doublons de shelf et racking et s'assurer que tout est présent 
-                        */
+                            let check2 = reviewObject.shelves.map(shelf => {    //checking shelves in racking with storeReviewObejct
+                                let present = false;
+                                racking.forEach(rack => {
+                                    if(rack.shelves.findIndex(a => a.name == shelf.name) !== -1){ present = true }
+                                })
+                                return present
+                            }).filter(a => a !== false)
 
-                        racking.map(rack => console.log(rack.name, rack.shelves.length))
-                        this.app.store.racking = racking
-                        this.app.store.shelves = shelves
+                            let check3 = reviewObject.racking.map(rack => {     //checking racking with storeReviewObject
+                                if(racking.findIndex(a => a.name == rack.name) !== -1){ return true }
+                                else return false
+                            }).filter(a => a !== false)
 
+                            if(reviewObject.shelves.length == check1.length && check1.length == check2.length && reviewObject.racking.length == check3.length){
+                                term(`Le magasin a été importé avec succès!\n`)
+                                this.app.store.racking = racking
+                                this.app.store.shelves = shelves
+                            }
+                            else { term(`Problème lors de l'importation du magasin\n`) }
+                        }).catch((e) => console.log(e))
                     }).catch((e) => console.log(e))
                 }).catch((e) => console.log(e))
-
-
-
-
             }).catch((e) => console.log(e))
         })
-
-
-/* 
-        fs.readdir('../SORTIE/shelves', (err, files) => { shelvesFiles = files })
-        shelvesFiles.forEach(file => {
-            fs.readFile(`../SORTIE/shelves/${file}`, 'utf8', (err, string) => {
-                if(err) { console.log('ERROR ', err) }
-                else {
-                    let data = JSON.parse(string)
-                    console.log(data)
-                }
-            })
-
-        }) */
-
-
     }
 
     storeGenerator = () => {

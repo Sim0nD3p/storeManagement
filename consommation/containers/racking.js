@@ -13,6 +13,7 @@ class Racking{
         this.length = length;
         this.tag = tag; ////assemblage ou MP
         this.type;  
+        this.address;   //range in letters
         this.shelves = []
         this.contentType = type;    //mixed, bac, bundle
         //this.priorityZone = [0, 1600]

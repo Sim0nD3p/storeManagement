@@ -86,8 +86,10 @@
 - verif contenants - DONE -
 - éliminer contentants sans dimensions (MAIN)
 - adressage - 10h clean - 
+- export/import store to JSON - 8h semi clean - DONE -
 - étagères fixes - 20h clean - 
 - assign containers - 20h clean -
+- possibilite d'ajouter une seule piece
 - refaire fichePiece - 8h clean - 
 - Fix bugs (see list below): - 16h clean -
     - creer piece -> afficher Piece = bug

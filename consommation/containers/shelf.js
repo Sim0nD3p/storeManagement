@@ -58,6 +58,7 @@ class Shelf{
         this.name = name;
         this.type = type; //what is type? bac, bundle, bus?
         this.tag = tag;
+        this.address; //range in numbers
         this.priority;
         this.isDoubleSided = false;
         this.width = 107; //mm

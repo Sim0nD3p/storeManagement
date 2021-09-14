@@ -24,6 +24,7 @@ const Bundle = require('./containers/bundle');
 const data2021_08_06 = require
 const storageData = require('./storageData')
 const bundleSize = require('./containers/bundleSize');
+const Adresser = require('./adresser');
 
 const List = require('./draftInput');
 //const prompt = require('prompt-sync')({ sigint: true });
@@ -58,12 +59,17 @@ class App {
         this.partTable = new partTable(this)
         this.displayStore = new DisplayStore(this);
         this.FichePiece = new FichePiece(this)
+        this.adresser = new Adresser(this)
         this.log = ''
+        this.enableGoBack = true;
 
     }
 
     goBack = () => {
-        console.log(this.lastScreen);
+        //console.log(this.lastScreen);
+        /* let exceptions = ['manageAdress']
+        if(exceptions.indexOf(this.lastScreen.screen) == -1){
+        } */
         this.clearScreen();
         if (this.lastScreen.screen == 'home') {
             this.currentScreen = 'home';
@@ -88,6 +94,7 @@ class App {
         else if (this.lastScreen.screen == 'afficherMagasin') { this.afficherMagasin() }
         else if(this.lastScreen.screen == 'modifierEntreposage'){ this.fichePiece.modifierEntreposage(this.lastScreen.content) }
         else if(this.lastScreen.screen == 'storeManagerMenu'){ this.store.storeManager.storeManagerMenu() }
+        else if(this.lastScreen.screen == 'manageAdress'){ this.store.storeManager.manageAdress(this.lastScreen) }
         else {
             this.home()
         }
@@ -1263,7 +1270,7 @@ class App {
         this.title('PFEP')
 
         term.on('key', (key) => {
-            if (key === 'CTRL_Z') { setTimeout(() => { this.goBack() }, 10) }
+            if (key === 'CTRL_Z') { if(this.enableGoBack){ setTimeout(() => { this.goBack() }, 10)} }
             if (key === 'CTRL_C') { /*console.clear();*/ process.exit() }
             if (key === 'CTRL_X') { this.clearScreen(); this.home() }
         });
