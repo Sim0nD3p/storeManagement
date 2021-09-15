@@ -2,7 +2,7 @@ const term = require("terminal-kit").terminal;
 
 const REACH_LIMIT = 3500;
 const PRIORITY_LIMIT = 1600
-const GAP = 100;
+const GAP = 150;
 const MAX_HEIGHT = 6000;
 /*
 Racking will have a 'good zone' were priority shelves will be placed
@@ -21,7 +21,7 @@ class Racking{
         this.contentSides = [null, null]
         this.height = 0
         this.priority;
-        this.class;
+        this.class; //unused?
     }
 
     getTotalHeight = () => {
@@ -57,6 +57,7 @@ class Racking{
         if(this.checkShelfComp(shelf) == true){
             if (this.shelves.length > 0) {  //nombre de shelf actuellement dans racking
                 let i = 0;
+                this.updateProps()
                 let currentBaseHeight = 0;
                 while (currentBaseHeight < MAX_HEIGHT && i < this.shelves.length && place == undefined) {
                     let s = this.shelves[i]
@@ -81,8 +82,7 @@ class Racking{
                     }
                     i++
                 }
-            } else place = 0
-            
+            } else if(this.shelves.length == 0){ place = 0 } 
         } else return false
 
 
@@ -245,15 +245,31 @@ class Racking{
         }
         return place
     }
+
+    setPriority = () => {
+        let totalConsom = 0;
+        let nb = 0;
+        this.shelves.forEach(shelf => {
+            if(shelf.totalConsom && !isNaN(shelf.totalConsom)){
+                totalConsom += Number(shelf.totalConsom)
+                nb++
+            }
+        })
+        this.priority = totalConsom
+    }
+    updateProps = () => {
+        this.contentSides = this.getContentSides()
+        this.height = this.getTotalHeight();
+        this.setPriority()
+        this.shelves = this.shelves.sort((a, b) => a.baseHeight - b.baseHeight)
+    }
+
     addShelf = (shelf, baseHeight) => {
 
         shelf.baseHeight = baseHeight
         this.shelves.push(shelf)
-        this.contentSides = this.getContentSides()
-        
-        
-        
-        this.height = this.getTotalHeight();        
+
+        this.updateProps()
 /* 
         if(shelf.isDoubleSided == true && (this.contentSides ))
         if(this.contentSides.indexOf(shelf.type) !== -1){

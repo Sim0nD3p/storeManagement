@@ -434,7 +434,7 @@ class ShelfManager{
      * Meme type de contenu (bundle, bac, bundleUsine || mixed)
      * Meme tag
      * placement via searchPlace (no BACK for bundle per conception)
-     * @param {*} part 
+     * @param {*} part \
      * @param {*} categorisation 
      * @returns [shelf, front, back]
      */

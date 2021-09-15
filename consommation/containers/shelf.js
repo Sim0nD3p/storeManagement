@@ -1,4 +1,10 @@
 const term = require('terminal-kit').terminal;
+const containerObject = require('./containerObject')
+const Bac = require('./bac');
+const Bundle = require('./bundle');
+const Palette = require('./palette')
+const CustomContainer = require('./customContainer');
+const bUs = require('./bUs')
 const VERTICAL = 'VERTICAL';
 const HORIZONTAL = 'HORIZONTAL';
 const FRONT = 'FRONT';
@@ -10,48 +16,7 @@ function clearScreen() {
     console.clear();
 }
 
-class containerObject{
-    constructor(name, position, dimensions, heightNb, container, consomMensMoy, accessPoint){
-        this.name = name;
-        this.height = heightNb
-        this.accessPoint = accessPoint;
-        this.totalHeight = container.height * heightNb;
-        this.weight = container.weight * heightNb;
-        this.consommation = consomMensMoy;
-        this.position = {
-            front: position.front,
-            width: position.width,
-        }
-        this.dimensions = {
-            front: dimensions.front,
-            width: dimensions.width,
-        }
-        this.getPos;
-        this.getDim;
-    }
 
-    getPosCoord(ratioL, ratioW){
-        this.getPos = {
-            front: Math.ceil(this.position.front / ratioL),
-            width: Math.ceil(this.position.width / ratioW),
-        }
-        this.getDim = {
-            front: Math.ceil(this.dimensions.front / ratioL),
-            width: Math.ceil(this.dimensions.width / ratioW)
-        }
-        return {
-            position:{
-                front: Math.floor(this.position.front / ratioL),
-                width: Math.floor(this.position.width / ratioW),
-            },
-            dimensions: {
-                front: Math.floor(this.dimensions.front / ratioL),
-                width: Math.floor(this.dimensions.width / ratioW)
-            }
-        }
-    }
-
-}
 
 class Shelf{
     constructor(name, shelfData, type, tag){
@@ -71,8 +36,13 @@ class Shelf{
         this.height = 0
         this.baseHeight = undefined
 
+        this.totalConsom = 0;
         this.space = this.initShelf(shelfData)
 
+    }
+
+    test = () => {
+        console.log('shelf method accessible')
     }
 
 
@@ -820,44 +790,49 @@ class Shelf{
 
         }
     }
-    getShelf(){
-        let padding = 0;
+    getShelf = (width, height) => {
+        width = width ? width : term.width
+        height = height ? height : term.height
+        let paddingWidth = (term.width - width) / 2;
+        let paddingHeight = (term.height - height) / 2;
         //ratios => real/screen .. real*screen/real = screen => screen = real/ratio
-        let ratioL = (this.space.length / (term.width - 2 * padding));
-        let ratioW = (this.width / (term.height - 2 * padding));
+        let ratioL = (this.space.length / (width));
+        let ratioW = (this.width / (height));
 
-        for(let i = padding; i < term.width - padding; i++){
-            term.moveTo(i, padding); term('-')
-            term.moveTo(i, term.height - padding); term('-')
+        for(let i = paddingWidth; i < term.width - paddingWidth; i++){
+            term.moveTo(i, paddingHeight); term('-')
+            term.moveTo(i, term.height - paddingHeight); term('-')
         }
-        for(let i = padding; i < term.height - padding; i++){
-            term.moveTo(padding, i); term('|')
-            term.moveTo(term.width - padding, i); term('|')
+        for(let i = paddingHeight; i < term.height - paddingHeight; i++){
+            term.moveTo(paddingWidth, i); term('|')
+            term.moveTo(term.width - paddingWidth, i); term('|')
         }
 
         let shelfContent = [];
         
 
     
+        let data;
        this.content.map((container, index) => {
-           let data = container.getPosCoord(ratioL, ratioW);
+           data = container.getPosCoord(ratioL, ratioW);
            for(let x = data.position.front; x < data.position.front + data.dimensions.front; x++){
-               term.moveTo(padding + x, term.height - padding - data.position.width); term('-');
-               term.moveTo(padding + x, term.height - padding - (data.position.width + data.dimensions.width)); term('-')
+               term.moveTo(paddingWidth + x, term.height - paddingHeight - data.position.width); term('-');
+               term.moveTo(paddingWidth + x, term.height - paddingHeight - (data.position.width + data.dimensions.width)); term('-')
            }
            for(let y = data.position.width; y < data.position.width + data.dimensions.width + 1; y++){
-               term.moveTo(padding + data.position.front, term.height - padding - y); term('|');
-               term.moveTo(padding + data.position.front + data.dimensions.front, term.height - padding - y); term('|')
+               term.moveTo(paddingWidth + data.position.front, term.height - paddingHeight - y); term('|');
+               term.moveTo(paddingWidth + data.position.front + data.dimensions.front, term.height - paddingHeight - y); term('|')
            }
             let name = container.name.split('_')
             let middleFront = data.position.front + data.dimensions.front / 2;
             let middleWidth = data.position.width + data.dimensions.width / 2;
-            term.moveTo(middleFront - name[1].length/2 + padding, term.height - padding - middleWidth); term(`${name[1]}`);
-            term.moveTo(middleFront + padding, term.height - padding - middleWidth + 1); term(`(${container.height}) - ${Math.ceil(container.consommation)}`)
+            term.moveTo(middleFront - name[1].length/2 + paddingWidth, term.height - paddingHeight - middleWidth); term(`${name[1]}`);
+            term.moveTo(middleFront + paddingWidth, term.height - paddingHeight - middleWidth + 1); term(`(${container.height}) - ${Math.ceil(container.consommation)}`)
             
 
         })
         term.moveTo(term.height, 1);
+
     }
 
     getPriorityIndex = () => {
@@ -875,12 +850,18 @@ class Shelf{
     getSpaceRatio = () => {
         let total = 0;
         let something = 0;
+        /* let array = this.space.map(x => {
+            return x.findIndex(a => a !== null)
+        })
+        console.log(array) */
+        //console.log('this.space.length ', this.space.length)
         for(let x = 0; x < this.space.length; x++){
             for(let y = 0; y < this.space[x].length; y++){
                 if(this.space[x][y] !== null){ something++ }
                 total++
             }
         }
+        //console.log('something / total ', something, total)
         return something / total
     }
     
@@ -916,7 +897,6 @@ class Shelf{
         if(!heightNb){ heightNb = 1 }
         
         this.content.push(new containerObject(item.name, position, dimensions, heightNb, item, part.consommation.mensuelleMoy, accessPoint))
-        this.priority = this.getPriorityIndex();
         for(let x = position.front; x < position.front + dimensions.front; x++){
             for(let y = position.width; y < position.width + dimensions.width; y++){
                 if(this.space[x] !== undefined && this.space[x][y] !== undefined){
@@ -925,13 +905,18 @@ class Shelf{
             }
             
         }
+
+        this.updateProps()
+
+        /* 
+        this.priority = this.getPriorityIndex();
         this.weight = this.setWeight()
         this.height = this.setHeight();
         this.accessRatio = this.getAccessRatio()
         this.spaceRatio = this.getSpaceRatio()
         if(this.getAccessRatio() == 0){ this.isDoubleSided = false }
         else if(this.getAccessRatio() !== 0){ this.isDoubleSided = true }
-
+ */
 
     }
 
@@ -966,8 +951,30 @@ class Shelf{
         })
         let totalConsom = 0;
         consom.forEach(c => totalConsom += c)
-        this.totalConsommation = totalConsom
+        this.totalConsom = totalConsom
         return totalConsom
+    }
+
+    getTest = () => {   //needs to be removed
+        console.log('shelf.getTest() - this.simon ', this.simon)
+        return this.simon
+    }
+    getSpace = () => {
+        return this.space
+    }
+    updateProps = () => {
+        this.priority = this.getPriorityIndex();
+        //this.totalConsom = this.setTotalConsom();
+        this.setTotalConsom()
+        //console.log(`totalConsom: ${this.totalConsom}`)
+        this.height = this.setHeight();
+        this.accessRatio = this.getAccessRatio()
+        this.spaceRatio = this.getSpaceRatio()
+        this.weight = this.setWeight()
+        if(this.getAccessRatio() == 0){ this.isDoubleSided = false }
+        else if(this.getAccessRatio() !== 0){ this.isDoubleSided = true }
+
+
     }
 
     getAccessRatio = () => {
@@ -993,7 +1000,7 @@ class Shelf{
         return array[0] + 100
 
     }
-    initShelf(shelfData){
+    initShelf = (shelfData) => {
         let array = [];
         for(let length = 0; length < shelfData.length / 10; length++){
             array.push(new Array(this.width).fill(null))

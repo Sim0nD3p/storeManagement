@@ -223,28 +223,31 @@ class DispayStore{
             term.column(35); term(`length: ${this.app.store.racking[i].length}`)
             term.column(55); term(`height: ${this.app.store.racking[i].height}`)
             term.column(75); term(`tag ${this.app.store.racking[i].tag}`)
+            term.column(90); term(`Priorité: ${this.app.store.racking[i].priority.toString().substring(0, 5)}`)
             //term.column(55); term(`${this.app.store.racking[i].}\n`)
-            term('\n------------------------------------------------------------------------------------------\n')
+            term('\n------------------------------------------------------------------------------------------------------------------------\n')
             //term('\n')
-            let spacing = [10, 20, 30, 50, 65, 80]
+            let spacing = [5, 20, 30, 60, 75, 90, 110]
             term.column(spacing[0]); term(`name`)
             term.column(spacing[1]); term(`type`)
             term.column(spacing[2]); term(`priority (shelf | avePart)`)
             term.column(spacing[3]); term(`baseHeight`)
-            term.column(spacing[4]); term(`accessRatio`)
-            term.column(spacing[5]); term(`spaceRatio`)
+            term.column(spacing[4]); term(`shelfHeight`)
+            term.column(spacing[5]); term(`accessRatio`)
+            term.column(spacing[6]); term(`spaceRatio`)
             term('\n')
             for(let j = 0; j < this.app.store.racking[i].shelves.length; j++){
                 term.column(spacing[0]); term(`${this.app.store.racking[i].shelves[j].name}`)
                 term.column(spacing[1]); term(`${this.app.store.racking[i].shelves[j].type}`)
                 term.column(spacing[2]); term(`${Math.ceil(this.app.store.racking[i].shelves[j].totalConsom)} | ${Math.ceil(this.app.store.racking[i].shelves[j].priority)}`)
                 term.column(spacing[3]); term(`${Math.ceil(this.app.store.racking[i].shelves[j].baseHeight)}`)
-                term.column(spacing[4]); term(`${this.app.store.racking[i].shelves[j].getAccessRatio()}`) 
-                term.column(spacing[5]); term(`${this.app.store.racking[i].shelves[j].getSpaceRatio()}`)
+                term.column(spacing[4]); term(`${Math.ceil(this.app.store.racking[i].shelves[j].height)}`)
+                term.column(spacing[5]); term(`${this.app.store.racking[i].shelves[j].getAccessRatio().toString().substring(0, 5)}`) 
+                term.column(spacing[6]); term(`${this.app.store.racking[i].shelves[j].getSpaceRatio().toString().substring(0, 5)}`)
                 term('\n')
                 
             }
-            term('\n========================================================================================\n\n')
+            term('\n========================================================================================================================\n\n')
         }
 
     }
@@ -259,14 +262,14 @@ class DispayStore{
                     if(index < this.app.store.shelves.length - 1){
                         this.app.clearScreen();
                         index++
-                        this.app.store.shelves[index].getShelf()
+                        this.app.store.shelves[index].getShelf(0.80*term.width, 0.80*term.height)
                     }
                 }
                 else if(key === 'DOWN' && allowSwitch == true){
                     if(index > 0){
                         this.app.clearScreen()
                         index--
-                        this.app.store.shelves[index].getShelf();
+                        this.app.store.shelves[index].getShelf(0.75*term.width, 0.75*term.height);
                     }
                 }
                 else if(key === 'ESCAPE'){
@@ -274,6 +277,7 @@ class DispayStore{
                 }
 
             }
+            term.moveTo(1, 1); term(this.app.store.shelves[index].name)
             })
         
     }

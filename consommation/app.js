@@ -24,7 +24,7 @@ const Bundle = require('./containers/bundle');
 const data2021_08_06 = require
 const storageData = require('./storageData')
 const bundleSize = require('./containers/bundleSize');
-const Adresser = require('./adresser');
+const Addresser = require('./addresser');
 
 const List = require('./draftInput');
 //const prompt = require('prompt-sync')({ sigint: true });
@@ -59,7 +59,7 @@ class App {
         this.partTable = new partTable(this)
         this.displayStore = new DisplayStore(this);
         this.FichePiece = new FichePiece(this)
-        this.adresser = new Adresser(this)
+        this.addresser = new Addresser(this)
         this.log = ''
         this.enableGoBack = true;
 
@@ -513,6 +513,15 @@ class App {
 
                 //let shelf = this.store.storeManager.shelfManager.createShelf('test', 4000, 2450)
                 //shelf.checkAvailability(this.store.getItemFromPFEP('SEP3411').storage)
+
+            }
+            else if(response.selectedIndex == 13){
+                console.log('test')
+                console.log(this.store.racking[0].shelves[0])
+                let array = this.store.racking[0].shelves[0].space.map(x => {
+                    return x.findIndex(a => a !== null)
+                })
+                console.log(array)
 
             }
 

@@ -2,18 +2,20 @@ const Bac = require('./containers/bac');
 const Bundle = require('./containers/bundle');
 const Palette = require('./containers/palette');
 const Shelf = require('./containers/shelf');
+const CustomContainer = require('./containers/customContainer');
+const bUs = require('./containers/bUs');
 const shelves = require('./containers/shelves');
 const containersData = require('./containers/containerData');
+const ContainerObject = require('./containers/containerObject')
 const ShelfManager = require('./shelfManager');
-const CustomContainer = require('./containers/customContainer');
 const term = require('terminal-kit').terminal;
 const ExportData = require('./exportData');
 const fs = require('fs')
 const shelvesData = require('./containers/shelves');
 const fsPromise = require('fs/promises')
-const bUs = require('./containers/bUs');
 const storageData = require('./storageData');
 const Racking = require('./containers/racking');
+const { Console } = require('console');
 
 const exportData = new ExportData()
 
@@ -119,7 +121,7 @@ class StoreManager {
                 const filler = 'N/D';
                 return prop ? prop.padEnd(pad) : filler.padEnd(pad)
             }
-            let header = createPad('ID', 15) + createPad('Priorité', 10) + createPad('Type', 10) + createPad('Tag', 5)
+            let header = createPad('ID', 15) + createPad('Priorité', 10) + createPad('Type', 10) + createPad('Tag', 5) + createPad('Adresse', 10)
             term.moveTo(2*term.width/3, 3); term.bold.underline('Étagères:\n');
             term.moveTo(2*term.width/3, 4); term.bold(header); term('\n')
             let shelvesItems = racking.shelves.map(shelf => {
@@ -127,7 +129,8 @@ class StoreManager {
                 let priority = createPad(Math.ceil(shelf.priority).toString(), 10)
                 let type = createPad(shelf.type, 10)
                 let tag = createPad(shelf.tag, 5)
-                return name + priority + type + tag
+                let address = createPad(shelf.address, 10)
+                return name + priority + type + tag + address
             })
             let menu = term.singleColumnMenu(shelvesItems, { cancelable: true, leftPadding: '\t\t\t\t\t\t\t\t\t\t\t\t ', keyBindings: { ENTER: 'submit', DOWN: 'next', UP: 'previous', CTRL_Z: 'escape' }}).promise
             menu.then((e) => {
@@ -161,7 +164,7 @@ class StoreManager {
             term.moveTo(marginLeft, 11); term.bold(`Nombre d'étagères: `); term(racking.shelves.length);
 
             let setMenu = term.singleColumnMenu(
-                ['Retour', 'Modifier adresse racking', 'Modifier adresses étagères'],
+                ['Retour', 'Modifier adresse racking', 'Voir adresses étagères'],
                 { y: 13, leftPadding: '\t\t\t\t\t\t', cancelable: true, keyBindings: { ENTER: 'submit', CTRL_Z: 'escape', UP: 'previous', DOWN: 'next'} }
             ).promise
             setMenu.then((res) => {
@@ -360,61 +363,91 @@ class StoreManager {
             })
         }
         exportData.exportJSON(reviewObject, 'storeReviewObject', '../SORTIE')
-
-        let currentString = '['
-        term(`^y${this.app.store.shelves.length}^: shelves sont dans le magasin\n`)
-        term(`^y${this.app.store.racking.length}^: racking sont dans le magasin\n`)
-        while(index < this.app.store.shelves.length + 1 && iter < 1000){
-            iter++
-            if(index < this.app.store.shelves.length && this.app.store.shelves[index] !== undefined){
-                if(groupIndex < 4){
-                    console.log(`adding ${this.app.store.shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
-                    currentString += JSON.stringify(this.app.store.shelves[index], null, 4) + ',';
-                    groupIndex++
-                    index++
+        const exportStore = () => {
+            let currentString = '['
+            term(`^y${this.app.store.shelves.length}^: shelves sont dans le magasin\n`)
+            term(`^y${this.app.store.racking.length}^: racking sont dans le magasin\n`)
+            while (index < this.app.store.shelves.length + 1 && iter < 1000) {
+                iter++
+                if (index < this.app.store.shelves.length && this.app.store.shelves[index] !== undefined) {
+                    if (groupIndex < 4) {
+                        console.log(`adding ${this.app.store.shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
+                        currentString += JSON.stringify(this.app.store.shelves[index], null, 4) + ',';
+                        groupIndex++
+                        index++
+                    }
+                    else if (groupIndex == 4) {
+                        console.log(`adding ${this.app.store.shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
+                        currentString += JSON.stringify(this.app.store.shelves[index], null, 4) + ']'
+                        groupIndex++
+                        index++
+                    }
+                    else if (groupIndex == 5) {
+                        console.log(`exporting ${this.app.store.shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
+                        let name = `shelves_${index - groupIndex}_To_${index}`
+                        groupIndex = 0;
+                        fs.writeFile(`../SORTIE/shelves/${name}.json`, currentString, (err) => {
+                            if (err) { console.log('ERROR ', err) }
+                            else { console.log(`${name} exported successfully`) }
+                        })
+                        currentString = '['
+                    }
                 }
-                else if(groupIndex == 4){
-                    console.log(`adding ${this.app.store.shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
-                    currentString += JSON.stringify(this.app.store.shelves[index], null, 4) + ']'
-                    groupIndex++
-                    index++
-                }
-                else if(groupIndex == 5){
-                    console.log(`exporting ${this.app.store.shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
+                else if (index == this.app.store.shelves.length) {
+                    iter == 1001;
+                    if (currentString.endsWith(',')) {
+                        currentString = currentString.substring(0, currentString.length - 1)
+                    }
+                    currentString += ']'
+                    console.log(`exporting ${this.app.store.shelves[index - 1].name}, index: ${index}, GI: ${groupIndex}`)
                     let name = `shelves_${index - groupIndex}_To_${index}`
-                    groupIndex = 0;
                     fs.writeFile(`../SORTIE/shelves/${name}.json`, currentString, (err) => {
-                        if(err){ console.log('ERROR ', err) }
+                        if (err) { console.log('ERROR ', err) }
                         else { console.log(`${name} exported successfully`) }
                     })
-                    currentString = '['
-                }
-            }
-            else if(index == this.app.store.shelves.length){
-                iter == 1001;
-                if(currentString.endsWith(',')){
-                    currentString = currentString.substring(0, currentString.length - 1)
-                }
-                currentString += ']'
-                console.log(`exporting ${this.app.store.shelves[index-1].name}, index: ${index}, GI: ${groupIndex}`)
-                let name = `shelves_${index - groupIndex}_To_${index}`
-                fs.writeFile(`../SORTIE/shelves/${name}.json`, currentString, (err) => {
-                    if(err) { console.log('ERROR ' , err) }
-                    else { console.log(`${name} exported successfully`) }
-                })
-                break;
+                    break;
 
+                }
             }
+            let data = []
+            for (let i = 0; i < this.app.store.racking.length; i++) {
+                let rackData = { ...this.app.store.racking[i] }
+                rackData.shelves = rackData.shelves.map(shelf => shelf.name)
+                data.push(rackData)
+            }
+            term(`^y${index}^: shelves ont été exportées\n`)
+            term(`^y${data.length}^: racking ont été exporté\n`)
+            exportData.exportJSON(data, 'racking', '../SORTIE')
+
         }
-        let data = []
-        for(let i = 0; i < this.app.store.racking.length; i++){
-            let rackData = { ...this.app.store.racking[i] }
-            rackData.shelves = rackData.shelves.map(shelf => shelf.name)
-            data.push(rackData)
+
+        const deleteDir = () => {
+            return new Promise((resolve, reject) => {
+                let files = fsPromise.readdir('../SORTIE/shelves')
+                let progress = 0;
+                files.then((resFiles) => {
+                    let nb = resFiles.length;
+                    if(resFiles.length > 0){
+                        resFiles.forEach(file => {
+                            let deletion = fsPromise.unlink('../SORTIE/shelves/' + file)
+                            deletion.then((res) => {
+                                if(res == undefined){ progress++ }
+                                if(progress == nb){ resolve('SUCCESS') }
+                            }).catch((e) => console.log(e))
+                        })
+                    }
+                    else { resolve('SUCCESS') }
+                })
+            })
         }
-        term(`^y${index}^: shelves ont été exportées\n`)
-        term(`^y${data.length}^: racking ont été exporté\n`)
-        exportData.exportJSON(data, 'racking', '../SORTIE')
+
+        let t = deleteDir()
+        t.then((e) => {
+            exportStore()
+        }).catch((e) => console.log(e))
+
+
+        
     }
     importStore = () => {
         let data = new Promise((resolve, reject) => {
@@ -434,8 +467,52 @@ class StoreManager {
                                 progress++
                                 if(string.length !== 0){
                                     console.log(res[i], string.length)
-                                    let json = JSON.parse(string)
-                                    shelves = shelves.concat(json)
+                                    let jsonArray = JSON.parse(string)
+
+                                    //pour chaque shelf
+                                    jsonArray.forEach(shelf => {
+                                        let shelfData = {
+                                            length: shelf.length,
+                                            rating: shelf.capacity * 2.2046
+                                        } 
+                                        let s = new Shelf(shelf.name, shelfData)
+                                        
+                                        s.content = shelf.content.map(c => {    //containerObjects
+                                            let content = new ContainerObject(c.name, c.position, c.dimensions)
+                                            content = {
+                                                ...content,
+                                                height: c.height,
+                                                accessPoint: c.accessPoint,
+                                                totalHeight: c.totalHeight,
+                                                weight: c.weight,
+                                                consommation: c.consommation,
+
+
+                                            }
+                                            return content
+                                        })
+                                        //console.log(shelf.space)
+                                        s.space = shelf.space
+                                        s = {
+                                            ...s,
+                                            type: shelf.type,
+                                            address: shelf.address,
+                                            priority: shelf.priority,
+                                            isDoubleSided: shelf.isDoubleSided,
+                                            content: shelf.content,
+                                            baseHeight: shelf.baseHeight,
+                                            accessRatio: shelf.accessRatio,
+                                            spaceRatio: shelf.spaceRatio,
+                                            tag: shelf.tag,
+                                            height: shelf.height,
+                                            //simon: 'ski',
+                                            weight: shelf.weight,
+                                            totalConsom: shelf.totalConsom,
+                                        }
+                                        //s.simon = 'ski'                                        
+                                        shelves.push(s)
+                                        
+                                    })
                                     console.log(`shelves.length: ${shelves.length}`)
                                 }
                                 if(progress == res.length){ resolve(shelves) }
@@ -445,20 +522,21 @@ class StoreManager {
                         racking = racking.map(rack => {
                             let shelves_names = rack.shelves
                             let r = new Racking(rack.name, rack.length, rack.contentType, rack.tag);
-                            r = { ...r, ...rack }
                             r.shelves = shelves_names.map(shelf_name => {
                                 if (shelves.find(a => a.name == shelf_name) !== undefined) {
                                     let source = shelves.find(a => a.name == shelf_name)
-                                    let shelfData = {
-                                        length: source.length,
-                                        rating: source.capacity * 2.2046
-                                    }
-                                    let s = new Shelf(source.name, shelfData)
-                                    s = { ...s, ...source }
-                                    return s
+                                    return source
                                 }
                                 else { console.log('CORRUPTED FILES!!'); return undefined }
                             })
+                            r = {
+                                ...r,
+                                address: rack.address,
+                                contentSides: rack.contentSides,
+                                height: rack.height,
+                                priority: rack.priority,
+
+                            }
                             return r
                         })
                         
@@ -524,6 +602,7 @@ class StoreManager {
             })
 
             this.app.store.rackManager.optimizeRacking()
+            this.app.addresser.setDefaultShelfAddress();
             //noContainer.forEach(a => console.log(a.length))
             this.app.log += `finalStoreList: ${this.finalStoreList.length}\n`
             term(`Les pièces sont séparées selon ${tags.length} tags dans les racking: ${tags}\n`)
