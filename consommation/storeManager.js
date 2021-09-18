@@ -16,6 +16,9 @@ const fsPromise = require('fs/promises')
 const storageData = require('./storageData');
 const Racking = require('./containers/racking');
 const { Console } = require('console');
+const { consomAnnuelleMoy } = require('./infosText');
+const GAP = 150
+const MAX_HEIGHT = 6000
 
 const exportData = new ExportData()
 
@@ -24,7 +27,7 @@ const exportData = new ExportData()
 class StoreManager {
     constructor(app) {
         this.app = app;
-        this.storePartList = [];
+        this.storePartList = [];    //unused?
         this.finalStoreList = [];
         this.noContainerList = [];
         //this.shelfManager = new ShelfManager(app)
@@ -164,17 +167,15 @@ class StoreManager {
             term.moveTo(marginLeft, 11); term.bold(`Nombre d'étagères: `); term(racking.shelves.length);
 
             let setMenu = term.singleColumnMenu(
-                ['Retour', 'Modifier adresse racking', 'Voir adresses étagères'],
+                ['Retour', 'Modifier adresse racking', 'Modifier indice de priorité', 'Voir adresses étagères'],
                 { y: 13, leftPadding: '\t\t\t\t\t\t', cancelable: true, keyBindings: { ENTER: 'submit', CTRL_Z: 'escape', UP: 'previous', DOWN: 'next'} }
             ).promise
             setMenu.then((res) => {
                 if(res.selectedIndex == 0){ rackingSelector(this.app.lastScreen) }
                 else if(res.selectedIndex == 1){
-                    this.app.enableGoBack = false;
                     term(`\nEntrer l'adresse du racking: `)
                     let inputField = term.inputField({cancelable: true, x: term.width/3, keyBindings: { ENTER: 'submit', BACKSPACE: 'backDelete', CTRL_Z: 'escape'}}).promise
                     inputField.then((res) => {
-                        this.app.enableGoBack = true
 
                         //AJOUTER IF POUR PAS QUE 2 RACKING AIENT LA MEME ADRESSE
                         let target = this.app.store.racking.find(a => a.name == racking.name)
@@ -183,6 +184,19 @@ class StoreManager {
                     }).catch((e) => console.log(e))
                 }
                 else if(res.selectedIndex == 2){
+                    term(`Entrer l'indice de priorité du racking\n`)
+                    let inputField = term.inputField({cancelable: true, x: term.width/3, keyBindings: { ENTER: 'submit', BACKSPACE: 'backDelete', CTRL_Z: 'escape'}}).promise
+                    inputField.then((res) => {
+                        console.log(res)
+                        //AJOUTER IF POUR PAS QUE 2 RACKING AIENT LA MEME PRIORITE
+                        if(res && !isNaN(res)){
+                            let target = this.app.store.racking.find(a => a.name == racking.name)
+                            if(target !== undefined){ target.priorityIndex = res }
+                        }
+                        rackingSelector({ index : this.app.lastScreen.index })
+                    }).catch((e) => console.log(e))
+                }
+                else if(res.selectedIndex == 3){
                     this.app.lastScreen = {
                         ...this.app.lastScreen,
                         type: 'racking',
@@ -196,8 +210,8 @@ class StoreManager {
             this.app.clearScreen()
             this.app.lastScreen = { screen: 'home' }
             term.bold(`Gestion de l'adressage\n`)
-            term.bold(`ID rack - Adresse`)
-            menuItems = this.app.store.racking.map(rack => `${rack.name} - ${rack.address ? rack.address : 'N/D'}`);
+            term.bold(`ID rack - Adresse - Indice priorité`)
+            menuItems = this.app.store.racking.map(rack => `${rack.name} - ${rack.address ? rack.address : 'N/D'} - ${rack.priorityIndex ? rack.priorityIndex : 'N/D'}`);
             let rackMenu = term.singleColumnMenu(
                 menuItems,
                 //arranger menuIndex
@@ -247,7 +261,7 @@ class StoreManager {
             'Vérification des contenants',
             'Générer magasin',
             'Vérification du magasin',
-            'Gérer adressage',
+            'Gérer adressage et indice de priorité',
             'Exporter magasin',
             'Importer magasin',
 
@@ -306,6 +320,10 @@ class StoreManager {
 
 
 
+        if(!this.finalStoreList){
+            let partList = this.getStoreList(this.app.store.PFEP, this.minOrderQte)
+            this.finalStoreList = partList.filter(a => a.storage.length > 0)
+        }
         let piecesNonPlacees = this.finalStoreList.map(part => {
             if(shelvesPartList.findIndex(a => a == part.code) == -1){
                 return part
@@ -353,37 +371,52 @@ class StoreManager {
                 return {
                     name: shelf.name,
                     length: shelf.length,
+                    baseHeight: shelf.baseHeight,
                 }
             }),
             racking: this.app.store.racking.map(rack => {
                 return {
-                    name: rack.name
+                    name: rack.name,
+                    priorityIndex: rack.priorityIndex,
+                    contentSides: rack.contentSides
                 }
 
-            })
+            }),
+            minOrderQte: this.minOrderQte,
+            initialStoreList: this.initialStoreList,
+            finalStoreList:this.finalStoreList,
+            noContainerList: this.noContainerList,
+
         }
         exportData.exportJSON(reviewObject, 'storeReviewObject', '../SORTIE')
         const exportStore = () => {
             let currentString = '['
             term(`^y${this.app.store.shelves.length}^: shelves sont dans le magasin\n`)
             term(`^y${this.app.store.racking.length}^: racking sont dans le magasin\n`)
-            while (index < this.app.store.shelves.length + 1 && iter < 1000) {
+
+
+            let shelves = []
+            this.app.store.racking.forEach(rack => {
+                shelves = shelves.concat(rack.shelves)
+            })
+
+            while (index < shelves.length + 1 && iter < 1000) {
                 iter++
-                if (index < this.app.store.shelves.length && this.app.store.shelves[index] !== undefined) {
+                if (index < shelves.length && shelves[index] !== undefined) {
                     if (groupIndex < 4) {
-                        console.log(`adding ${this.app.store.shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
-                        currentString += JSON.stringify(this.app.store.shelves[index], null, 4) + ',';
+                        console.log(`adding ${shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
+                        currentString += JSON.stringify(shelves[index], null, 4) + ',';
                         groupIndex++
                         index++
                     }
                     else if (groupIndex == 4) {
-                        console.log(`adding ${this.app.store.shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
-                        currentString += JSON.stringify(this.app.store.shelves[index], null, 4) + ']'
+                        console.log(`adding ${shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
+                        currentString += JSON.stringify(shelves[index], null, 4) + ']'
                         groupIndex++
                         index++
                     }
                     else if (groupIndex == 5) {
-                        console.log(`exporting ${this.app.store.shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
+                        console.log(`exporting ${shelves[index].name}, index: ${index}, GI: ${groupIndex}`)
                         let name = `shelves_${index - groupIndex}_To_${index}`
                         groupIndex = 0;
                         fs.writeFile(`../SORTIE/shelves/${name}.json`, currentString, (err) => {
@@ -393,13 +426,13 @@ class StoreManager {
                         currentString = '['
                     }
                 }
-                else if (index == this.app.store.shelves.length) {
+                else if (index == shelves.length) {
                     iter == 1001;
                     if (currentString.endsWith(',')) {
                         currentString = currentString.substring(0, currentString.length - 1)
                     }
                     currentString += ']'
-                    console.log(`exporting ${this.app.store.shelves[index - 1].name}, index: ${index}, GI: ${groupIndex}`)
+                    console.log(`exporting ${shelves[index - 1].name}, index: ${index}, GI: ${groupIndex}`)
                     let name = `shelves_${index - groupIndex}_To_${index}`
                     fs.writeFile(`../SORTIE/shelves/${name}.json`, currentString, (err) => {
                         if (err) { console.log('ERROR ', err) }
@@ -493,6 +526,10 @@ class StoreManager {
                                         })
                                         //console.log(shelf.space)
                                         s.space = shelf.space
+                                        s.height = shelf.height;
+                                        s.baseHeight = shelf.baseHeight;
+                                        console.log(shelf.baseHeight, shelf.height)
+                                        console.log(s.baseHeight, s.height)
                                         s = {
                                             ...s,
                                             type: shelf.type,
@@ -500,11 +537,11 @@ class StoreManager {
                                             priority: shelf.priority,
                                             isDoubleSided: shelf.isDoubleSided,
                                             content: shelf.content,
-                                            baseHeight: shelf.baseHeight,
+                                            //baseHeight: shelf.baseHeight,
                                             accessRatio: shelf.accessRatio,
                                             spaceRatio: shelf.spaceRatio,
                                             tag: shelf.tag,
-                                            height: shelf.height,
+                                            //height: shelf.height,
                                             //simon: 'ski',
                                             weight: shelf.weight,
                                             totalConsom: shelf.totalConsom,
@@ -524,8 +561,7 @@ class StoreManager {
                             let r = new Racking(rack.name, rack.length, rack.contentType, rack.tag);
                             r.shelves = shelves_names.map(shelf_name => {
                                 if (shelves.find(a => a.name == shelf_name) !== undefined) {
-                                    let source = shelves.find(a => a.name == shelf_name)
-                                    return source
+                                    return shelves.find(a => a.name == shelf_name)
                                 }
                                 else { console.log('CORRUPTED FILES!!'); return undefined }
                             })
@@ -535,6 +571,7 @@ class StoreManager {
                                 contentSides: rack.contentSides,
                                 height: rack.height,
                                 priority: rack.priority,
+                                priorityIndex: rack.priorityIndex,
 
                             }
                             return r
@@ -543,6 +580,10 @@ class StoreManager {
                         let review = fsPromise.readFile('../SORTIE/storeReviewObject.json', 'utf8')
                         review.then((reviewObject) => {
                             reviewObject = JSON.parse(reviewObject)
+                            this.minOrderQte = reviewObject.minOrderQte
+                            this.initialStoreList = reviewObject.initialStoreList;
+                            this.finalStoreList = reviewObject.finalStoreList;
+                            this.noContainerList = reviewObject.noContainerList;
                             
                             let check1 = reviewObject.shelves.map(shelf => { //checking shelves array with storeReviewObject
                                 if(shelves.findIndex(a => a.name == shelf.name) !== -1){ return true }
@@ -577,54 +618,178 @@ class StoreManager {
 
     storeGenerator = () => {
         this.app.clearScreen();
-        term.bold("Création d'un magasin de pièces\n")
-        let list = this.partSelector(this.app.store.PFEP)
-        list.then((partList) => {
-            this.app.log += '----- initializing store creation -----\n'
-            this.app.log += `Initial partlist length: ${partList.length}\n`
+        //insert warning!!
+
+        const creationTypeMenu = new Promise((resolve, reject) => {
+            term(`Types contraintes pour nouveau magasin:\n`)
+            const creationTypes = [
+                `Option 1: Garder les emplacements d'étagères et des rackings`,
+                `Option 2: Repositionner les étagères, garder les emplacements des rackings`,
+                `Option 3: Repositionner tous les éléments`
+            ]
+            let menu = term.singleColumnMenu(creationTypes, { cancelable: true, keyBindings: { ENTER: 'submit', DOWN: 'next', UP: 'previous', CTRL_Z: 'escape' } }).promise
+            menu.then((res) => {
+                if (res.selectedIndex !== undefined) { resolve(res.selectedIndex) }
+                else { reject('NO OPTION SELECTED') }
+            }).catch((e) => { reject() })
+        })
+
+        //updateContainerPlacement
+        //updateShelves
+        //createNewStore
+
+
+        
+        const updateContainerPlacement = (partList) => {
+            /* this.app.store.shelves.forEach(shelf => {
+                shelf.content = [];
+                shelf.space = shelf.initShelf({ length: shelf.length })
+            }) */
+            console.log('updateContainerPlacement')
+
+            let storeFile = fsPromise.readFile('../SORTIE/storeReviewObject.json', 'utf8')=
+            storeFile.then((storeObject) => {
+                storeObject = JSON.parse(storeObject)
+            }).catch((e) => console.log(e))
+
+            const clearShelvesOnRacking = () => {
+                let newShelves = []
+                let newRacking = this.app.store.racking.map(rack => {
+                    let r = new Racking(rack.name, rack.length, rack.type, undefined)
+                    let shelvesSource = rack.shelves.sort((a, b) => a.baseHeight - b.baseHeight)=
+                    r.shelves = shelvesSource.map((shelf, index) => {
+                        let shelfData = {
+                            length: shelf.length,
+                            rating: shelf.capacity * 2.2046
+                        }
+                        let s = new Shelf(shelf.name, shelfData, undefined, undefined)
+                        s = {
+                            ...s,
+                            baseHeight: shelf.baseHeight,
+                            address: shelf.address,
+                            height: shelf.height
+                        }
+                        newShelves.push(s)
+                        return s
+                    })
+                    r = {
+                        ...r,
+                        address: rack.address,
+                        contentSides: rack.contentSides,
+                        height: rack.height,
+                        priorityIndex: rack.priorityIndex
+                    }
+                    return r
+                })
+                this.app.store.racking = newRacking
+            }
+
+            clearShelvesOnRacking()
+
+            const findPlace = (part) => {
+                this.app.store.racking.map(rack => {
+                    rack.shelves.map(shelf => {
+                        /*
+
+                        algo goes from loop thru rack and shelf returns searchPlace result we will chose which is the best afterwards
+
+                        */
+
+
+                    })
+                })
+            }
+
+
+
+
+        }
+        const updateShelvesPlacement = () => {
+
+        }
+        const createNewStore = (partList) => {
             this.initialStoreList = partList;
             let split = this.app.store.rackManager.splitPartsByTag(partList)
             let tags = Object.keys(split)
-            
-            
-            this.app.log += `tag categories are ${tags}\n`
             tags.forEach(tag => {
+                console.log(tag)
                 let sorted = this.app.store.rackManager.getPriorityList(split[tag]);    //sorted tagList
                 this.noContainerList = this.noContainerList.concat(sorted.filter((a) => a.storage.length == 0));    //filter noContainer
 
                 sorted = sorted.filter((a) => a.storage.length > 0);    //filter container
-        
-                
+
+
                 this.app.log += `sending ${sorted.length} parts to placeInRacking\n`
                 this.finalStoreList = this.finalStoreList.concat(sorted);   //pushing parts that does algo to go in shelves
-                this.app.store.rackManager.placeInRacking(sorted, tag); //calling place in racking on partList
-                //this.app.store.rackManager.test(sorted, tag);
-            })
 
+                
+                this.app.store.rackManager.placeInRacking(sorted, tag); //calling place in racking on partList
+                //this.app.store.rackManager.test(sorted, tag);           
+            })
             this.app.store.rackManager.optimizeRacking()
             this.app.addresser.setDefaultShelfAddress();
-            //noContainer.forEach(a => console.log(a.length))
-            this.app.log += `finalStoreList: ${this.finalStoreList.length}\n`
-            term(`Les pièces sont séparées selon ${tags.length} tags dans les racking: ${tags}\n`)
-             //option pour voir liste de priorité
+        }
+        
+        creationTypeMenu.then((typeIndex) => {
+            this.app.clearScreen()
+            let list = this.partSelector(this.app.store.PFEP)
+            
+            
+            list.then((partList) => {
+                switch(typeIndex){
+                    case 0: updateContainerPlacement(partList); break;
+                    case 1: updateShelvesPlacement(partList); break;
+                    case 2: createNewStore(partList); break;
+                }   
+                
+            }).catch((e) => console.log(e))
 
-
-             
-             /*
-            sorted.map(a => {
-            term.column(0); term(a.code);
-            term.column(15); term(Math.ceil(a.consommation.mensuelleMoy));
-            term.column(25); term(a.class)
-            term('\n')
-            })
-            */
-
-
-            //this.filterPFEP(this.app.store.PFEP).map(a => console.log(a.code, a.description, a.class, a.family))
-
-            exportData.exportTxt(this.app.log, 'log', '../SORTIE')
 
         }).catch((e) => console.log(e))
+
+        
+
+
+        const generateStore = () => {
+            term.bold("Création d'un magasin de pièces\n")
+            let list = this.partSelector(this.app.store.PFEP)
+            list.then((partList) => {
+                this.app.log += '----- initializing store creation -----\n'
+                this.app.log += `Initial partlist length: ${partList.length}\n`
+                
+
+
+                this.app.log += `tag categories are ${tags}\n`
+                tags.forEach(tag => {
+                    let sorted = this.app.store.rackManager.getPriorityList(split[tag]);    //sorted tagList
+                    this.noContainerList = this.noContainerList.concat(sorted.filter((a) => a.storage.length == 0));    //filter noContainer
+
+                    sorted = sorted.filter((a) => a.storage.length > 0);    //filter container
+
+
+                    this.app.log += `sending ${sorted.length} parts to placeInRacking\n`
+                    this.finalStoreList = this.finalStoreList.concat(sorted);   //pushing parts that does algo to go in shelves
+
+                    
+                    this.app.store.rackManager.placeInRacking(sorted, tag); //calling place in racking on partList
+                    //this.app.store.rackManager.test(sorted, tag);
+                })
+
+                this.app.store.rackManager.optimizeRacking()
+                this.app.addresser.setDefaultShelfAddress();
+                //noContainer.forEach(a => console.log(a.length))
+                this.app.log += `finalStoreList: ${this.finalStoreList.length}\n`
+                term(`Les pièces sont séparées selon ${tags.length} tags dans les racking: ${tags}\n`)
+                //option pour voir liste de priorité
+                //this.filterPFEP(this.app.store.PFEP).map(a => console.log(a.code, a.description, a.class, a.family))
+                exportData.exportTxt(this.app.log, 'log', '../SORTIE')
+
+            }).catch((e) => console.log(e))
+
+        }
+
+
+        
 
 
     } 

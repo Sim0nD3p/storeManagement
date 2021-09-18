@@ -26,9 +26,7 @@ class ShelfManager{
             customShelf: 0
         }
     }
-    checkAvailability(part, shelf, returnFull){
 
-    }
     getShelf(name){
         console.log('getShelf from shelfManager')
         let index = -1;
@@ -39,6 +37,8 @@ class ShelfManager{
     }
 
     /**
+     * Chose which shelf to create from the list in shelves.js according to current shelves in racking and their priority  
+     * **not the best programming here
      * @param {string} prop (length, priority)
      * @param {number} length 
      * @param {number} weight
@@ -203,8 +203,16 @@ class ShelfManager{
     }
 
     //should return shelf
+    /**
+     * Create and returns shelf for an array of parts to be placed on
+     * **Array might be useless (maybe could only use one part) 
+     * @param {*Array} partsToPlace 
+     * @param {*String} tag 
+     * @returns shelfObject
+     */
     createShelf(partsToPlace, tag){
         let weightArray = []; let totalWeightArray = []; let containersArray = []; let totalContainerArray = []; let finalShelf; let priorityArray = []
+        //Might be a lot of useless stuff here
         for(let i = 0; i < partsToPlace.length; i++){
             //weightArray
             let weight = 0;
@@ -223,9 +231,6 @@ class ShelfManager{
                 priorityArray.push(partsToPlace[i].part.consommation.mensuelleMoy)
             }
             
-            
-
-            
             totalContainerArray[i] = {
                 bac1: totalContainerArray[i-1] ? totalContainerArray[i-1].bac1 + (containersArray[i].bac1 ? containersArray[i].bac1 : 0) : (containersArray[i].bac1 ? containersArray[i].bac1 : 0),
                 bac2: totalContainerArray[i-1] ? totalContainerArray[i-1].bac2 + (containersArray[i].bac2 ? containersArray[i].bac2 : 0) : (containersArray[i].bac2 ? containersArray[i].bac2 : 0),
@@ -237,14 +242,9 @@ class ShelfManager{
         let totalPriority = 0
         for(let i = 0; i < priorityArray.length; i++){ totalPriority += priorityArray[i] }
         totalPriority = isNaN(totalPriority / priorityArray.length) ? 0 : totalPriority / priorityArray.length
-        //console.log('weightArray')
-        //console.log(weightArray)
-        //console.log('totalWeightArray')
-        //console.log(totalWeightArray);
-        //console.log('containersArray')
-        //console.log(containersArray);
-        //console.log('totalContainersArray')
-        //console.log(totalContainerArray);
+
+
+        //THIS IS USEFULL THO
         switch(partsToPlace[0].categorisation.type.substring(0, 3)){
             case 'bun': {
                 //let shelf = new Shelf(`shelf_${this.app.store.shelves.length + 1}`, this.unusedShelves[0], 'bundle');
@@ -332,8 +332,6 @@ class ShelfManager{
                     //let place = shelf.searchPlace(partsToPlace[i].part, FRONT);
                     //console.log('place')
                     //console.log(place)
-
-
                 }
 
                 break;
@@ -462,47 +460,3 @@ class ShelfManager{
 
 
 module.exports = ShelfManager;
-
-
-/* 
-
-createShelf(name, length, rating){
-        let shelfData;
-        for(let i = 0; i < this.unusedShelves.length; i++){
-            if(this.unusedShelves[i].rating === rating && this.unusedShelves[i].length == length){
-                shelfData = this.unusedShelves[i];
-                this.unusedShelves[i].qte--
-                break;
-            }
-        }
-        const shelf = new Shelf(name, shelfData)
-        console.log(shelf)
-        return shelf
-    }
-
-
-        let t0 = performance.now();
-        let option1 = []
-        for(let i = 0; i < this.unusedShelves.length; i++){
-            let name = 'shelve_' + this.unusedShelves[i].rating + '_' + i;
-            let shelf = []
-            for(let w = 0; w < 1067; w++){
-                shelf.push(new Array(this.unusedShelves[i].length).fill(0))
-            }
-            option1.push(shelf)
-
-        }
-        //console.log(option1)
-        option1.map((shelf, index) => {
-            console.log(index)
-            shelf.map((width, index) => {
-                width[0] = new Bac(containerData[0], `name_${width}_0`, part)
-                width[1] = new Bac(containerData[0], `name_${width}_1`, part)
-
-                /* width.map((length, index) => {
-                    length = new Bac(containerData[0], `name_${width}_${length}`, part)
-                }) *//*
-            })
-        })
-        let t1 = performance.now()
-        console.log(`the operation was performed in ${t1-t0} ms`) */

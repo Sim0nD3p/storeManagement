@@ -51,7 +51,20 @@ class FichePiece{
                 term.column(leftMargin), term.bold('Adresse: '), term(address(supplier.address).substring(0, 20)), term('\n'),
                 term.column(leftMargin), term.bold(`Lead time moyen: `), term(supplier.leadTime ? supplier.leadTime.toString().substring(0, 10) : filler), term(` mois`), term('\n'),
                 term.column(leftMargin), term.bold(`Lead time max: `), term(supplier.leadTimeMax ? supplier.leadTimeMax.toString().substring(0, 10) : filler), term(` mois`), term('\n'),
+                term('\n')
             ]
+        }
+        const emballage = (leftMargin) => {
+            let emballageTF = part.emballage.TF ? part.emballage.TF : null; 
+            let emballageSupplier = part.emballage.fournisseur ? part.emballage.fournisseur : null
+            term.column(leftMargin); term.bold.underline(`INFORMATIONS D'EMBALLAGE\n`)
+            term.column(leftMargin); term.bold('Emballage Techno-Fab:'); term('\n')
+            term.column(leftMargin + 5); term.bold(`Type: `); term(emballageTF.type ? emballageTF.type.substring(0, 10) : filler); term('\n');
+            term.column(leftMargin + 5); term.bold(`Nombre de pièces / contenant: `); term(emballageTF.nbPieces ? emballageTF.nbPieces.toString().substring(0, 10) : filler); term('\n');
+            term.column(leftMargin); term.bold('Emballage fournisseur:'); term('\n');
+            term.column(leftMargin + 5); term.bold(`Type: `); term(emballageSupplier.type ? emballageSupplier.type.substring(0, 10) : filler); term('\n');
+            term.column(leftMargin + 5); term.bold(`Nombre de pièces / contenant: `); term(emballageSupplier.nbPieces ? emballageSupplier.nbPieces.toString().substring(0, 10) : filler); term('\n');
+            term.column(leftMargin); term.bold()
         }
 
 
@@ -71,15 +84,25 @@ class FichePiece{
         term('\n')
 
         supplierInfos(part.supplier[0], leftMargin)
+        emballage(leftMargin)
+        term('\n')
 
-        let emballageTF = part.emballage.TF ? part.emballage.TF : null; 
-        term.column(leftMargin); term.bold.underline(`INFORMATIONS D'EMBALLAGE\n`)
-        term.column(leftMargin); term.bold(`Type: `); term(emballageTF.type ? emballageTF.type.substring(0, 10) : filler); term('\n');
-        term.column(leftMargin); term.bold(`Nombre de pièces par contenant: `); term(emballageTF.nbPieces ? emballageTF.nbPieces.substring(0, 10) : filler); term('\n');
-        term.column(leftMargin); term.bold(); term(); term('\n');
-        term.column(leftMargin); term.bold(); term(); term('\n');
-        term.column(leftMargin); term.bold(); term(); term('\n');
-        term.column(leftMargin); term.bold()
+
+        const storage = (storage, leftMargin) => {
+            if(storage.length !== 0){
+                const container = storage[0]
+                term.column(leftMargin); term.bold.underline(`INFORMATIONS D'ENTREPOSAGE`); term('\n')
+                term.column(leftMargin); term.bold(`Type de contenant: `); term(container.type ? container.type.substring(0, 10) : filler); term('\n');
+                term.column(leftMargin); term.bold(`Nombre de piece / contenant: `); term(container.count ? container.count.toString().substring(0, 5) : filler); term('\n');
+                term.column(leftMargin); term.bold(`Nombre de contenants maximal: `); term(storage.length ? storage.length.toString().substring(0, 5) : filler); term('\n');
+                term.column(leftMargin); term.bold(`Masse: `); term(container.weight ? container.weight.toString().substring(0, 5) : filler); term(` (kg)`); term('\n');
+                term.column(leftMargin); term.bold('Dimensions: '); term(dimensions({length: container.length, width: container.width, height: container.height})); term('\n')
+            }
+            
+        }
+        storage(part.storage, leftMargin)
+
+        
 
 
 

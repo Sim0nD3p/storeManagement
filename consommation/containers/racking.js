@@ -21,6 +21,7 @@ class Racking{
         this.contentSides = [null, null]
         this.height = 0
         this.priority;
+        this.priorityIndex;
         this.class; //unused?
     }
 

@@ -965,6 +965,7 @@ class Shelf{
     updateProps = () => {
         this.priority = this.getPriorityIndex();
         //this.totalConsom = this.setTotalConsom();
+        console.log(this.getPriorityIndex())
         this.setTotalConsom()
         //console.log(`totalConsom: ${this.totalConsom}`)
         this.height = this.setHeight();

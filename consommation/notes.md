@@ -95,9 +95,12 @@
     - creer piece -> afficher Piece = bug
     - still calling error when gen containers
 
+- Notes on preassigned shelf priority
+    - assign priority to racking and shelves
+    - juste fill shelves first to priority
+    On permet de bouger shelves dans racking ou pas
 
 
-    SHELF AFFICHE PAS ON IMPORT
     
 
 

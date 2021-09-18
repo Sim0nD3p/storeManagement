@@ -25,12 +25,6 @@ class RackManager{
         }
     }
 
-    test = (partList, tag) => {
-        for(let i = 0; i < partList.length; i++){
-            this.app.log += `part: ${partList[i].code}\n`
-        }
-    }
-
     getRacking(name){
         let rackIndex = -1
         for(let i = 0; i < this.app.store.racking.length; i++){
@@ -40,6 +34,7 @@ class RackManager{
     }
 
     /**
+     * Used to split parts by tag
      * Returns object with arrays of parts by tag
      * @param {*Array} partList - PFEP like array
      * @returns object {...tag: [arrayOfParts]}
@@ -59,6 +54,11 @@ class RackManager{
         return sorted
     }
 
+    /**
+     * Sorts partList
+     * @param {*} partList 
+     * @returns 
+     */
     getPriorityList = (partList) => {
         let sorted = partList.sort((a, b) => {
             //if(a.class && b.class){
@@ -71,41 +71,7 @@ class RackManager{
         return sorted
     }
 
-    initRacking_old(PFEP) {
-        PFEP = this.filterParts(PFEP);  //enleve les pieces avec le tag barre de stephane, could go eventually
-        let array = PFEP.map((item, index) => {
-            if(item.storage.length > 0){
-                if (item.class) {
-                        if (item.family && item.family !== 'Consommable' && item.family !== 'Collant') {
-                            if (item.family !== 'Assemblage' && !item.family.includes('Extrusion usin')) {
-                                return { code: item.code, type: 'MP', class: item.class, consoMens: item.consommation ? item.consommation.mensuelleMoy : undefined }
-                            }
-                            else return { code: item.code, type: 'assemblage', class: item.class, consoMens: item.consommation ? item.consommation.mensuelleMoy : undefined }
-                        }
-                        else if (!item.family) { return { code: item.code, type: 'MP', class: item.class, consoMens: item.consommation ? item.consommation.mensuelleMoy : undefined } }
-                } else return { code: item.code, type: 'MP', class: item.class, consoMens: item.consommation ? item.consommation.mensuelleMoy : undefined }
-            }
-        })
-
-        let array_new = PFEP.map((item, index) => {
-            if(item.family && item.family !== 'Assemblage' && item.family.includes('usin')){
-                return { code: item.code, type: 'MP', class: item.class, consoMens: item.consommation ? item.consommation.mensuelleMoy : undefined }
-            } else return { code: item.code, type: 'assemblage', class: item.class, consoMens: item.consommation ? item.consommation.mensuelleMoy : undefined } 
-        })
-        array_new = array.filter(part => part !== undefined)
-        term(`${array.length} parts should be placed in racking\n`)
-        let object = this.getPriorityList(array)
-
-        let MP = object.MP.map((mp, index) => { return this.app.store.getItemFromPFEP(mp.code) })
-        let assemblages = object.assemblages.map((ass, index) => { return this.app.store.getItemFromPFEP(ass.code) })
-        this.partLists = { MP: [...MP], assemblages: [...assemblages] }
-        
-        console.log(`MP ${MP.length}`)
-        console.log(`assemblages ${assemblages.length}`)
-        this.placeInRacking(MP, 'MP');
-        this.placeInRacking(assemblages, 'ASS')
-        this.optimizeRacking()
-    }
+    
 
     /**
      * Makes list of nexts parts to place in to shelf to be created and uses shelfManager.createShelf() to return new shelf
@@ -151,7 +117,7 @@ class RackManager{
 
 
     /**
-     * 
+     * utility?
      * @param {array} partsPriority array of parts priority
      * @returns array of average priority for parts
      */
@@ -171,6 +137,13 @@ class RackManager{
     }
 
     //filters TAG and LENGTH (searchPlace filters HEIGHT and TYPE)
+
+    /**
+     * Finds racking for shelf
+     *  - checks rack height limit, racking length, if there is place for the shelf in racking
+     *  - if no potential racking, creates new racking and place shelf in it
+     * @param {*shelfObject} shelfObject
+     */
     placeNewShelf = (shelf) => {
         for(let i = 0; i < this.app.store.racking.length; i++){ //gets totalHeight of all racking
             this.app.store.racking[i].height = this.app.store.racking[i].getTotalHeight();
@@ -210,80 +183,12 @@ class RackManager{
         potentialRacks.forEach(rack => this.app.log += `\t${rack.name}, ${rack.type}, ${rack.length}, ${rack.tag}\n`)
 
     }
-    placeNewShelf_old(shelf) {
-        let rackType = shelf.type == 'bac' ? 'mixed' : shelf.type;
-        //console.log(`shelf.type ${shelf.type}`)
-        //let shelfPriority = this.predictNewShelfPriority(partsToPlace.map(part => part.categorisation.consoMens))
-        for(let i = 0; i < this.app.store.racking.length; i++){
-            this.app.store.racking[i].height = this.app.store.racking[i].getTotalHeight();
-        }
+    
+    
 
 
-        let baseHeight = 0;
-        let targetRack;
-        let potentialRacks = this.app.store.racking.map((rack, index) => {  //finds potential racks (length, type)
-            if (shelf.length == rack.length && shelf.tag == rack.tag) { return rack }
-            else return null
-        })
-
-        const getMaxHeight = (type) => {
-            //bundle, bac, bUs, cus, pal
-
-        }
-        let maxHeight = getMaxHeight(shelf.type)
-        for(let i = 0; i < this.app.store.racking.length; i++){
-            this.app.store.racking[i].searchPlace
-        }
-        
-        potentialRacks = potentialRacks.filter((a) => a !== null)
-        this.app.log += `\track options are:\n`
-        potentialRacks.forEach(rack => this.app.log += `\t${rack.name}, ${rack.type}, ${rack.length}, ${rack.tag}\n`)
-
-        //console.log('potentialRacks')
-        //console.log(potentialRacks)
-
-        if(potentialRacks.findIndex((a) => a !== null) == -1){  //si aucun potential rack => create new rack
-            let rack = new Racking(`racking_${this.app.store.racking.length + 1}`, shelf.length, rackType, shelf.tag)
-            this.app.store.racking.push(rack)
-            targetRack = rack
-        }
-        else{
-            potentialRacks = potentialRacks.filter((a) => a !== null);   //filters potentialRacks (null)
-            //console.log('potentialRacking')
-            //console.log(potentialRacks)
-            let options = potentialRacks.map((rack, index) => {
-                return [rack.name, rack.searchPlace(shelf)]
-            })
-            for(let i = 0; i < potentialRacks.length; i++){
-
-                let place = potentialRacks[i].searchPlace(shelf, 'reach_limit')
-                if(!isNaN(place) && rackType == potentialRacks[i].contentType){
-                    baseHeight = place
-                    targetRack = this.getRacking(potentialRacks[i].name)
-            }
-                //ALGO TO FIND BEST POTENTIAL RACK
-                //nb of shelf already on rack => priorityZone
-                //we got to check for priority (consomMens)
-                
-                //console.log(potentialRacks[i].shelves.length)
-                if(potentialRacks[i].shelves.length <= 5){
-//                    targetRack = this.getRacking(potentialRacks[i].name)
-                } 
-            }
-            if (targetRack == undefined) {
-                let rack = new Racking(`racking_${this.app.store.racking.length + 1}`, shelf.length, rackType, shelf.tag)
-                targetRack = rack
-                this.app.store.racking.push(rack)                
-            }
-        }
-        //targetRack.getBlocs(shelf)       
-        this.app.log += `\tPLACED ${shelf.name} in ${targetRack.name}\n` 
-        targetRack.addShelf(shelf, baseHeight)
-
-    }
-
+    //might not be wanted when not creating a new store from scratch
     optimizeRacking() {
-
         //makes sure that all shelves are placed in racking
         for (let i = 0; i < this.app.store.shelves.length; i++) {
             if (this.app.store.shelves[i].baseHeight == undefined) {
@@ -468,133 +373,10 @@ class RackManager{
             })
             return racking
         }        
-
-        
-
-
-
-
         this.app.store.racking = redistributeShelves(init)
-        
-        
-        
-
     }
 
-    optimizeRacking_old(){
-        //makes sure that all shelves are placed in racking
-        for(let i = 0; i < this.app.store.shelves.length; i++){
-            if(this.app.store.shelves[i].baseHeight == undefined){
-                this.placeNewShelf(this.app.store.shelves[i])
-            }
-        }
-
-
-        //gets all shelves, organized by length
-        let initShelvesObj = {}
-        for(let i = 0; i < this.app.store.shelves.length; i++){
-            initShelvesObj = {
-                ...initShelvesObj,
-                [this.app.store.shelves[i].length]: {
-                    ...initShelvesObj[this.app.store.shelves[i].length],
-                    [this.app.store.shelves[i].name]: this.app.store.shelves[i]
-                }
-            }
-        }
-
-        let shelves = {}
-        for(const length in initShelvesObj){
-            let currentLength = [];
-            for(const shelf in initShelvesObj[length]){
-                currentLength.push(initShelvesObj[length][shelf])
-
-            }
-            shelves = {
-                ...shelves,
-                [length]: currentLength,
-            }
-        }
-        
-        let types = Object.keys(initShelvesObj)
-        const height = (shelf) => {
-            if(shelf.type == 'bac'){ return 'reach_limit' }
-            else if(shelf.type == 'bUs'){ return 'reach_limit' }
-            else return undefined
-        }
-
-
-        let racking = []
-        for(let i = 0; i < types.length; i++){
-            console.log(types[i])
-            shelves[types[i]].forEach(s => s.setTotalConsom())
-            let order = shelves[types[i]].sort((a, b) => {
-                if(a.type < b.type) return -1
-                if(a.type > b.type) return 1
-
-                if(a.totalConsommation < b.totalConsommation) return 1
-                if(a.totalConsommation > b.totalConsommation) return -1
-
-            })
-            console.log('-----')
-            order = order.map((s => console.log(s.name, s.totalConsommation)))
-            console.log('---')
-
-            
-            let typeRacking = []
-            let currentRack = new Racking('temp_1', order[0].length, order[0].type, order[0].tag)
-            order.forEach(shelf => {
-                let place = currentRack.searchPlace(shelf, height(shelf))
-                if(place !== false && place !== undefined){
-                    currentRack.addShelf(shelf, place)
-                }
-                else {
-                    if(typeRacking.findIndex(a => a.name == currentRack.name) == -1){ typeRacking.push(currentRack) }
-                    let potential = typeRacking.map(rack => {
-                        let place = rack.searchPlace(shelf, height(shelf))
-                        if(place !== false && place !== undefined){ return [rack, place] }  //array [rack, baseHeight]
-                        else return null
-                    }).filter(a => a !== null)
-                    if(potential.length > 0){
-
-                    }
-                }
-
-            })
-
-
-            
-            
-            /* 
-            shelves[types[i]].forEach(shelf => {
-                let potential = racking.map(rack => {
-                    if(rack.length == shelf.length && rack.tag == shelf.tag){
-                        let height = height(shelf)
-                        return [rack.name, this.app.store.rackManager.getRacking(rack.name).searchPlace(shelf, height(shelf))]
-                    }
-                }).filter(a => a[1] !== false)
-                if(potential.length > 0){
-
-                }
-            })
- */
-
-            shelves[types[i]].map((shelf, index) => {
-                console.log(shelf.name, shelf.priority, shelf.content.length)
-
-            })
-            
-        }
-        /*
-        loop thru racking assinging shelves (sorted by priority) around racking of same length
-        check if rack with low height can be replaced by shelve on other racking
-
-        */
-        //console.log(shelves['4000'])
-
-
-
-
-    }
+    
 
     placeInRacking(partList, tag){
         this.app.log += `received ${partList.length} parts (placeInRacking)\n`

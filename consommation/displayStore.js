@@ -223,7 +223,7 @@ class DispayStore{
             term.column(35); term(`length: ${this.app.store.racking[i].length}`)
             term.column(55); term(`height: ${this.app.store.racking[i].height}`)
             term.column(75); term(`tag ${this.app.store.racking[i].tag}`)
-            term.column(90); term(`Priorité: ${this.app.store.racking[i].priority.toString().substring(0, 5)}`)
+            term.column(90); term(`Priorité: ${this.app.store.racking[i].priority ? this.app.store.racking[i].priority.toString().substring(0, 5) : null}`)
             //term.column(55); term(`${this.app.store.racking[i].}\n`)
             term('\n------------------------------------------------------------------------------------------------------------------------\n')
             //term('\n')
@@ -242,8 +242,8 @@ class DispayStore{
                 term.column(spacing[2]); term(`${Math.ceil(this.app.store.racking[i].shelves[j].totalConsom)} | ${Math.ceil(this.app.store.racking[i].shelves[j].priority)}`)
                 term.column(spacing[3]); term(`${Math.ceil(this.app.store.racking[i].shelves[j].baseHeight)}`)
                 term.column(spacing[4]); term(`${Math.ceil(this.app.store.racking[i].shelves[j].height)}`)
-                term.column(spacing[5]); term(`${this.app.store.racking[i].shelves[j].getAccessRatio().toString().substring(0, 5)}`) 
-                term.column(spacing[6]); term(`${this.app.store.racking[i].shelves[j].getSpaceRatio().toString().substring(0, 5)}`)
+                term.column(spacing[5]); term(`${this.app.store.racking[i].shelves[j].getAccessRatio() ? this.app.store.racking[i].shelves[j].getAccessRatio().toString().substring(0, 5) : null}`) 
+                term.column(spacing[6]); term(`${this.app.store.racking[i].shelves[j].getSpaceRatio() ? this.app.store.racking[i].shelves[j].getSpaceRatio().toString().substring(0, 5) : null}`)
                 term('\n')
                 
             }

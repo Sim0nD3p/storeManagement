@@ -517,11 +517,7 @@ class App {
             }
             else if(response.selectedIndex == 13){
                 console.log('test')
-                console.log(this.store.racking[0].shelves[0])
-                let array = this.store.racking[0].shelves[0].space.map(x => {
-                    return x.findIndex(a => a !== null)
-                })
-                console.log(array)
+                console.log(this.store.racking[17].shelves[0])
 
             }
 
