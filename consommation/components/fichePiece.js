@@ -344,6 +344,11 @@ class FichePiece{
 
         term.moveTo(3, 3)
         partMenu(2*term.width/3 + leftMargin)
+
+        term.moveTo(2*term.width/3, 3*term.height/4);
+        let pos = this.app.store.getPartsLocation(part)
+        term(`rack: `); term.yellow(pos.rack); term(`  shelf: `); term(pos.shelf)
+        term.styleReset(0)
         
 
 
