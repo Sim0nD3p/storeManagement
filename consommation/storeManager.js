@@ -276,16 +276,18 @@ class StoreManager {
             {cancelable: true, keyBindings: { CTRL_Z:'escape', ENTER: 'submit', DOWN: 'next', UP: 'previous', }}            
         ).promise
         menu.then((res) => {
-            this.app.lastScreen.screen = 'storeManagerMenu';
-            switch(res.selectedIndex){
-                case 0: this.assignItemsContainers(); break;
-                case 1: this.verifyItemsContainers(); break;
-                case 2: this.storeGenerator(); break;
-                case 3: this.storeVerification(); break;
-                case 4: this.manageAdress(); break;
-                case 5: this.exportStore(); break;
-                case 6: this.importStore(); break;
-                default: this.app.home(); break;
+            if(res.selectedIndex !== undefined){
+                this.app.lastScreen.screen = 'storeManagerMenu';
+                switch(res.selectedIndex){
+                    case 0: this.assignItemsContainers(); break;
+                    case 1: this.verifyItemsContainers(); break;
+                    case 2: this.storeGenerator(); break;
+                    case 3: this.storeVerification(); break;
+                    case 4: this.manageAdress(); break;
+                    case 5: this.exportStore(); break;
+                    case 6: this.importStore(); break;
+                    //default: this.app.home(); break;
+                }
             }
         }).catch((e) => console.log(e))
 

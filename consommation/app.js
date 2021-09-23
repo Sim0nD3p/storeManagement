@@ -95,6 +95,9 @@ class App {
         else if(this.lastScreen.screen == 'modifierEntreposage'){ this.fichePiece.modifierEntreposage(this.lastScreen.content) }
         else if(this.lastScreen.screen == 'storeManagerMenu'){ this.store.storeManager.storeManagerMenu() }
         else if(this.lastScreen.screen == 'manageAdress'){ this.store.storeManager.manageAdress(this.lastScreen) }
+        else if(this.lastScreen.screen == 'displayPart'){
+            this.FichePiece.displayPart(this.lastScreen.content)
+        }
         else {
             this.home()
         }
@@ -394,6 +397,7 @@ class App {
             let part = this.store.getItemFromPFEP(res)
             if(part !== -1){
                 //this.lastScreen = { screen: 'afficherPiece', content: part }
+                this.lastScreen = { screen: 'displayPart', content: part }
                 this.FichePiece.displayPart(part)
             }
             else {
