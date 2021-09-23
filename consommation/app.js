@@ -362,7 +362,52 @@ class App {
     afficherDetailsPiece(item) {
 
     }
-    rechercherItem(code) {
+
+    rechercherItem = (code) => {
+        this.clearScreen()
+        this.lastScreen.screen = 'home'
+        const autoComplete = this.store.PFEP.map(part => part.code)
+
+        let margin = 5;
+        let string = 'Recherche de pièce';
+        term.moveTo(term.width/2 - string.length/2, 2); term.bold.underline(string + '\n')
+        string = 'Entrer code de pièce: ';
+        term.moveTo(term.width/2 - string.length, 4); term.bold(string)
+        let input = term.inputField(
+            {
+                y: 4,
+                x: term.width/2,
+                //echo:true,
+                cancelable:true,
+                autoCompleteHint:true,
+                autoCompleteMenu:true,
+                autoComplete:autoComplete,
+                keyBindings: {
+                    CTRL_Z: 'cancel',
+                    ENTER: 'submit',
+                    BACKSPACE: 'backDelete',
+                    TAB: 'autoComplete',
+                }
+            }
+        ).promise
+        input.then((res) => {
+            let part = this.store.getItemFromPFEP(res)
+            if(part !== -1){
+                //this.lastScreen = { screen: 'afficherPiece', content: part }
+                this.FichePiece.displayPart(part)
+            }
+            else {
+                console.log('error')
+            }
+
+
+        }).catch((e) => console.log(e))
+
+
+
+
+    }
+    rechercherItem_old(code) {
         this.clearScreen()
         console.clear();
 
@@ -507,17 +552,30 @@ class App {
                 this.rechercherFournisseur();
             }
             else if (response.selectedIndex === 12) {
-                console.log('THIS IS THE TESTING SECTION');
                 this.lastScreen.screen = 'home'
                 this.store.storeManager.storeManagerMenu()
-
+                
                 //let shelf = this.store.storeManager.shelfManager.createShelf('test', 4000, 2450)
                 //shelf.checkAvailability(this.store.getItemFromPFEP('SEP3411').storage)
-
+                
             }
             else if(response.selectedIndex == 13){
+                console.log('THIS IS THE TESTING SECTION');
                 console.log('test')
-                console.log(this.store.racking[17].shelves[0])
+                let shelf1;
+                this.store.racking.map(rack => {
+                    return rack.shelves.map(shelf => {
+                        if(shelf.name == 'shelf_4'){ shelf1 = shelf }
+                    })
+                })
+
+                let shelf2;
+                this.store.shelves.map(shelf => {
+                    if(shelf.name == 'shelf_4'){
+                        shelf2 = shelf
+                    }
+                })
+                console.log(shelf1 == shelf2)
 
             }
 

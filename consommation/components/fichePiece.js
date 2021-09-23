@@ -43,16 +43,18 @@ class FichePiece{
             return number.substring(0, 3) + '-' + number.substring(3, 6) + '-' + number.substring(6, 11)
         }
         const supplierInfos = (supplier, leftMargin) => {
-            return [
-                term.column(leftMargin), term.bold.underline(`FOURNISSEUR PRINCIPAL\n`),
-                term.column(leftMargin), term.bold(`Nom: `), term(supplier.name ? supplier.name.substring(0, 20) : filler), term('\n'),
-                term.column(leftMargin), term.bold(`Téléphone: `), term(supplier.phone ? phoneNumber(supplier.phone).substring(0, 20) : filler), term('\n'),
-                term.column(leftMargin), term.bold(`Fax: `), term(supplier.fax ? phoneNumber(supplier.fax).substring(0, 20) : filler), term('\n'),
-                term.column(leftMargin), term.bold('Adresse: '), term(address(supplier.address).substring(0, 20)), term('\n'),
-                term.column(leftMargin), term.bold(`Lead time moyen: `), term(supplier.leadTime ? supplier.leadTime.toString().substring(0, 10) : filler), term(` mois`), term('\n'),
-                term.column(leftMargin), term.bold(`Lead time max: `), term(supplier.leadTimeMax ? supplier.leadTimeMax.toString().substring(0, 10) : filler), term(` mois`), term('\n'),
-                term('\n')
-            ]
+            if(supplier !== undefined){
+                return [
+                    term.column(leftMargin), term.bold.underline(`FOURNISSEUR PRINCIPAL\n`),
+                    term.column(leftMargin), term.bold(`Nom: `), term(supplier.name ? supplier.name.substring(0, 20) : filler), term('\n'),
+                    term.column(leftMargin), term.bold(`Téléphone: `), term(supplier.phone ? phoneNumber(supplier.phone).substring(0, 20) : filler), term('\n'),
+                    term.column(leftMargin), term.bold(`Fax: `), term(supplier.fax ? phoneNumber(supplier.fax).substring(0, 20) : filler), term('\n'),
+                    term.column(leftMargin), term.bold('Adresse: '), term(address(supplier.address).substring(0, 20)), term('\n'),
+                    term.column(leftMargin), term.bold(`Lead time moyen: `), term(supplier.leadTime ? supplier.leadTime.toString().substring(0, 10) : filler), term(` mois`), term('\n'),
+                    term.column(leftMargin), term.bold(`Lead time max: `), term(supplier.leadTimeMax ? supplier.leadTimeMax.toString().substring(0, 10) : filler), term(` mois`), term('\n'),
+                    term('\n')
+                ]
+            }
         }
         const emballage = (leftMargin) => {
             let emballageTF = part.emballage.TF ? part.emballage.TF : null; 
@@ -101,6 +103,9 @@ class FichePiece{
             
         }
         storage(part.storage, leftMargin)
+
+
+        console.log(this.app.store.getPartsLocation(part))
 
         
 

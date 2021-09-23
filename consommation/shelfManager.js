@@ -426,6 +426,45 @@ class ShelfManager{
         //console.log(targetShelf[1], targetShelf[2], targetShelf[3])
         return [targetShelf[0], targetShelf[1]]
     }
+
+    getTargetTypes = (type) => {
+        const types = ['bun', 'bac', 'cus', 'bUs', 'pal']   //IMPORTANT IF WE ADD TYPES
+        switch(type.substring(0, 3)){
+            case 'bun': return ['bun', 'bUs']
+            case 'bac': return ['bac', 'cus']
+            case 'cus': return ['bac', 'cus']
+            case 'bUs' : return ['bun', 'bUs']
+            case 'pal': return ['pal']  //pal is not completed, WILL fuck the program
+        }
+    }
+
+
+    /**
+     * For updateContainerPlacement
+     * finds potential shelves and placement FRON|BACK selon accessSides du racking
+     * @param {*} part 
+     * @param {*} tag 
+     * @param {*} shelves 
+     * @returns 
+     */
+    findPotentialShelves = (part, shelves, accessSides) => {
+        //types are [bac, bun, cus, bUs]
+        const targetTypes = this.getTargetTypes(part.storage[0].type)
+        //console.log(targetTypes)
+        let potentialShelves = shelves.map(shelf => {
+            if(shelf.type == undefined || targetTypes.indexOf(shelf.type.substring(0, 3)) !== -1){
+                if(shelf.tag == part.tag || shelf.tag == undefined){
+                    let placement = [shelf.searchPlace(part, FRONT) !== false ? true : false, shelf.searchPlace(part, BACK) !== false ? true : false]
+                    if (placement[0] !== false || placement[1] !== false) {
+                        return [shelf, placement[0], placement[1]]
+                    } else return null
+                } else return null
+            } else return null
+        }).filter(a => a !== null)
+
+        return potentialShelves
+    }
+
     
 
     /**

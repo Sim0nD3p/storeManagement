@@ -13,6 +13,7 @@ class Racking{
         this.length = length;
         this.tag = tag; ////assemblage ou MP
         this.type;  
+        this.liftAccess = false
         this.address;   //range in letters
         this.shelves = []
         this.contentType = type;    //mixed, bac, bundle
@@ -258,10 +259,20 @@ class Racking{
         })
         this.priority = totalConsom
     }
+    setLiftAccess = () => {
+        const typesThatNeedLift = ['bundle', 'bUs']
+        if(typesThatNeedLift.indexOf(this.contentSides[0]) !== -1 || typesThatNeedLift.indexOf(this.contentSides[1]) !== -1){
+            this.liftAccess = true
+        }
+        else{
+            this.liftAccess = false
+        }
+    }
     updateProps = () => {
         this.contentSides = this.getContentSides()
         this.height = this.getTotalHeight();
         this.setPriority()
+        this.setLiftAccess()
         this.shelves = this.shelves.sort((a, b) => a.baseHeight - b.baseHeight)
     }
 

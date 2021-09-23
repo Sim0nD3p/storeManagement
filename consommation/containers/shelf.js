@@ -141,7 +141,7 @@ class Shelf{
                     return position
                 } else return null
             })
-            console.log(positions)
+            //console.log(positions)
             positions = positions.filter((a) => a !== null)
             return positions
         }
@@ -965,7 +965,6 @@ class Shelf{
     updateProps = () => {
         this.priority = this.getPriorityIndex();
         //this.totalConsom = this.setTotalConsom();
-        console.log(this.getPriorityIndex())
         this.setTotalConsom()
         //console.log(`totalConsom: ${this.totalConsom}`)
         this.height = this.setHeight();

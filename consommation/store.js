@@ -31,6 +31,33 @@ class Store{
     }
 
 
+    getShelfFromRacking = (shelf_name) => {
+        for(let i = 0; i < this.racking.length; i++){
+            for(let j = 0; j < this.racking[i].shelves.length; j++){
+                if(this.racking[i].shelves[j].name == shelf_name){
+                    return this.racking[i].shelves[j]
+                }
+            }
+        }
+    }
+
+    getPartsLocation = (part) => {
+        let rack, shelf, place;
+        for(let Irack = 0; Irack < this.racking.length; Irack++){
+            for(let Ishelf = 0; Ishelf < this.racking[Irack].shelves.length; Ishelf++){
+                for(let Ipart = 0; Ipart < this.racking[Irack].shelves[Ishelf].content.length; Ipart++){
+                    if(this.racking[Irack].shelves[Ishelf].content[Ipart].name.split('_')[1] == part.code){
+                        rack = this.racking[Irack].address;
+                        shelf = this.racking[Irack].shelves[Ishelf].address
+                    }
+                }
+            }
+        }
+        return {
+            rack: rack,
+            shelf: shelf
+        }
+    }
 
 
     //useless?
@@ -41,6 +68,8 @@ class Store{
         }
         return array
     }
+
+    getShelf
 
     //useless?
     getContainer(type){
@@ -143,6 +172,7 @@ class Store{
     genStore(){
         let racking = this.rackManager.initRacking(this.PFEP)
     }
+
 
 
     

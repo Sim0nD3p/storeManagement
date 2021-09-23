@@ -157,7 +157,7 @@ class DispayStore{
             menuItems,
             {cancelable: true, keyBindings:{ ENTER: 'submit', CTRL_Z: 'escape', UP: 'previous', DOWN: 'next'}},
             (error, response) => {
-                if(response){
+                if(response !== undefined){
                     this.app.clearScreen()
                     let shelf = this.app.store.rackManager.shelfManager.getShelf(response.selectedText)
                     shelf.getShelf();

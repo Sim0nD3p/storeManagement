@@ -19,6 +19,9 @@ const { Console } = require('console');
 const { consomAnnuelleMoy } = require('./infosText');
 const GAP = 150
 const MAX_HEIGHT = 6000
+const FRONT = 'FRONT'
+const BACK = 'BACK'
+const StoreUpdater = require('./storeUpdater')
 
 const exportData = new ExportData()
 
@@ -30,6 +33,7 @@ class StoreManager {
         this.storePartList = [];    //unused?
         this.finalStoreList = [];
         this.noContainerList = [];
+        this.storeUpdater = new StoreUpdater(app)
         //this.shelfManager = new ShelfManager(app)
 
     }
@@ -122,6 +126,7 @@ class StoreManager {
 
             function createPad(prop, pad){
                 const filler = 'N/D';
+                prop = prop.toString()
                 return prop ? prop.padEnd(pad) : filler.padEnd(pad)
             }
             let header = createPad('ID', 15) + createPad('Priorité', 10) + createPad('Type', 10) + createPad('Tag', 5) + createPad('Adresse', 10)
@@ -483,6 +488,7 @@ class StoreManager {
         
     }
     importStore = () => {
+        console.log('importing store')
         let data = new Promise((resolve, reject) => {
             let rackingCall = fsPromise.readFile('../SORTIE/racking.json', 'utf8')
             rackingCall.then((res) => {
@@ -499,7 +505,6 @@ class StoreManager {
                             readFile.then((string) => {
                                 progress++
                                 if(string.length !== 0){
-                                    console.log(res[i], string.length)
                                     let jsonArray = JSON.parse(string)
 
                                     //pour chaque shelf
@@ -524,12 +529,9 @@ class StoreManager {
                                             }
                                             return content
                                         })
-                                        //console.log(shelf.space)
                                         s.space = shelf.space
                                         s.height = shelf.height;
                                         s.baseHeight = shelf.baseHeight;
-                                        console.log(shelf.baseHeight, shelf.height)
-                                        console.log(s.baseHeight, s.height)
                                         s = {
                                             ...s,
                                             type: shelf.type,
@@ -550,7 +552,6 @@ class StoreManager {
                                         shelves.push(s)
                                         
                                     })
-                                    console.log(`shelves.length: ${shelves.length}`)
                                 }
                                 if(progress == res.length){ resolve(shelves) }
                             }).catch((e) => console.log(e))
@@ -572,6 +573,7 @@ class StoreManager {
                                 height: rack.height,
                                 priority: rack.priority,
                                 priorityIndex: rack.priorityIndex,
+                                liftAccess: rack.liftAccess,
 
                             }
                             return r
@@ -641,64 +643,13 @@ class StoreManager {
 
         
         const updateContainerPlacement = (partList) => {
-            /* this.app.store.shelves.forEach(shelf => {
-                shelf.content = [];
-                shelf.space = shelf.initShelf({ length: shelf.length })
-            }) */
             console.log('updateContainerPlacement')
-
-            let storeFile = fsPromise.readFile('../SORTIE/storeReviewObject.json', 'utf8')=
-            storeFile.then((storeObject) => {
-                storeObject = JSON.parse(storeObject)
-            }).catch((e) => console.log(e))
-
-            const clearShelvesOnRacking = () => {
-                let newShelves = []
-                let newRacking = this.app.store.racking.map(rack => {
-                    let r = new Racking(rack.name, rack.length, rack.type, undefined)
-                    let shelvesSource = rack.shelves.sort((a, b) => a.baseHeight - b.baseHeight)=
-                    r.shelves = shelvesSource.map((shelf, index) => {
-                        let shelfData = {
-                            length: shelf.length,
-                            rating: shelf.capacity * 2.2046
-                        }
-                        let s = new Shelf(shelf.name, shelfData, undefined, undefined)
-                        s = {
-                            ...s,
-                            baseHeight: shelf.baseHeight,
-                            address: shelf.address,
-                            height: shelf.height
-                        }
-                        newShelves.push(s)
-                        return s
-                    })
-                    r = {
-                        ...r,
-                        address: rack.address,
-                        contentSides: rack.contentSides,
-                        height: rack.height,
-                        priorityIndex: rack.priorityIndex
-                    }
-                    return r
-                })
-                this.app.store.racking = newRacking
-            }
-
-            clearShelvesOnRacking()
-
-            const findPlace = (part) => {
-                this.app.store.racking.map(rack => {
-                    rack.shelves.map(shelf => {
-                        /*
-
-                        algo goes from loop thru rack and shelf returns searchPlace result we will chose which is the best afterwards
-
-                        */
-
-
-                    })
-                })
-            }
+            let [newRacking, newShelves] = this.storeUpdater.clearRacking()
+            this.app.store.racking = newRacking;
+            this.app.store.shelves = newShelves;
+            
+            console.log('-----')
+            this.storeUpdater.placeContainers(partList)
 
 
 
@@ -707,6 +658,9 @@ class StoreManager {
         const updateShelvesPlacement = () => {
 
         }
+
+
+        
         const createNewStore = (partList) => {
             this.initialStoreList = partList;
             let split = this.app.store.rackManager.splitPartsByTag(partList)
@@ -718,6 +672,10 @@ class StoreManager {
 
                 sorted = sorted.filter((a) => a.storage.length > 0);    //filter container
 
+                //predefine type of shelf for bundle racking
+                //define type of shelf when adding part
+
+                //racking should dictate type of shelf and double sided based on accessSides
 
                 this.app.log += `sending ${sorted.length} parts to placeInRacking\n`
                 this.finalStoreList = this.finalStoreList.concat(sorted);   //pushing parts that does algo to go in shelves
@@ -736,6 +694,7 @@ class StoreManager {
             
             
             list.then((partList) => {
+                partList = partList.filter(a => a.storage.length > 0)
                 switch(typeIndex){
                     case 0: updateContainerPlacement(partList); break;
                     case 1: updateShelvesPlacement(partList); break;
