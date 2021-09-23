@@ -31,6 +31,7 @@ const utilite = (partUtilite) => {
 class FichePiece{
     constructor(app){
         this.app = app
+        this.bindCursorToKeys = false
 
 
     }
@@ -63,53 +64,164 @@ class FichePiece{
         }
     }
     modifierPiece = (part) => {
+        this.app.clearScreen()
         //this.app.lastScreen.screen = 'home'
         const leftMargin = 5; const filler = 'ND'
-        let bluePrints = this.primaryInfos(part, leftMargin, filler, 3)
-        bluePrints = bluePrints.concat(this.supplierInfos(part.supplier[0], leftMargin, filler, 15))
-        bluePrints = bluePrints.concat(this.emballage(part.emballage, leftMargin, filler, 22))
-        if(part.storage.length > 0){
-            bluePrints = bluePrints.concat(this.storage(part.storage, leftMargin, filler, 30))
-        }
-        bluePrints = bluePrints.concat(this.consommation(part.emballage, term.width/3+leftMargin, filler, 4))
+        this.bindCursorToKeys = true
+        let index = 0
+
+        let bluePrints = [];
+        term.moveTo(leftMargin, 4); term.bold.underline('INFORMATIONS PRINCIPALES');
+        term.moveTo(leftMargin, 14); term.bold.underline(`INFORMATIONS FOURNISSEUR`);
+        term.moveTo(leftMargin, 22); term.bold.underline('INFORMATIONS EMBALLAGE');
+        term.moveTo(leftMargin, 30); term.bold.underline('INFORMATIONS ENTREPOSAGE');
+        term.moveTo(term.width/3+leftMargin, 4); term.bold.underline('INFORMATIONS DE CONSOMMATION')
+
+        let primary = this.primaryInfos(part, leftMargin, filler, 5); primary ? bluePrints = bluePrints.concat(primary) : null;
+        let supplier = this.supplierInfos(part.supplier[0], leftMargin, filler, 15); supplier ? bluePrints = bluePrints.concat(supplier) : null;
+        let emballage = this.emballage(part.emballage, leftMargin, filler, 23); emballage ? bluePrints = bluePrints.concat(emballage) : null
+        let storage = this.storage(part.storage, leftMargin, filler, 31); storage ? bluePrints = bluePrints.concat(storage) : null
+        let consommation = this.consommation(part.consommation, term.width/3+leftMargin, filler, 5); consommation ? bluePrints = bluePrints.concat(consommation) : null
+        bluePrints = bluePrints.sort((a, b) => {
+            if(a.y == b.y) return a.x - b.x
+            else return a.y - b.y
+        })
 
 
 
-        function moveCursor(dir, bP){
+
+        function moveCursor_old(dir, bP) {
             let location = term.getCursorLocation();
             location.then((pos) => {
-                let x;
-                if(dir == 'UP'){
-                    if(bP.findIndex(a => a.y == pos.y-1) !== -1){
-                        let p = bP.find(a => a.y == pos.y-1);
+                let x; let y;
+
+                if (dir == 'UP') {
+                    if (bP.findIndex(a => a.y == pos.y - 1) !== -1) {
+                        let p = bP.find(a => a.y == pos.y - 1);
                         x = p.x + p.name.length
                     }
-                    else x = pos.x
-                    term.moveTo(x, pos.y-1)
+
+
+
+                    else {
+                        let target = bP.sort((a, b) => { return Math.abs(b.y - pos.y) - Math.abs(a.y - pos.y) })
+                        console.log(target)
+                        target = target.findIndex(a => a.y - pos.y > 0)
+                        if (target !== undefined) {
+                            x = target.x;
+                            y = target.y
+                        }
+                        else {
+                            x = 1;
+                            y = 1
+                        }
+
+                    }
+                    term.moveTo(x, y)
+                    return { x: x, y: y }
 
                 }
-                else if(dir == 'DOWN'){
-                    if(bP.findIndex(a => a.y == pos.y+1) !== -1){
-                        let p = bP.find(a => a.y == pos.y+1);
+                else if (dir == 'DOWN') {
+                    if (bP.findIndex(a => a.y == pos.y + 1) !== -1) {
+                        let p = bP.find(a => a.y == pos.y + 1);
                         x = p.x + p.name.length
                     } else x = pos.x
-                    term.moveTo(x, pos.y+1)
+                    term.moveTo(x, pos.y + 1)
+                    return { x: x, y: pos.y + 1 }
 
                 }
 
             }).catch((e) => console.log(e))
         }
+
+        const pannel = (bP, index) => {
+            bP = bP.sort((a, b) => {
+                if(a.x == b.x){
+                    return a.y - b.y
+                }
+                return a.x - b.x
+            })
+            term.moveTo(bP[index].x, bP[index].y)
+            return index
+
+
+        }
+        const moveCursor = (dir, bP) => {
+            let getPosition = term.getCursorLocation()
+            getPosition.then((pos) => {
+                let target = bP.sort((a, b) => {
+                    if(a.x == b.x){
+                        return a.y - b.y
+                    }
+                    return a.x - b.x
+                })
+                if(dir == 'UP' || dir == 'DOWN'){
+                    let targetX = bP.sort((a, b) => Math.abs(a.x-pos.x) - Math.abs(b.x-pos.x))[0].x
+                    target = target.filter(a => a.x == targetX || a.x == targetX+5).sort((a, b) => Math.abs(a.y - pos.y) - Math.abs(b.y - pos.y))
+                    if(dir == 'DOWN'){
+                        target = target.filter(a => pos.y - a.y < 0).find(a => a !== undefined)
+                        term.moveTo(target.x, target.y)
+
+                    }
+                    else if(dir == 'UP'){
+                        target = target.filter(a => pos.y - a.y > 0).find(a => a !== undefined)
+                        term.moveTo(target.x, target.y)
+                    }
+    
+                }
+                else if(dir == 'LEFT' || dir == 'RIGHT'){
+                    let columns = [];
+                    target.forEach(t => { if(columns.indexOf(t.x) == -1){ columns.push(t.x) }})
+                    for(let i = 1; i < columns.length; i++){ if(columns[i-1] == columns[i] - 5){ columns.splice(i, 1) } }
+                    //target = target.filter((a) => a.x columns.indexOf(a.x) !== -1)
+                    console.log(target)
+
+
+                }
+
+            })
+        }
+
+
         term.on('key', (key) => {
-            if(key == 'UP'){
-                moveCursor('UP', bluePrints)
-            }
-            else if(key == 'DOWN'){
-                moveCursor('DOWN', bluePrints)
+            if(this.bindCursorToKeys === true){
+                let position;
+                if (key == 'UP') {
+                    if(index == bluePrints.length - 1){ index = 0}
+                    else index++
+                    pannel(bluePrints, index)
+                    //position = moveCursor('UP', bluePrints)
+                }
+                else if (key == 'DOWN') {
+                    if(index == 0){ index = bluePrints.length - 1 }
+                    else index--
+                    pannel(bluePrints, index)
+                    //position = moveCursor('DOWN', bluePrints)
+                }
+                else if (key == 'LEFT') {
+                    pannel(bluePrints, index)
+                    position = moveCursor('LEFT', bluePrints)
+                }
+                else if (key == 'RIGHT') {
+                    pannel(bluePrints, index)
+                    position = moveCursor('RIGHT', bluePrints)
+                }
+
+
+
+
+
+
+
+
+                    
+                else if(key == 'CTRL_Z'){
+                    this.bindCursorToKeys = false
+                    term.reset();
+                }
 
             }
-            else if(key == 'CTRL_Z'){
-                term.reset();
-            }
+
             
         })
 
@@ -135,14 +247,14 @@ class FichePiece{
      */
     primaryInfos = (part, leftMargin, filler, yStart) => {
         let bluePrints = [
-            { prop:'code', name: 'Code: ', y: yStart, x: leftMargin },
-            { prop:'description', name: 'Description: ', y: yStart + 1, x: leftMargin},
-            { prop:'family', name: 'Famille: ', y: yStart + 2, x: leftMargin},
-            { prop:'utilite', name: 'Utilité: ', y: yStart + 3, x: leftMargin},
-            { prop:'class', name: 'Classe: ', y: yStart + 4, x: leftMargin},
-            { prop:'tag', name: 'Tag: ', y: yStart + 5, x: leftMargin},
-            { prop:'specs', name: 'Dimensions: ', y: yStart + 6, x: leftMargin},
-            { prop:'specs.weight', name: 'Masse: ', y: yStart + 7, x: leftMargin},
+            { prop:'code', name: 'Code: ', y: yStart, x: leftMargin, type: 'primary' },
+            { prop:'description', name: 'Description: ', y: yStart + 1, x: leftMargin, type: 'primary' },
+            { prop:'family', name: 'Famille: ', y: yStart + 2, x: leftMargin, type: 'primary' },
+            { prop:'utilite', name: 'Utilité: ', y: yStart + 3, x: leftMargin, type: 'primary' },
+            { prop:'class', name: 'Classe: ', y: yStart + 4, x: leftMargin, type: 'primary' },
+            { prop:'tag', name: 'Tag: ', y: yStart + 5, x: leftMargin, type: 'primary' },
+            { prop:'specs', name: 'Dimensions: ', y: yStart + 6, x: leftMargin, type: 'primary' },
+            { prop:'specs.weight', name: 'Masse: ', y: yStart + 7, x: leftMargin, type: 'primary' },
         ]
 
         bluePrints.forEach(s => {
@@ -157,19 +269,6 @@ class FichePiece{
             }
 
         })
-/* 
-        term.column(leftMargin); term.bold.underline(`INFORMATIONS PRIMAIRES\n`)
-        term.moveTo(leftMargin, bluePrints[0].y); term.bold(bluePrints[0].name); term(part.code ? part.code.substring(0, 20) : filler);
-        //term.column(leftMargin); term.bold('Code: '); term(part.code ? part.code.substring(0, 20) : filler); term('\n');
-        term.moveTo(bluePrints[1].x, bluePrints[1].y); term.bold(bluePrints[1].name); term(part[bluePrints[1].prop] ? part[bluePrints[1].prop].toString().substring(0, 20) : filler);
-        //term(part.description ? part.description.substring(0, 20) : filler); term('\n');
-        term.moveTo(bluePrints[2].x, bluePrints[2].y); term.bold(bluePrints[2].name); term(part[bluePrints[1].prop] ? part[bluePrints[1].prop].toString().substring(0, 20) : filler);
-        term.moveTo(bluePrints[3].x, bluePrints[3].y); term.bold(bluePrints[3].name); term(part[bluePrints[1].prop] ? part[bluePrints[1].prop].toString().substring(0, 20) : filler);
-        term.moveTo(bluePrints[4].x, bluePrints[4].y); term.bold(bluePrints[4].name); term(part[bluePrints[1].prop] ? part[bluePrints[1].prop].toString().substring(0, 20) : filler);
-        term.moveTo(bluePrints[5].x, bluePrints[5].y); term.bold(bluePrints[5].name); term(part[bluePrints[1].prop] ? part[bluePrints[1].prop].toString().substring(0, 20) : filler);
-        term.moveTo(bluePrints[6].x, bluePrints[6].y); term.bold(bluePrints[6].name); term(part[bluePrints[1].prop] ? part[bluePrints[1].prop].toString().substring(0, 20) : filler);
-        term.moveTo(bluePrints[7].x, bluePrints[7].y); term.bold(bluePrints[7].name); term(part[bluePrints[1].prop] ? part[bluePrints[1].prop].toString().substring(0, 20) : filler);
- */
 
         return bluePrints
 
@@ -184,24 +283,30 @@ class FichePiece{
      * @returns 
      */
     supplierInfos = (supplier, leftMargin, filler, yStart) => {
-        let bluePrints = [
-            { name: 'Nom: ', prop: 'name', x: leftMargin, y: yStart },
-            { name: 'Téléphone: ', prop: 'phone', x: leftMargin, y: yStart + 1 },
-            { name: 'Fax: ', prop: 'fax', x: leftMargin, y: yStart + 2 },
-            { name: 'Adresse: ', prop: 'address', x: leftMargin, y: yStart + 3 },
-            { name: 'Lead time moyen: : ', prop: 'leadTime', x: leftMargin, y: yStart + 4 },
-            { name: 'Lead time max: ', prop: 'leadTimeMax', x: leftMargin, y: yStart + 5 },
-        ]
-        bluePrints.forEach(b => {
-            if(b.name == 'Adresse: '){
-                term.moveTo(b.x, b.y); term.bold(b.name); term(supplier[b.prop] ? supplier[b.prop].toString().substring(0, 20) : filler)
-
-            }
-            else { 
-                term.moveTo(b.x, b.y); term.bold(b.name); term(supplier[b.prop] ? supplier[b.prop].toString().substring(0, 20) : filler)
-            }
-        })
-        return bluePrints
+        if(supplier !== undefined){
+            let bluePrints = [
+                { name: 'Nom: ', prop: 'name', x: leftMargin, y: yStart, type: 'supplier' },
+                { name: 'Téléphone: ', prop: 'phone', x: leftMargin, y: yStart + 1, type: 'supplier' },
+                { name: 'Fax: ', prop: 'fax', x: leftMargin, y: yStart + 2, type: 'supplier' },
+                { name: 'Adresse: ', prop: 'address', x: leftMargin, y: yStart + 3, type: 'supplier' },
+                { name: 'Lead time moyen: : ', prop: 'leadTime', x: leftMargin, y: yStart + 4, type: 'supplier' },
+                { name: 'Lead time max: ', prop: 'leadTimeMax', x: leftMargin, y: yStart + 5, type: 'supplier' },
+            ]
+            bluePrints.forEach(b => {
+                if(b.name == 'Adresse: '){
+                    term.moveTo(b.x, b.y); term.bold(b.name); term(supplier[b.prop] ? supplier[b.prop].toString().substring(0, 20) : filler)
+    
+                }
+                else { 
+                    term.moveTo(b.x, b.y); term.bold(b.name); term(supplier[b.prop] ? supplier[b.prop].toString().substring(0, 20) : filler)
+                }
+            })
+            return bluePrints
+        }
+        else {
+            term.moveTo(leftMargin, yStart); term.red('Informatins fournisseur manquantes')
+        } 
+        
     }
     /**
      * takes 6 lines
@@ -213,12 +318,12 @@ class FichePiece{
      */
     emballage = (emballage, leftMargin, filler, yStart) => {
         let bluePrints = [
-            { prop: null, name: 'Emballage Techno-Fab:', x: leftMargin, y: yStart },
-            { prop: 'TF.type', name: 'Type: ', x: leftMargin + 5, y: yStart + 1 },
-            { prop: 'TF.nbPieces', name: 'Nombre de pièces / contenant: ', x: leftMargin + 5, y: yStart + 2 },
-            { prop: null, name: 'Emballage fournisseur:', x: leftMargin, y: yStart + 3},
-            { prop: 'fournisseur.type', name: 'Type: ', x: leftMargin + 5, y: yStart + 4 },
-            { prop: 'fournisseur.nbPieces', name: 'Nombre de pièces / contenant: ', x: leftMargin+5, y: yStart + 5},
+            { prop: null, name: 'Emballage Techno-Fab:', x: leftMargin, y: yStart, type: 'emballage' },
+            { prop: 'TF.type', name: 'Type: ', x: leftMargin, y: yStart + 1, type: 'emballage' },
+            { prop: 'TF.nbPieces', name: 'Nombre de pièces / contenant: ', x: leftMargin, y: yStart + 2, type: 'emballage' },
+            { prop: null, name: 'Emballage fournisseur:', x: leftMargin, y: yStart + 3, type: 'emballage' },
+            { prop: 'fournisseur.type', name: 'Type: ', x: leftMargin, y: yStart + 4, type: 'emballage' },
+            { prop: 'fournisseur.nbPieces', name: 'Nombre de pièces / contenant: ', x: leftMargin, y: yStart + 5, type: 'emballage' },
         ]
         bluePrints.forEach(p => {
             if(p.prop == null){
@@ -226,7 +331,7 @@ class FichePiece{
 
             }
             else {
-                term.moveTo(p.x, p.y); term.bold(p.name); term(this.accessProp(emballage, p.prop) ? this.accessProp(emballage, p.prop) : filler)
+                term.moveTo(p.x, p.y); term.bold(p.name); term(this.accessProp(emballage, p.prop) ? this.accessProp(emballage, p.prop).toString().substring(0, 5) : filler)
             }
         })
         return bluePrints
@@ -235,11 +340,11 @@ class FichePiece{
     storage = (storage, leftMargin, filler, yStart) => {
         if(storage.length > 0){
             let bluePrints = [
-                { prop: 'type', name: 'Type de contenant: ', x: leftMargin, y: yStart},
-                { prop: 'count', name: 'Nombre de piece / contenant: ', x: leftMargin, y: yStart + 1},
-                { prop: 'length', name: 'Nombre de contenants maximal: ', x: leftMargin, y: yStart + 2},
-                { prop: 'weight', name: 'Masse: ', x: leftMargin, y: yStart + 3},
-                { prop: 'dimensions', name: 'Dimensions: ', x: leftMargin, y: yStart + 4},
+                { prop: 'type', name: 'Type de contenant: ', x: leftMargin, y: yStart, type: 'storage' },
+                { prop: 'count', name: 'Nombre de piece / contenant: ', x: leftMargin, y: yStart + 1, type: 'storage' },
+                { prop: 'length', name: 'Nombre de contenants maximal: ', x: leftMargin, y: yStart + 2, type: 'storage' },
+                { prop: 'weight', name: 'Masse: ', x: leftMargin, y: yStart + 3, type: 'storage' },
+                { prop: 'dimensions', name: 'Dimensions: ', x: leftMargin, y: yStart + 4, type: 'storage' },
             ]
             bluePrints.forEach(p => {
                 let container = storage[0]
@@ -256,30 +361,18 @@ class FichePiece{
             })
             return bluePrints
         }
-
-    }
-    consommation_old = (consommation, leftMargin, filler) => {
-        if(consommation){
-            term.column(leftMargin); term.bold.underline(`INFORMATION DE CONSOMMATION`); term('\n');
-            term.column(leftMargin); term.bold(`Consommation mensuelle moyenne: `); term(consommation.mensuelleMoy ? consommation.mensuelleMoy.toString().substring(0, 5) : filler); term('\n')
-            term.column(leftMargin); term.bold(`Consommation mensuelle maximale: `); term(consommation.mensuelleMax ? consommation.mensuelleMax.toString().substring(0, 5) : filler); term('\n')
-            term.column(leftMargin); term.bold(`Consommation anuelle moyenne: `); term(consommation.anuelle ? consommation.anuelle.toString().substring(0, 5) : filler); term('\n');
-            term.column(leftMargin); term.bold(`Commande typique: `); term(consommation.commandeType ? consommation.commandeType.toString().substring(0, 5) : filler); term('\n');
-            term.column(leftMargin); term.bold(`Fréquence de réapprovisionnement: `); term(consommation.freqReappro ? consommation.freqReappro.toString().substring(0, 5) + ` mois` : filler); term('\n');
-
-            term.column(leftMargin); term.bold(`Total commandes:`); term('\n');
-            term.column(leftMargin + 5); term.bold(`Nombre de commandes: `); term(consommation.totalOrders.nbOrders ? consommation.totalOrders.nbOrders.toString().substring(0, 5) : filler); term(`\n`);
-            term.column(leftMargin + 5); term.bold(`Nombre de pièces: `); term(consommation.totalOrders.nbPieces ? consommation.totalOrders.nbPieces.toString().substring(0, 5) : filler); term('\n');
+        else {
+            term.moveTo(leftMargin, yStart); term.red(`Informations d'entreposage manquantes`)
         }
     }
 
     consommation = (consommation, leftMargin, filler, yStart) => {
         let bluePrints = [
-            { prop: 'mensuelleMoy', name: 'Consommation mensuelle moyenne: ', x: leftMargin, y: yStart },
-            { prop: 'mensuelleMax', name: 'Consommation mensuelle maximale: : ', x: leftMargin, y: yStart + 1 },
-            { prop: 'anuelle', name: 'Consommation anuelle moyenne: : ', x: leftMargin, y: yStart + 2 },
-            { prop: 'commandeType', name: 'Commande typique: ', x: leftMargin, y: yStart + 3 },
-            { prop: 'freqReappro', name: 'Fréquence de réapprovisionnement: ', x: leftMargin, y: yStart + 4 },
+            { prop: 'mensuelleMoy', name: 'Consommation mensuelle moyenne: ', x: leftMargin, y: yStart, type: 'consommation' },
+            { prop: 'mensuelleMax', name: 'Consommation mensuelle maximale: : ', x: leftMargin, y: yStart + 1, type: 'consommation' },
+            { prop: 'anuelle', name: 'Consommation anuelle moyenne: : ', x: leftMargin, y: yStart + 2, type: 'consommation' },
+            { prop: 'commandeType', name: 'Commande typique: ', x: leftMargin, y: yStart + 3, type: 'consommation' },
+            { prop: 'freqReappro', name: 'Fréquence de réapprovisionnement: ', x: leftMargin, y: yStart + 4, type: 'consommation' },
         ]
         bluePrints.forEach(p => {
             term.moveTo(p.x, p.y); term.bold(p.name); term(consommation[p.prop] ? consommation[p.prop].toString().substring(0, 5) : filler)
@@ -289,7 +382,7 @@ class FichePiece{
 
     displayPart = (part) => {
         this.app.clearScreen()
-        this.app.lastScreen.screen = 'home'
+        this.app.lastScreen.screen = 'rechercherItem'
         if(typeof part == 'string'){ part = this.app.store.getItemFromPFEP(part) }
         
         const partMenu = (leftMargin) => {
@@ -301,17 +394,19 @@ class FichePiece{
             ]
             let menu = term.singleColumnMenu(
                 menuItems,
-                {leftPadding: '\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t', cancelable: true, keyBindings: { ENTER: 'submit', DOWN: 'next', UP: 'previous', CTRL_Z: 'escape'}}
+                {leftPadding: '\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t', cancelable: true, keyBindings: { CTRL_Z: 'escape', ENTER: 'submit', DOWN: 'next', UP: 'previous'}}
             ).promise
 
             menu.then((res) => {
+                this.app.clearScreen()
                 if(res !== undefined){
-                    this.app.clearScreen()
-                    this.app.lastScreen = {screen: 'displayPart', content: part };
-                    switch(res.selectedIndex){
-                        case 0: this.rawData(part); break;
-                        case 1: this.displayHistoric(part.history); break;
-                        case 2: this.modifierPiece(part)
+                    if(res.canceled !== true){
+                        this.app.lastScreen = {screen: 'displayPart', content: part };
+                        switch(res.selectedIndex){
+                            case 0: this.rawData(part); break;
+                            case 1: this.displayHistoric(part.history); break;
+                            case 2: this.modifierPiece(part)
+                        }
                     }
                 }
             }).catch((e) => console.log(e))
@@ -323,24 +418,22 @@ class FichePiece{
         let filler = 'undefined'
         let str = `FICHE DE PIÈCE: ${part.code}`
         term.moveTo(term.width/2-str.length/2, 2).bold.underline(str); term('\n')
-        
 
-        term.moveTo(leftMargin, 3), term.bold.underline(`INFORMATION PRINCIPALES`);
-        this.primaryInfos(part, leftMargin, filler, 4);
+        term.moveTo(leftMargin, 4), term.bold.underline(`INFORMATION PRINCIPALES`);
+        this.primaryInfos(part, leftMargin, filler, 5);
 
-        term.moveTo(leftMargin, 13), term.bold.underline(`FOURNISSEUR PRINCIPAL`);
-        this.supplierInfos(part.supplier[0], leftMargin, filler, 14);
+        term.moveTo(leftMargin, 14), term.bold.underline(`FOURNISSEUR PRINCIPAL`);
+        this.supplierInfos(part.supplier[0], leftMargin, filler, 15);
 
+        term.moveTo(leftMargin, 22); term.bold.underline(`INFORMATION EMBALLAGE`);
+        this.emballage(part.emballage, leftMargin, filler, 23);
 
-        term.moveTo(leftMargin, 21); term.bold.underline(`INFORMATION EMBALLAGE`);
-        this.emballage(part.emballage, leftMargin, filler, 22);
-
-        term.moveTo(leftMargin, 29); term.bold.underline(`INFORMATIONS D'ENTREPOSAGE`);
-        this.storage(part.storage, leftMargin, filler, 30);
+        term.moveTo(leftMargin, 30); term.bold.underline(`INFORMATIONS D'ENTREPOSAGE`);
+        this.storage(part.storage, leftMargin, filler, 31);
 
         term.moveTo(3, 3)
-        term.moveTo(term.width/3 + leftMargin, 3); term.bold.underline(`INFORMATION DE CONSOMMATION`);
-        this.consommation(part.consommation, term.width/3 + leftMargin, filler, 4);
+        term.moveTo(term.width/3 + leftMargin, 4); term.bold.underline(`INFORMATION DE CONSOMMATION`);
+        this.consommation(part.consommation, term.width/3 + leftMargin, filler, 5);
 
         term.moveTo(3, 3)
         partMenu(2*term.width/3 + leftMargin)
@@ -349,30 +442,6 @@ class FichePiece{
         let pos = this.app.store.getPartsLocation(part)
         term(`rack: `); term.yellow(pos.rack); term(`  shelf: `); term(pos.shelf)
         term.styleReset(0)
-        
-
-
-        
-
-        
-
-
-
-
-        
-        /*
-        MAINS INFOS
-        code
-        description
-        family
-        utilite
-        class
-        specs
-        */
-
-
-
-
     }
 }
 

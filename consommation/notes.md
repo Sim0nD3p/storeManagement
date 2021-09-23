@@ -95,6 +95,10 @@
     - creer piece -> afficher Piece = bug
     - still calling error when gen containers
 
+- checker avec stephane pour pieces sans containers
+
+
+
 - Notes on preassigned shelf priority
     - assign priority to racking and shelves
     - juste fill shelves first to priority

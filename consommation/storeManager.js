@@ -102,6 +102,23 @@ class StoreManager {
             else return null
         }).filter(a => a !== null)
 
+
+
+        //2021-0-23 new addingin something is broken
+        let [initialPartList, notInStore] =  this.getStoreList(this.app.store.PFEP, this.minOrderQte);
+        console.log(`getStoreList has ${initialPartList.length} elements`)
+        let missingContainer = {};
+        initialPartList.forEach(part => {
+            if(part.storage){
+                if(part.storage.length == 0){ missingContainer = { ...missingContainer, [part.code]: part } } 
+            } else {
+                console.log(part.storage, part.code)
+            }
+        })
+        console.log(missingContainer)
+        exportData.exportJSON(missingContainer, 'missingContainers', '../SORTIE')
+
+
         term(`\n ${baseContainers.length} pieces ont des contenants\n`)
         term(`aucune autre anaylse n'a ete programmee\n`)
 
@@ -297,7 +314,7 @@ class StoreManager {
         this.app.clearScreen();
         term.bold(`Vérification du magasin\n`)
         
-        let shelvesPartList = []
+        let shelvesPartList = []        //parts on shelves
         this.app.store.shelves.forEach((shelf, index) => {
             shelf.content.map((item, index) => {
                 if(shelvesPartList.indexOf(item.name.split('_')[1]) == -1){
@@ -307,7 +324,7 @@ class StoreManager {
         })
 
         let rackingPartList = [];
-        let shelvesInRacking = [];
+        let shelvesInRacking = [];      //shelves and parts in racking
         this.app.store.racking.forEach((racking, index) => {
             racking.shelves.map((shelf, index) => {
                 shelvesInRacking.push(shelf)
@@ -356,6 +373,7 @@ class StoreManager {
         term.column(5); term(`*La liste de pièces sans contenants a été exportée dans le fichier [piecesSansContenant.json]\n`)
         term(`------------------------------\n`)
         term(`^y${shelvesPartList.length}^: pièces sont dans les étagères\n`)
+
 
         
         

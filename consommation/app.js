@@ -362,10 +362,6 @@ class App {
 
     }
 
-    afficherDetailsPiece(item) {
-
-    }
-
     rechercherItem = (code) => {
         this.clearScreen()
         this.lastScreen.screen = 'home'
@@ -397,7 +393,7 @@ class App {
             let part = this.store.getItemFromPFEP(res)
             if(part !== -1){
                 //this.lastScreen = { screen: 'afficherPiece', content: part }
-                this.lastScreen = { screen: 'displayPart', content: part }
+                //this.lastScreen = { screen: 'displayPart', content: part }
                 this.FichePiece.displayPart(part)
             }
             else {
@@ -597,33 +593,35 @@ class App {
             'Afficher racking',
             'Afficher toutes les étagères',
         ]
-        term.singleColumnMenu(menuItems,
-            { cancelable: true, keyBindings: { ENTER: 'submit', DOWN: 'next', UP: 'previous', CTRL_Z: 'escape' } },
-            (error, response) => {
-                if (response !== undefined) {
-                    if (response.selectedIndex === 0) {
-                        this.lastScreen.screen = 'afficherMagasin'
-                        this.displayStore.displayContainers()
+        if(this.store.racking.length > 0){
+            term.singleColumnMenu(menuItems,
+                { cancelable: true, keyBindings: { ENTER: 'submit', DOWN: 'next', UP: 'previous', CTRL_Z: 'escape' } },
+                (error, response) => {
+                    if (response !== undefined) {
+                        if (response.selectedIndex === 0) {
+                            this.lastScreen.screen = 'afficherMagasin'
+                            this.displayStore.displayContainers()
+                        }
+                        else if(response.selectedIndex === 1){
+                            this.lastScreen.screen = 'afficherMagasin';
+                            this.displayStore.displayShelf();
+                        }
+                        else if(response.selectedIndex === 2){
+                            this.lastScreen.screen = 'afficherMagasin';
+                            this.displayStore.displayShelfContent()
+                        }
+                        else if(response.selectedIndex === 3){
+                            this.lastScreen.screen = 'afficherMagasin';
+                            this.displayStore.displayRacking();
+                        }
+                        else if(response.selectedIndex === 4){
+                            this.lastScreen.screen = 'afficherMagasin';
+                            this.displayStore.getAllShelves()
+    
+                        }
                     }
-                    else if(response.selectedIndex === 1){
-                        this.lastScreen.screen = 'afficherMagasin';
-                        this.displayStore.displayShelf();
-                    }
-                    else if(response.selectedIndex === 2){
-                        this.lastScreen.screen = 'afficherMagasin';
-                        this.displayStore.displayShelfContent()
-                    }
-                    else if(response.selectedIndex === 3){
-                        this.lastScreen.screen = 'afficherMagasin';
-                        this.displayStore.displayRacking();
-                    }
-                    else if(response.selectedIndex === 4){
-                        this.lastScreen.screen = 'afficherMagasin';
-                        this.displayStore.getAllShelves()
-
-                    }
-                }
-            })
+                })
+        } else console.log('Aucun magasin trouvé')
     }
     rechercherFournisseur() {
         this.clearScreen();
