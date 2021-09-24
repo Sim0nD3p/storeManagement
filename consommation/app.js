@@ -95,9 +95,6 @@ class App {
         else if(this.lastScreen.screen == 'modifierEntreposage'){ this.fichePiece.modifierEntreposage(this.lastScreen.content) }
         else if(this.lastScreen.screen == 'storeManagerMenu'){ this.store.storeManager.storeManagerMenu() }
         else if(this.lastScreen.screen == 'manageAdress'){ this.store.storeManager.manageAdress(this.lastScreen) }
-        else if(this.lastScreen.screen == 'displayPart'){
-            this.FichePiece.displayPart(this.lastScreen.content)
-        }
         else {
             this.home()
         }
@@ -393,7 +390,6 @@ class App {
             let part = this.store.getItemFromPFEP(res)
             if(part !== -1){
                 //this.lastScreen = { screen: 'afficherPiece', content: part }
-                //this.lastScreen = { screen: 'displayPart', content: part }
                 this.FichePiece.displayPart(part)
             }
             else {
@@ -593,35 +589,33 @@ class App {
             'Afficher racking',
             'Afficher toutes les étagères',
         ]
-        if(this.store.racking.length > 0){
-            term.singleColumnMenu(menuItems,
-                { cancelable: true, keyBindings: { ENTER: 'submit', DOWN: 'next', UP: 'previous', CTRL_Z: 'escape' } },
-                (error, response) => {
-                    if (response !== undefined) {
-                        if (response.selectedIndex === 0) {
-                            this.lastScreen.screen = 'afficherMagasin'
-                            this.displayStore.displayContainers()
-                        }
-                        else if(response.selectedIndex === 1){
-                            this.lastScreen.screen = 'afficherMagasin';
-                            this.displayStore.displayShelf();
-                        }
-                        else if(response.selectedIndex === 2){
-                            this.lastScreen.screen = 'afficherMagasin';
-                            this.displayStore.displayShelfContent()
-                        }
-                        else if(response.selectedIndex === 3){
-                            this.lastScreen.screen = 'afficherMagasin';
-                            this.displayStore.displayRacking();
-                        }
-                        else if(response.selectedIndex === 4){
-                            this.lastScreen.screen = 'afficherMagasin';
-                            this.displayStore.getAllShelves()
-    
-                        }
+        term.singleColumnMenu(menuItems,
+            { cancelable: true, keyBindings: { ENTER: 'submit', DOWN: 'next', UP: 'previous', CTRL_Z: 'escape' } },
+            (error, response) => {
+                if (response !== undefined) {
+                    if (response.selectedIndex === 0) {
+                        this.lastScreen.screen = 'afficherMagasin'
+                        this.displayStore.displayContainers()
                     }
-                })
-        } else console.log('Aucun magasin trouvé')
+                    else if(response.selectedIndex === 1){
+                        this.lastScreen.screen = 'afficherMagasin';
+                        this.displayStore.displayShelf();
+                    }
+                    else if(response.selectedIndex === 2){
+                        this.lastScreen.screen = 'afficherMagasin';
+                        this.displayStore.displayShelfContent()
+                    }
+                    else if(response.selectedIndex === 3){
+                        this.lastScreen.screen = 'afficherMagasin';
+                        this.displayStore.displayRacking();
+                    }
+                    else if(response.selectedIndex === 4){
+                        this.lastScreen.screen = 'afficherMagasin';
+                        this.displayStore.getAllShelves()
+
+                    }
+                }
+            })
     }
     rechercherFournisseur() {
         this.clearScreen();
