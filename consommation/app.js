@@ -95,6 +95,13 @@ class App {
         else if(this.lastScreen.screen == 'modifierEntreposage'){ this.fichePiece.modifierEntreposage(this.lastScreen.content) }
         else if(this.lastScreen.screen == 'storeManagerMenu'){ this.store.storeManager.storeManagerMenu() }
         else if(this.lastScreen.screen == 'manageAdress'){ this.store.storeManager.manageAdress(this.lastScreen) }
+
+        else if(this.lastScreen.screen == 'displayPart'){ this.FichePiece.displayPart(this.lastScreen.content)}
+        else if(this.lastScreen.screen == 'modifyPart'){
+            this.FichePiece.index = this.lastScreen.index;
+            this.FichePiece.modifierPiece(this.lastScreen.content)
+        }
+        else if(this.lastScreen.screen == 'containerSelector'){ this.FichePiece.changeContainer.containerSelector(this.lastScreen.content)}
         else {
             this.home()
         }
@@ -1329,9 +1336,23 @@ class App {
         this.title('PFEP')
 
         term.on('key', (key) => {
-            if (key === 'CTRL_Z') { if(this.enableGoBack){ setTimeout(() => { this.goBack() }, 10)} }
+            const movingKeys = ['UP', 'DOWN', 'LEFT', 'RIGHT']
+            if (key === 'CTRL_Z') {
+                if(this.FichePiece.bindCursorToKeys === true){ this.FichePiece.bindCursorToKeys = false }
+                if(this.enableGoBack){ setTimeout(() => { this.goBack() }, 10)}
+            }
             if (key === 'CTRL_C') { /*console.clear();*/ process.exit() }
             if (key === 'CTRL_X') { this.clearScreen(); this.home() }
+            if(movingKeys.indexOf(key) !== -1){
+                if (this.FichePiece.bindCursorToKeys === true) {
+                    this.FichePiece.index = this.FichePiece.moveCursor(key, this.FichePiece.index)
+                }
+            }
+            if(key === 'ENTER'){
+                if(this.FichePiece.bindCursorToKeys === true){
+                    this.FichePiece.changeProp()
+                }
+            }
         });
         //this.home()
         this.industry.importSuppliersJSON()

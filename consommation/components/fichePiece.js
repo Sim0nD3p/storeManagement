@@ -1,4 +1,7 @@
 const term = require(`terminal-kit`).terminal
+const ChangeSupplier = require('./changeSupplier');
+const ChangeContainer = require('./changeContainer');
+const filler = 'ND'
 
 const phoneNumber = (number) => {
     return number.substring(0, 3) + '-' + number.substring(3, 6) + '-' + number.substring(6, 11)
@@ -32,6 +35,10 @@ class FichePiece{
     constructor(app){
         this.app = app
         this.bindCursorToKeys = false
+        this.index = 0;
+        this.part;
+        this.changeSupplier = new ChangeSupplier(app)
+        this.changeContainer = new ChangeContainer(app);
 
 
     }
@@ -46,7 +53,6 @@ class FichePiece{
         const header = 'Historique des commandes'
         term.moveTo(term.width/2 - header.length/2, 2); term.bold.underline(header); term('\n');
         const levels = [5, 15, 25, 35];
-        const filler = 'N/D';
         term.column(levels[0]); term.bold.underline('Année');
         term.column(levels[1]); term.bold.underline('Mois');
         term.column(levels[2]); term.bold.underline('Jour');
@@ -63,170 +69,167 @@ class FichePiece{
             }   
         }
     }
+    getSrcObj = (type) => {
+        if(type == 'supplier[0]'){ return this.part.supplier[0] }
+        else if(type == 'consommation'){ return this.part.consommation }
+        else if(type == 'storage'){ return this.part.storage }
+        else if(type == 'storage[0]'){ return this.part.storage[0] }
+        else if(type == 'emballage'){ return this.part.emballage }
+    }
+    getProp = (p) => {
+            
+        if(p.prop !== null){
+            try {
+                if(this.accessProp(this.part, p.prop)){
+                    return this.accessProp(this.part, p.prop)
+                }
+                else throw 'error'
+            } catch (error) {
+                return this.accessProp(this.getSrcObj(p.type), p.prop)
+            }
+        }
+    }
+
+    setProp = (p, input) => {
+        if(p.prop !== null && p.prop !== undefined){
+            if(this.part[p.prop]){
+                term.yellow(this.part[p.prop])
+            }
+        }
+
+    }
+    
+    moveCursor = (key, index) => {
+        const formatProp = (prop) => {
+            if(typeof prop == 'string'){
+                return prop.substring(0, 15)
+            }
+            else if(typeof prop == 'number'){
+                return prop.toString().substring(0, 5)
+            }
+            else if(typeof prop == 'object'){
+                if(Object.keys(prop).indexOf('length') !== -1){
+                    return dimensions(prop)
+                }
+            }
+        }
+        
+        term.moveTo(this.plans[index].x, this.plans[index].y); term.bold(this.plans[index].name); term(this.getProp(this.plans[index]) ? formatProp(this.getProp(this.plans[index])) : filler)
+
+        //if(this.accessProp(part, plans[index].prop))
+
+        if(key == 'DOWN')
+        {
+            //console.log(this.accessProp(part, plans[index].prop))
+            if(index == this.plans.length - 1)
+            {
+                index = 0
+            }
+            else
+            {
+                index++
+            }
+        }
+        else if(key == 'UP')
+        {
+            if(index == 0)
+            {
+                index = this.plans.length - 1
+            }
+            else
+            {
+                index--
+            }
+        }
+        else if(key == 'LEFT')
+        {
+
+        }
+        else if(key == 'RIGHT')
+        {
+
+        }
+        term.moveTo(this.plans[index].x, this.plans[index].y); term.bold.bgYellow(this.plans[index].name); term.bgYellow(this.getProp(this.plans[index]) ? formatProp(this.getProp(this.plans[index])) : filler)
+
+        term.moveTo(this.plans[index].x + this.plans[index].name.length, this.plans[index].y)
+        return index
+    }
+
+    userInput = (x, y) => {
+        this.bindCursorToKeys = false
+        if(this.plans.findIndex(a => a.y == y && a.x + a.name.length !== x) !== -1){
+            let pRow = this.plans.find(a => a.y == y && a.x + a.name.length !== x)
+            setTimeout(() => {
+                term.moveTo(pRow.x, pRow.y); term.bold(pRow.name); term(this.getProp(pRow) ? this.getProp(pRow) : filler) 
+                term.moveTo(x, y)
+            }, 10);
+        }
+        return term.inputField({ x: x, y: y, maxLength: 10, cancelable: true, keyBindings: { ENTER: 'submit', BACKSPACE: 'backDelete', CTRL_Z: 'cancel'}}).promise
+
+    }
+
+    
+
+    changeProp = (index) => {
+        let p = this.plans[this.index]
+        if(p.type == 'primary'){
+            this.userInput(p.x + p.name.length, p.y).then((res) => {
+                this.bindCursorToKeys = true
+                this.setProp(p, 'null')
+
+            }).catch((e) => console.log(e))
+
+        }
+        else if(p.type == 'supplier' || p.type == 'supplier[0]'){
+            this.changeSupplier.test()
+        }
+        else if(p.type == 'consommation'){
+
+        }
+        else if(p.type == 'emballage'){
+
+        }
+        else if(p.type == 'storage' || p.type == 'storage[0]'){
+            this.app.lastScreen = {
+                screen: 'modifyPart',
+                content: this.part,
+                index: this.index
+            }
+            this.app.clearScreen()
+            this.bindCursorToKeys = false
+            this.changeContainer.containerSelector(this.part)
+
+        }
+    }
+
     modifierPiece = (part) => {
         this.app.clearScreen()
         //this.app.lastScreen.screen = 'home'
-        const leftMargin = 5; const filler = 'ND'
+        const leftMargin = 5;
         this.bindCursorToKeys = true
         let index = 0
 
-        let bluePrints = [];
+        let plans = [];
         term.moveTo(leftMargin, 4); term.bold.underline('INFORMATIONS PRINCIPALES');
         term.moveTo(leftMargin, 14); term.bold.underline(`INFORMATIONS FOURNISSEUR`);
         term.moveTo(leftMargin, 22); term.bold.underline('INFORMATIONS EMBALLAGE');
         term.moveTo(leftMargin, 30); term.bold.underline('INFORMATIONS ENTREPOSAGE');
         term.moveTo(term.width/3+leftMargin, 4); term.bold.underline('INFORMATIONS DE CONSOMMATION')
 
-        let primary = this.primaryInfos(part, leftMargin, filler, 5); primary ? bluePrints = bluePrints.concat(primary) : null;
-        let supplier = this.supplierInfos(part.supplier[0], leftMargin, filler, 15); supplier ? bluePrints = bluePrints.concat(supplier) : null;
-        let emballage = this.emballage(part.emballage, leftMargin, filler, 23); emballage ? bluePrints = bluePrints.concat(emballage) : null
-        let storage = this.storage(part.storage, leftMargin, filler, 31); storage ? bluePrints = bluePrints.concat(storage) : null
-        let consommation = this.consommation(part.consommation, term.width/3+leftMargin, filler, 5); consommation ? bluePrints = bluePrints.concat(consommation) : null
-        bluePrints = bluePrints.sort((a, b) => {
-            if(a.y == b.y) return a.x - b.x
-            else return a.y - b.y
+        let primary = this.primaryInfos(part, leftMargin, filler, 5); primary ? plans = plans.concat(primary) : null;
+        let supplier = this.supplierInfos(part.supplier[0], leftMargin, filler, 15); supplier ? plans = plans.concat(supplier) : null;
+        let emballage = this.emballage(part.emballage, leftMargin, filler, 23); emballage ? plans = plans.concat(emballage) : null
+        let storage = this.storage(part.storage, leftMargin, filler, 31); storage ? plans = plans.concat(storage) : null
+        let consommation = this.consommation(part.consommation, term.width/3+leftMargin, filler, 5); consommation ? plans = plans.concat(consommation) : null
+        
+        plans = plans.sort((a, b) => {
+            if(a.x == b.x) return a.y - b.y
+            return a.x - b.x
         })
-
-
-
-
-        function moveCursor_old(dir, bP) {
-            let location = term.getCursorLocation();
-            location.then((pos) => {
-                let x; let y;
-
-                if (dir == 'UP') {
-                    if (bP.findIndex(a => a.y == pos.y - 1) !== -1) {
-                        let p = bP.find(a => a.y == pos.y - 1);
-                        x = p.x + p.name.length
-                    }
-
-
-
-                    else {
-                        let target = bP.sort((a, b) => { return Math.abs(b.y - pos.y) - Math.abs(a.y - pos.y) })
-                        console.log(target)
-                        target = target.findIndex(a => a.y - pos.y > 0)
-                        if (target !== undefined) {
-                            x = target.x;
-                            y = target.y
-                        }
-                        else {
-                            x = 1;
-                            y = 1
-                        }
-
-                    }
-                    term.moveTo(x, y)
-                    return { x: x, y: y }
-
-                }
-                else if (dir == 'DOWN') {
-                    if (bP.findIndex(a => a.y == pos.y + 1) !== -1) {
-                        let p = bP.find(a => a.y == pos.y + 1);
-                        x = p.x + p.name.length
-                    } else x = pos.x
-                    term.moveTo(x, pos.y + 1)
-                    return { x: x, y: pos.y + 1 }
-
-                }
-
-            }).catch((e) => console.log(e))
-        }
-
-        const pannel = (bP, index) => {
-            bP = bP.sort((a, b) => {
-                if(a.x == b.x){
-                    return a.y - b.y
-                }
-                return a.x - b.x
-            })
-            term.moveTo(bP[index].x, bP[index].y)
-            return index
-
-
-        }
-        const moveCursor = (dir, bP) => {
-            let getPosition = term.getCursorLocation()
-            getPosition.then((pos) => {
-                let target = bP.sort((a, b) => {
-                    if(a.x == b.x){
-                        return a.y - b.y
-                    }
-                    return a.x - b.x
-                })
-                if(dir == 'UP' || dir == 'DOWN'){
-                    let targetX = bP.sort((a, b) => Math.abs(a.x-pos.x) - Math.abs(b.x-pos.x))[0].x
-                    target = target.filter(a => a.x == targetX || a.x == targetX+5).sort((a, b) => Math.abs(a.y - pos.y) - Math.abs(b.y - pos.y))
-                    if(dir == 'DOWN'){
-                        target = target.filter(a => pos.y - a.y < 0).find(a => a !== undefined)
-                        term.moveTo(target.x, target.y)
-
-                    }
-                    else if(dir == 'UP'){
-                        target = target.filter(a => pos.y - a.y > 0).find(a => a !== undefined)
-                        term.moveTo(target.x, target.y)
-                    }
-    
-                }
-                else if(dir == 'LEFT' || dir == 'RIGHT'){
-                    let columns = [];
-                    target.forEach(t => { if(columns.indexOf(t.x) == -1){ columns.push(t.x) }})
-                    for(let i = 1; i < columns.length; i++){ if(columns[i-1] == columns[i] - 5){ columns.splice(i, 1) } }
-                    //target = target.filter((a) => a.x columns.indexOf(a.x) !== -1)
-                    console.log(target)
-
-
-                }
-
-            })
-        }
-
-
-        term.on('key', (key) => {
-            if(this.bindCursorToKeys === true){
-                let position;
-                if (key == 'UP') {
-                    if(index == bluePrints.length - 1){ index = 0}
-                    else index++
-                    pannel(bluePrints, index)
-                    //position = moveCursor('UP', bluePrints)
-                }
-                else if (key == 'DOWN') {
-                    if(index == 0){ index = bluePrints.length - 1 }
-                    else index--
-                    pannel(bluePrints, index)
-                    //position = moveCursor('DOWN', bluePrints)
-                }
-                else if (key == 'LEFT') {
-                    pannel(bluePrints, index)
-                    position = moveCursor('LEFT', bluePrints)
-                }
-                else if (key == 'RIGHT') {
-                    pannel(bluePrints, index)
-                    position = moveCursor('RIGHT', bluePrints)
-                }
-
-
-
-
-
-
-
-
-                    
-                else if(key == 'CTRL_Z'){
-                    this.bindCursorToKeys = false
-                    term.reset();
-                }
-
-            }
-
-            
-        })
-
-
-
+        this.plans = plans
+        //this.app.clearScreen()
+        //console.log(plans)
+        term.moveTo(plans[index].x + plans[index].name.length, plans[index].y)
     }
     accessProp = (part, path) => {
         let split = path.split('.')
@@ -285,12 +288,12 @@ class FichePiece{
     supplierInfos = (supplier, leftMargin, filler, yStart) => {
         if(supplier !== undefined){
             let bluePrints = [
-                { name: 'Nom: ', prop: 'name', x: leftMargin, y: yStart, type: 'supplier' },
-                { name: 'Téléphone: ', prop: 'phone', x: leftMargin, y: yStart + 1, type: 'supplier' },
-                { name: 'Fax: ', prop: 'fax', x: leftMargin, y: yStart + 2, type: 'supplier' },
-                { name: 'Adresse: ', prop: 'address', x: leftMargin, y: yStart + 3, type: 'supplier' },
-                { name: 'Lead time moyen: : ', prop: 'leadTime', x: leftMargin, y: yStart + 4, type: 'supplier' },
-                { name: 'Lead time max: ', prop: 'leadTimeMax', x: leftMargin, y: yStart + 5, type: 'supplier' },
+                { name: 'Nom: ', prop: 'name', x: leftMargin, y: yStart, type: 'supplier[0]' },
+                { name: 'Téléphone: ', prop: 'phone', x: leftMargin, y: yStart + 1, type: 'supplier[0]' },
+                { name: 'Fax: ', prop: 'fax', x: leftMargin, y: yStart + 2, type: 'supplier[0]' },
+                { name: 'Adresse: ', prop: 'address', x: leftMargin, y: yStart + 3, type: 'supplier[0]' },
+                { name: 'Lead time moyen: : ', prop: 'leadTime', x: leftMargin, y: yStart + 4, type: 'supplier[0]' },
+                { name: 'Lead time max: ', prop: 'leadTimeMax', x: leftMargin, y: yStart + 5, type: 'supplier[0]' },
             ]
             bluePrints.forEach(b => {
                 if(b.name == 'Adresse: '){
@@ -340,11 +343,11 @@ class FichePiece{
     storage = (storage, leftMargin, filler, yStart) => {
         if(storage.length > 0){
             let bluePrints = [
-                { prop: 'type', name: 'Type de contenant: ', x: leftMargin, y: yStart, type: 'storage' },
-                { prop: 'count', name: 'Nombre de piece / contenant: ', x: leftMargin, y: yStart + 1, type: 'storage' },
+                { prop: 'type', name: 'Type de contenant: ', x: leftMargin, y: yStart, type: 'storage[0]' },
+                { prop: 'count', name: 'Nombre de piece / contenant: ', x: leftMargin, y: yStart + 1, type: 'storage[0]' },
                 { prop: 'length', name: 'Nombre de contenants maximal: ', x: leftMargin, y: yStart + 2, type: 'storage' },
-                { prop: 'weight', name: 'Masse: ', x: leftMargin, y: yStart + 3, type: 'storage' },
-                { prop: 'dimensions', name: 'Dimensions: ', x: leftMargin, y: yStart + 4, type: 'storage' },
+                { prop: 'weight', name: 'Masse: ', x: leftMargin, y: yStart + 3, type: 'storage[0]' },
+                { prop: 'dimensions', name: 'Dimensions: ', x: leftMargin, y: yStart + 4, type: 'storage[0]' },
             ]
             bluePrints.forEach(p => {
                 let container = storage[0]
@@ -383,6 +386,7 @@ class FichePiece{
     displayPart = (part) => {
         this.app.clearScreen()
         this.app.lastScreen.screen = 'rechercherItem'
+        this.part = part;
         if(typeof part == 'string'){ part = this.app.store.getItemFromPFEP(part) }
         
         const partMenu = (leftMargin) => {

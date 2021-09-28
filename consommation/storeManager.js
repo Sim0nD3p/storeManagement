@@ -879,6 +879,8 @@ class StoreManager {
 
     //qteMax, type
     bacManager(type, item, qte){
+        if(!qte && item.qteMax){ qte = item.qteMax }
+        
         let partsLeft = qte;
         let containerCount = 0;
         let array = [];
