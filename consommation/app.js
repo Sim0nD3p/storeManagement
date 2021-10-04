@@ -480,8 +480,49 @@ class App {
 
     }
 
+    home = () => {
+        this.clearScreen();
+        this.lastScreen = { screen: 'home' }
 
-    home() {
+        function createPad(str, length){
+            if(str.length > length){ str = str.substring(0, length) }
+            else str = str.padEnd(length)
+            return str
+        }
+        const mainOptions = [
+            'Informations',
+            'Rechercher pièce',
+            'Afficher magasin',
+            'Afficher listes de pièces',
+            'Afficher liste fournisseurs',
+            'Maintenance',
+            'Menu magasin',
+            'Création',
+        ]
+        const header = 'StoreManagement 10/2021'
+
+        term.moveTo(term.width/2 - header.length/2, 2); term.bold.underline(header); term('\n');
+        let mainMenu = term.gridMenu(
+            mainOptions.map(o => createPad(o, term.width/4)),
+            { x: 20, width: term.width-20, itemMaxWidth: term.width/2 }
+            ).promise
+        mainMenu.then((res) => {
+            switch(res.selectedIndex){
+                case 0: this.infos(); break;
+                case 1: this.rechercherItem(); break;
+                case 2: this.displayStore(); break;
+                case 3: this.afficherPieces(); break;
+                case 4: this.fournisseurs(); break;
+                case 5: this.maintenance(); break;
+                case 6: this.store.storeManager.storeManagerMenu(); break;
+                case 7: console.log('en d/veloppement'); break;
+                default: this.home(); break;
+            }
+        }).catch((e) => console.log(e))
+    }
+
+
+    home_old = () => {
         this.clearScreen()
         this.lastScreen = { screen: 'home' }
         term.bold('PFEP V1.0\n');
@@ -504,7 +545,8 @@ class App {
             'Test',
         ]
         term.gridMenu(menuItems, (error, response) => {
-            this.lastScreen.screen = 'home';
+            this.lastScreen = { screen: 'home' };
+
             if (response.selectedIndex === 0) { this.infos() }
             else if (response.selectedIndex === 1) {
                 term(`\n\n\n Entrer le mot de passe pour enregistrer les modifications au PFEP\n`);
