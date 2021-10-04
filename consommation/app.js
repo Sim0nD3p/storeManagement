@@ -96,7 +96,7 @@ class App {
         else if(this.lastScreen.screen == 'storeManagerMenu'){ this.store.storeManager.storeManagerMenu() }
         else if(this.lastScreen.screen == 'manageAdress'){ this.store.storeManager.manageAdress(this.lastScreen) }
 
-        else if(this.lastScreen.screen == 'displayPart'){ this.FichePiece.displayPart(this.lastScreen.content)}
+        else if(this.lastScreen.screen == 'displayPart'){ this.FichePiece.bindCursorToKeys = false; this.FichePiece.displayPart(this.lastScreen.content)}
         else if(this.lastScreen.screen == 'modifyPart'){
             this.FichePiece.index = this.lastScreen.index;
             this.FichePiece.modifierPiece(this.lastScreen.content)
@@ -563,22 +563,13 @@ class App {
                 
             }
             else if(response.selectedIndex == 13){
-                console.log('THIS IS THE TESTING SECTION');
-                console.log('test')
-                let shelf1;
-                this.store.racking.map(rack => {
-                    return rack.shelves.map(shelf => {
-                        if(shelf.name == 'shelf_4'){ shelf1 = shelf }
-                    })
-                })
-
-                let shelf2;
-                this.store.shelves.map(shelf => {
-                    if(shelf.name == 'shelf_4'){
-                        shelf2 = shelf
+                this.store.PFEP.forEach(part => {
+                    if(part.utilite && part.utilite !== undefined){
+                        if(Array.isArray(part.utilite) == false){
+                            this.store.getItemFromPFEP(part.code).utilite = part.utilite.split(' ')
+                        }
                     }
                 })
-                console.log(shelf1 == shelf2)
 
             }
 

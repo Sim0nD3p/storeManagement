@@ -116,7 +116,7 @@ class Store{
 
     /**
      * Fills containers
-     * @param {string} type - container type
+     * @param {string} type - container type (bac1, bac2, bundle, bUs, cus)
      * @param {*object} part - part object from PFEP
      * @param {*number} qte - qte to place
      * @param {*} data 
@@ -320,22 +320,50 @@ class Store{
             }
         }
     }
+
     createPiece() {
         this.app.clearScreen();
-        term.bold(`Création d'une nouvelle fiche de pièce\n`);
-        term(`Entrer le nom de la nouvelle pièce\n`);
-        term.inputField(
-            { cancelable: true, keyBindings: { ENTER: 'submit', CTRL_Z: 'escape', BACKSPACE: 'backDelete' } },
-            (error, input) => {
-                if (input !== undefined) {
-                    let data = { code: input };
-                    let dataType = 'csv';
-                    this.PFEP.push(new Item(data, dataType));
-                    this.app.fichePiece.modifierDetails(this.getItemFromPFEP(input));
-                }
+        let str = `Création d'une nouvelle pièce`
+        term.moveTo(term.width/2 - str.length/2, 2); term.bold.underline(str);
+        term.moveTo(term.width/2 - 20, 4); term(`Entrer nom de pièce: `)
+        const name = () => {
+            return new Promise((resolve, reject) => {
+                let nameInput = term.inputField({cancelable: true, keyBindings: { ENTER: 'submit', BACKSPACE: 'backDelete', CTRL_Z: 'cancel'}}).promise
+                nameInput.then((name) => {
+                    if(this.app.store.PFEP.findIndex(a => a.code == name) !== -1){
+                        reject('error nom')
+                    }
+                    else {
+                        resolve(name)        
+                    }
+                    
+                })
 
-            }
-        )
+            })
+        }
+
+        const description = () => {
+            return new Promise((resolve, reject) => {
+                term.moveTo(term.width / 2 - str.length / 2, 2); term.bold.underline(str);
+                term.moveTo(term.width / 2 - 20, 4); term(`Entrer description de pièce: `)
+                let descriptionInput = term.inputField({cancelable: true, keyBindings: { ENTER: 'submit', BACKSPACE: 'backDelete', CTRL_Z: 'cancel'}}).promise
+                descriptionInput.then((description) => {
+                    if(description.length > 0){
+                        resolve(description)
+                    }
+                    else reject('error description')
+                })
+            })
+        }
+
+        name().then((name) => {
+            description().then((description) => {
+                console.log(name, description)
+                let part = new Item()
+                console.log(part)
+
+            }).catch((e) => console.log(e))
+        }).catch((e) => console.log(e))
     }
 
 

@@ -88,17 +88,7 @@ class FichePiece{
                 return this.accessProp(this.getSrcObj(p.type), p.prop)
             }
         }
-    }
-
-    setProp = (p, input) => {
-        if(p.prop !== null && p.prop !== undefined){
-            if(this.part[p.prop]){
-                term.yellow(this.part[p.prop])
-            }
-        }
-
-    }
-    
+    }    
     moveCursor = (key, index) => {
         const formatProp = (prop) => {
             if(typeof prop == 'string'){
@@ -114,8 +104,10 @@ class FichePiece{
             }
         }
         
+        term.styleReset();
         term.moveTo(this.plans[index].x, this.plans[index].y); term.bold(this.plans[index].name); term(this.getProp(this.plans[index]) ? formatProp(this.getProp(this.plans[index])) : filler)
 
+        
         //if(this.accessProp(part, plans[index].prop))
 
         if(key == 'DOWN')
@@ -155,33 +147,89 @@ class FichePiece{
         return index
     }
 
-    userInput = (x, y) => {
+    userInput = (x, y, hint) => {
         this.bindCursorToKeys = false
+        hint = hint ? hint : '';
         if(this.plans.findIndex(a => a.y == y && a.x + a.name.length !== x) !== -1){
             let pRow = this.plans.find(a => a.y == y && a.x + a.name.length !== x)
             setTimeout(() => {
+                term.styleReset()
                 term.moveTo(pRow.x, pRow.y); term.bold(pRow.name); term(this.getProp(pRow) ? this.getProp(pRow) : filler) 
                 term.moveTo(x, y)
             }, 10);
         }
-        return term.inputField({ x: x, y: y, maxLength: 10, cancelable: true, keyBindings: { ENTER: 'submit', BACKSPACE: 'backDelete', CTRL_Z: 'cancel'}}).promise
+        return term.inputField({ x: x, y: y, minLength: 20, maxLength: 20, cursorPosition: -1, default: hint, cancelable: true, keyBindings: { ENTER: 'submit', BACKSPACE: 'backDelete', CTRL_Z: 'cancel'}}).promise
 
     }
-
-    
 
     changeProp = (index) => {
         let p = this.plans[this.index]
         if(p.type == 'primary'){
-            this.userInput(p.x + p.name.length, p.y).then((res) => {
-                this.bindCursorToKeys = true
-                this.setProp(p, 'null')
+            if(p.prop == 'specs'){
+                const specsTypes = ['length', 'width', 'height'];
+                const dimInput = (x, y) => {
+                    return term.inputField({ x: x, y: y, maxLength: 5, cancelable: true, keyBindings: { ENTER: 'submit', BACKSPACE: 'backDelete', CTRL_Z: 'cancel'}}).promise
+                }
+                let menuItems = [this.part.specs.length, this.part.specs.width, this.part.specs.height]
+                term.moveTo(p.x + p.name.length, p.y); term.erase(20); term.bgYellow();
+                let selector = term.singleColumnMenu(menuItems.map(a => a + ' mm'), { y: p.y-1, leftPadding: '\t\t\t', cancelable: true, keyBindings: { CTRL_Z: 'escape', ENTER: 'submit', UP:'previous', DOWN:'next'}}).promise
+                this.bindCursorToKeys = false
 
-            }).catch((e) => console.log(e))
+                selector.then((res) => {
+                    let baseXY = [p.x+p.name.length+8, p.y-1+res.selectedIndex]
+                    let input = dimInput(baseXY[0], baseXY[1])
+                    input.then((newValue) => {
+                        newValue = Number(newValue)
+                        term.moveTo(baseXY[0], baseXY[1])
+                        term.red(newValue); term.red(` mm`)
+                        if(newValue !== undefined && !isNaN(newValue) && newValue !== 0){
+                            switch(res.selectedIndex){
+                                case 0: this.app.store.getItemFromPFEP(this.part.code).specs.length = newValue; break;  //length
+                                case 1: this.app.store.getItemFromPFEP(this.part.code).specs.width = newValue; break;  //width
+                                case 2: this.app.store.getItemFromPFEP(this.part.code).specs.height = newValue; break;  //height
+                                default: break;
+                            }
+                        }
+                        this.app.clearScreen()
+                        this.modifierPiece(this.part);
+                        this.moveCursor('DOWN', this.index-1)
+                    }).catch((e) => console.log(e))
+                }).catch((e) => console.log(e)) 
+            }
+            else if(p.prop == 'utilite'){
+                let baseStr = ''
+                if(this.part.utilite !== undefined){
+                    this.accessProp(this.part, p.prop).forEach(s => baseStr += s + ' ')
+                }
+                this.userInput(p.x + p.name.length, p.y).then((res) => {
+                    term.red(res)
+                })
 
+
+
+            }
+            else {
+                this.userInput(p.x + p.name.length, p.y).then((res) => {
+                    this.bindCursorToKeys = true
+                    let valueTypes = {
+                        code: 'string',
+                        description: 'string',
+                        family: 'string',
+                        tag: 'string',
+                        weight: 'number',
+                        class: 'string',
+                    }
+                    term(this.getProp(p))
+    
+                }).catch((e) => console.log(e))
+                
+            }
         }
         else if(p.type == 'supplier' || p.type == 'supplier[0]'){
-            this.changeSupplier.test()
+            this.bindCursorToKeys = false
+            this.app.lastScreen = { screen: 'modifyPart', content: this.part, index: this.index }
+
+            this.changeSupplier.managePartSupplier(this.part)
         }
         else if(p.type == 'consommation'){
 
@@ -204,7 +252,7 @@ class FichePiece{
 
     modifierPiece = (part) => {
         this.app.clearScreen()
-        //this.app.lastScreen.screen = 'home'
+        this.app.lastScreen = { screen: 'displayPart', content: this.part }
         const leftMargin = 5;
         this.bindCursorToKeys = true
         let index = 0
@@ -232,10 +280,15 @@ class FichePiece{
         term.moveTo(plans[index].x + plans[index].name.length, plans[index].y)
     }
     accessProp = (part, path) => {
-        let split = path.split('.')
         let obj = part
-        for(let i = 0; i < split.length; i++){
-            obj = obj[split[i]]
+        let split = path.split('.')
+        try {
+            for(let i = 0; i < split.length; i++){
+                obj = obj[split[i]]
+            }    
+        } catch (error) {
+            obj = ''
+            
         }
         return obj
     }

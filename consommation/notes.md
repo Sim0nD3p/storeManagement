@@ -83,29 +83,23 @@
 - racking mains - DONE
 
 ## FINAL LIST TO FINISH THE PROGRAM
-- verif contenants - DONE -
-- éliminer contentants sans dimensions (MAIN) 
-- adressage - 10h clean - 
-- export/import store to JSON - 8h semi clean - DONE - took like 3 days
-- étagères fixes - 20h clean - 
-- assign containers - 20h clean -
-- possibilite d'ajouter une seule piece
-- refaire fichePiece - 8h clean - 
-- Fix bugs (see list below): - 16h clean -
+- verif contenants - DONE
+- adressage - DONE -
+- fixed shleves and racking - DONE -
+- assing racking/shelves priority - DONE -
+- refaire fichePiece - DONE - 
+    - change/assign container
+    - change supplier
+    - create part
+    -create supplier
+- Fix bugs (see list below):
     - creer piece -> afficher Piece = bug
     - still calling error when gen containers
 
-- checker avec stephane pour pieces sans containers
 
+## IDEES ADRESSAGE
+- A5-2G3
 
-
-- Notes on preassigned shelf priority
-    - assign priority to racking and shelves
-    - juste fill shelves first to priority
-    On permet de bouger shelves dans racking ou pas
-
-
-    
 
 
 
