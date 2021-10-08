@@ -95,45 +95,45 @@ class StoreManager {
         }
 
     }
-    //list => PFEP
+    /**
+     * CHECKED 2021-10-07 (voir doc)
+     */
     verifyItemsContainers = () => {
-        let baseContainers = this.app.store.PFEP.map(part => {
+        let overallContainers = this.app.store.PFEP.map(part => {
             if(part.storage.length > 0){ return part }
             else return null
         }).filter(a => a !== null)
+        
+        let oC = {}
+        overallContainers.forEach(c => {
+            oC = { ...oC, [c.code]: c }
+        })
 
-
-
-        //2021-0-23 new addingin something is broken
         let [initialPartList, notInStore] =  this.getStoreList(this.app.store.PFEP, this.minOrderQte);
-        console.log(`getStoreList has ${initialPartList.length} elements`)
+
+        //On separe les items avec et sans containers
         let missingContainer = {};
+        let goodContainer = {};
         initialPartList.forEach(part => {
             if(part.storage){
                 if(part.storage.length == 0){ missingContainer = { ...missingContainer, [part.code]: part } } 
-            } else {
-                console.log(part.storage, part.code)
+                else if(part.storage.length > 0){ goodContainer = { ...goodContainer, [part.code]: part } }
             }
         })
-        console.log(missingContainer)
+        
         exportData.exportJSON(missingContainer, 'missingContainers', '../SORTIE')
+        exportData.exportJSON(goodContainer, 'presentContainers', '../SORTIE')
+        exportData.exportJSON(oC, 'partsWithContainer', '../SORTIE')
+        
+        
+        term('\n\n\n')
+        term(`baseRef made a list of ${initialPartList.length} parts that are eligible to go in store\n`)
+        term(`From that list, ${Object.keys(goodContainer).length} parts have containers and ${Object.keys(missingContainer).length} parts do not have containers\n`)
+        term(`From all the ${this.app.store.PFEP.length} parts in the PFEP, ${Object.keys(oC).length} part have containers\n`)
 
-
-        term(`\n ${baseContainers.length} pieces ont des contenants\n`)
-        term(`aucune autre anaylse n'a ete programmee\n`)
-
-        console.log(baseContainers.length)
-        let filter1 = baseContainers.map(part => {
-            let valid = true;
-            part.storage.forEach(cont => {
-                if(isNaN(cont.height) || isNaN(cont.width) || isNaN(cont.length)){
-                    valid = false
-                }
-            })
-            if(valid == true){ return part }
-            else return null
-        }).filter(a => a !== null)
-        console.log(filter1.length)
+        term(`La liste de pièce sans contenant a été exporté [missingContainer.json]\n`)
+        term(`La liste de pièce avec contenant a été exporté [presentContainer.json]\n`)
+        term(`La liste de toutes les pièces avec contenant a été exporté [partsWithContainer.json]\n`)
 
     }
 
@@ -274,11 +274,25 @@ class StoreManager {
         }
         else { rackingSelector(content ? content : 0) }
     }
+    infosMagasin = () => {
+        this.app.clearScreen()
+        let shelvesQte = {}
+        for(let i = 0; i < this.app.store.racking.length; i++){
+            let length = this.app.store.racking[i].length
+            let count = shelvesQte[length] ? shelvesQte[length] : 0;
+            shelvesQte = {
+                ...shelvesQte,
+                [length]: count += this.app.store.racking[i].shelves.length 
+            }
+        }
+        console.log(shelvesQte)
+    }
 
     storeManagerMenu = () => {
         this.app.clearScreen();
         this.app.lastScreen.screen = 'home';
         let menuItems = [
+            'Informations magasin',
             'Contenants pièces',
             'Vérification des contenants',
             'Générer magasin',
@@ -296,20 +310,53 @@ class StoreManager {
             if(res.selectedIndex !== undefined){
                 this.app.lastScreen.screen = 'storeManagerMenu';
                 switch(res.selectedIndex){
-                    case 0: this.assignItemsContainers(); break;
-                    case 1: this.verifyItemsContainers(); break;
-                    case 2: this.storeGenerator(); break;
-                    case 3: this.storeVerification(); break;
-                    case 4: this.manageAdress(); break;
-                    case 5: this.exportStore(); break;
-                    case 6: this.importStore(); break;
+                    case 0: this.infosMagasin(); break;
+                    case 1: this.assignItemsContainers(); break;
+                    case 2: this.verifyItemsContainers(); break;
+                    case 3: this.storeGenerator(); break;
+                    case 4: this.storeVerification(); break;
+                    case 5: this.manageAdress(); break;
+                    case 6: this.exportStore(); break;
+                    case 7: this.importStore(); break;
                     //default: this.app.home(); break;
                 }
             }
         }).catch((e) => console.log(e))
 
     }
+
+    /**
+     * A REFAIRE
+     */
     storeVerification = () => {
+        this.app.lastScreen.screen = 'storeManagerMenu'
+        this.app.clearScreen();
+        term.bold(`Vérification du magasin\n`)
+
+
+        let partList = [];
+        let shelvesList = [];
+        this.app.store.racking.forEach(rack => {
+            rack.shelves.map(shelf => {
+                if(shelf.name && shelvesList.indexOf(shelf.name) == -1){
+                    shelvesList.push(shelf)
+                }
+                shelf.content.forEach(item => {
+                    if(item.name.split('_')[1] && partList.indexOf(item.name.split('_')[1] == -1)){
+                        partList.push(item.name.split('_')[1])
+                    }
+                })
+            })
+        })
+        console.log(partList.length)
+        console.log(shelvesList.length)
+        this.storeVerification_old()
+
+
+
+    }
+
+    storeVerification_old = () => {
         this.app.lastScreen.screen = 'storeManagerMenu'
         this.app.clearScreen();
         term.bold(`Vérification du magasin\n`)

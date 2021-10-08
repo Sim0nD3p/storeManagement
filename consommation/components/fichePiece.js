@@ -75,20 +75,9 @@ class FichePiece{
         else if(type == 'storage'){ return this.part.storage }
         else if(type == 'storage[0]'){ return this.part.storage[0] }
         else if(type == 'emballage'){ return this.part.emballage }
+        else if(type == 'primary'){ return this.part }
     }
-    getProp = (p) => {
-            
-        if(p.prop !== null){
-            try {
-                if(this.accessProp(this.part, p.prop)){
-                    return this.accessProp(this.part, p.prop)
-                }
-                else throw 'error'
-            } catch (error) {
-                return this.accessProp(this.getSrcObj(p.type), p.prop)
-            }
-        }
-    }    
+    
     moveCursor = (key, index) => {
         const formatProp = (prop) => {
             if(typeof prop == 'string'){
@@ -158,9 +147,50 @@ class FichePiece{
                 term.moveTo(x, y)
             }, 10);
         }
-        return term.inputField({ x: x, y: y, minLength: 20, maxLength: 20, cursorPosition: -1, default: hint, cancelable: true, keyBindings: { ENTER: 'submit', BACKSPACE: 'backDelete', CTRL_Z: 'cancel'}}).promise
+        //return term.inputField({ x: x, y: y, minLength: 20, maxLength: 20, cursorPosition: -1, default: hint, cancelable: true, keyBindings: { ENTER: 'submit', BACKSPACE: 'backDelete', CTRL_Z: 'cancel'}}).promise
+
+        return term.inputField({ x: x, y: y, cancelable: true, keyBindings: { ENTER: 'submit', BACKSPACE: 'backDelete', CTRL_Z: 'cancel' }}).promise
+    }
+    getProp = (p) => {
+            
+        if(p.prop !== null){
+            try {
+                if(this.accessProp(this.part, p.prop)){
+                    return this.accessProp(this.part, p.prop)
+                }
+                else throw 'error'
+            } catch (error) {
+                return this.accessProp(this.getSrcObj(p.type), p.prop)
+            }
+        }
+    }    
+    setProp = (p, value) => {
+        if (p.prop !== null) {
+            try {
+                if(this.part[p.prop]){
+                    this.part[p.prop] = value
+                }
+                else throw 'error'
+            } catch (error) {
+                let obj = this.getSrcObj(p.type)
+                let split = p.prop.split('.')
+                try {
+                    switch(split.length){
+                        case 1: obj[split[0]] = value; break;
+                        case 2: obj[split[0]][split[1]] = value; break;
+                        case 3: obj[split[0]][split[1]][split[2]] = value; break;
+                        case 4: obj[split[0]][split[1]][split[2]][split[3]] = value; break;
+                        case 5: obj[split[0]][split[1]][split[2]][split[3]][split[4]] = value; break;
+                    }
+                } catch (error) {
+                    console.log('error')
+
+                }
+            }
+        }
 
     }
+    
 
     changeProp = (index) => {
         let p = this.plans[this.index]
@@ -196,31 +226,34 @@ class FichePiece{
                     }).catch((e) => console.log(e))
                 }).catch((e) => console.log(e)) 
             }
-            else if(p.prop == 'utilite'){
+            else if(p.prop == 'utilite'){   //bug when array.length > 1?
                 let baseStr = ''
                 if(this.part.utilite !== undefined){
-                    this.accessProp(this.part, p.prop).forEach(s => baseStr += s + ' ')
+                    //this.accessProp(this.part, p.prop).forEach(s => baseStr += s + ' ')
                 }
-                this.userInput(p.x + p.name.length, p.y).then((res) => {
+                this.userInput(p.x + p.name.length, p.y, 'te').then((res) => {
                     term.red(res)
+                    this.modifierPiece(this.part);
+                    this.moveCursor('DOWN', this.index-1)
                 })
 
 
 
             }
             else {
-                this.userInput(p.x + p.name.length, p.y).then((res) => {
-                    this.bindCursorToKeys = true
-                    let valueTypes = {
-                        code: 'string',
-                        description: 'string',
-                        family: 'string',
-                        tag: 'string',
-                        weight: 'number',
-                        class: 'string',
-                    }
-                    term(this.getProp(p))
-    
+                let valueTypes = {
+                    code: 'string',
+                    description: 'string',
+                    family: 'string',
+                    tag: 'string',
+                    weight: 'number',
+                    class: 'string',
+                }
+                this.userInput(p.x + p.name.length, p.y, '').then((res) => {
+                    console.log(res);
+                    this.setProp(p, res);
+                    this.modifierPiece(this.part);
+                    this.moveCursor('DOWN', this.index-1)
                 }).catch((e) => console.log(e))
                 
             }
@@ -229,12 +262,30 @@ class FichePiece{
             this.bindCursorToKeys = false
             this.app.lastScreen = { screen: 'modifyPart', content: this.part, index: this.index }
 
+            this.app.clearScreen()
             this.changeSupplier.managePartSupplier(this.part)
         }
         else if(p.type == 'consommation'){
 
         }
         else if(p.type == 'emballage'){
+            if(p.prop !== null){
+                if(p.prop.includes('TF')){
+                    term.red(`Veuillez modifier cette propriété dans la section entreposage`)
+
+                }
+                else {
+                    this.userInput(p.x + p.name.length, p.y).then((res) => {
+                        //console.log(res)
+                        //console.log(p)
+                        this.setProp(p, res)
+                        this.modifierPiece(this.part);
+                        this.moveCursor('DOWN', this.index-1)
+        
+                    }).catch((e) => console.log(e))
+                    
+                }
+            }
 
         }
         else if(p.type == 'storage' || p.type == 'storage[0]'){
@@ -418,7 +469,10 @@ class FichePiece{
             return bluePrints
         }
         else {
-            term.moveTo(leftMargin, yStart); term.red(`Informations d'entreposage manquantes`)
+            let bluePrints = { prop: null, name: `Informations d'entreposage manquantes`, x: leftMargin, y: yStart, type: 'storage[0]'}
+
+            term.moveTo(bluePrints.x, bluePrints.y); term.bold(bluePrints.name);
+            return bluePrints 
         }
     }
 

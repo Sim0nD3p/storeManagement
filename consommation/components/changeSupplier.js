@@ -12,7 +12,7 @@ class ChangeSupplier{
         //this.app.lastScreen = { screen: 'managePartSupplier', content: part }
         let str = 'Modification des données fournisseur'
         term.moveTo(term.width/2 - str.length/2, 2); term.bold.underline(str)
-        term.moveTo(leftMargin, 3); term.bold.underline(`Fournisseurs actuels`)
+        term.moveTo(leftMargin, 3); term.bold.underline(`Fournisseurs potentiels actuels`)
         
         function createPad(val, length){
             if(val == undefined){ val = 'ND' }
@@ -37,7 +37,13 @@ class ChangeSupplier{
         let options = term.singleColumnMenu(menuOptions, { y: 5, leftPadding: '\t\t\t\t\t\t\t\t\t\t', cancelable: true, keyBindings: { CTRL_Z: 'escape', ENTER: 'submit', UP:'previous', DOWN:'next'}}).promise
         options.then((res) => {
             console.log(res)
+            const suppliers = this.app.industry.suppliers.map(s => s.name)
+            let supplierInput = term.inputField({ cancelable: true, autoComplete: suppliers, autoCompleteMenu: 'true', keyBindings: { ENTER: 'submit', CTRL_Z: 'cancel', BACKSPACE: 'backDelete', TAB: 'autoComplete' }}).promise
+            supplierInput.then((res) => {
+                this.app.store.getItemFromPFEP(part.code).supplier.unshift(this.app.industry.getSupplierName(res))
+            }).catch((e) => console.log(e))
         }).catch((e) => console.log(e))
+
         //selectionner fournisseur principal a partir de la liste
         //creer nouveau fournisseur
         //modifier fournisseur

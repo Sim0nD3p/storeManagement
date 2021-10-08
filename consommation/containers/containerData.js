@@ -29,20 +29,21 @@ const containerData = [
             height: 305,
         }
     },
-    /* {
-        type: 'tablette',
-        description: 'Pièces empilées sur tablette',
+    /*{
+        type: 'bac2',
+        description: 'Grand bac (plusieurs couleurs)',
+        weight:0,
         inside: {
-            length: '',
-            width: '',
-            height: '',
+            length: 645,
+            width: 385,
+            height: 250,
         },
         outside: {
-            length: '',
-            width: '',
-            height: '',
+            length: 805,
+            width: 465,
+            height: 305,
         }
-    }, */
+    },*/
 ]
 
 module.exports = containerData;

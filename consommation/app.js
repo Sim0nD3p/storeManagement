@@ -510,7 +510,7 @@ class App {
             switch(res.selectedIndex){
                 case 0: this.infos(); break;
                 case 1: this.rechercherItem(); break;
-                case 2: this.displayStore(); break;
+                case 2: this.afficherMagasin(); break;
                 case 3: this.afficherPieces(); break;
                 case 4: this.fournisseurs(); break;
                 case 5: this.maintenance(); break;

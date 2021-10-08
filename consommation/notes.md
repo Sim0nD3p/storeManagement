@@ -82,16 +82,19 @@
 - custom shelf - DONE
 - racking mains - DONE
 
-## FINAL LIST TO FINISH THE PROGRAM
 - verif contenants - DONE
 - adressage - DONE -
 - fixed shleves and racking - DONE -
 - assing racking/shelves priority - DONE -
 - refaire fichePiece - DONE - 
-    - change/assign container
+## FINAL LIST TO FINISH THE PROGRAM
+    - change/assign container in fichePiece
+    - add restrictions to field in fichePiece
     - change supplier
     - create part
-    -create supplier
+    - utilite
+
+    - create supplier - CANCELED - 
 - Fix bugs (see list below):
     - creer piece -> afficher Piece = bug
     - still calling error when gen containers
