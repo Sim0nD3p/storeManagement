@@ -903,6 +903,7 @@ class StoreManager {
         })
     }
 
+    //for automatic creation
     bundleManager(item, qte) {
         let partsLeft = qte;
         let bundleCount = 0;

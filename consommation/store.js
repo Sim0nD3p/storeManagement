@@ -10,7 +10,8 @@ const StoreManager = require('./storeManager');
 const Palette = require('./containers/palette');
 const RackManager = require('./rackManager');
 const { METHODS } = require('http');
-
+const Part = require('./Part');
+const Bac = require('./containers/bac');
 
 const MINIMUM_BUNDLE_LENGTH = 950;
 
@@ -20,6 +21,7 @@ class Store{
         this.partList = [];     //part list for reference (improves performance) useless?
         this.PFEP_partList = [];    //useless?
         this.PFEP = [];
+        this.nPEFP = [];
         this.app = app
         //this.containersSample = this.buyContainers();
         this.shelves = [];  //etageres contenant les contenants
@@ -163,7 +165,7 @@ class Store{
         containers = containers.filter(a => a !== undefined && a !== null)
         this.containers = this.containers.concat(containers);
 
-        if(containers.length > 0){
+        if(containers.length > 0 && this.getItemFromPFEP(part.code) !== -1){
             this.getItemFromPFEP(part.code).storage = containers;
         }
         return containers
@@ -208,6 +210,75 @@ class Store{
                 })
                 this.app.industry.checkSupplierParts();
             } catch(err) {
+                console.log('Error parsing JSON string', err)
+            }
+        })
+
+    }
+    nImportPFEPJSON = () => {
+        fs.readFile('./PFEP.json', 'utf8', (err, jsonString) => {
+            if (err) { console.log("Erreur lors de la lecture du fichier PFEP.json", err); return }
+            try {
+                let PFEPJSON = JSON.parse(jsonString);
+                PFEPJSON.map((item, index) => {
+                    let part = new Part()
+                    part = {
+                        ...part,
+                        ...item
+                    }
+                    if(item.emballage.TF.type == 'cus'){
+                        let containers = this.storeManagerDesk(
+                            item.emballage.TF.type,   //should be bac1, bac1, bundle, cus, bUs
+                            item,
+                            item.qteMax ? Math.ceil(item.qteMax) : Math.ceil(item.emballage.TF.nbPieces)
+                        )
+                        container.forEach(c => {
+                            c.setAutoDimensions(item, type, qte)
+                        })
+
+                    }
+                    part.supplier = item.supplier
+                    part.storage = item.storage.map((container) => {
+                        if(container){
+                            if(container.type.includes('bac')){    //gotta change bac type, rewrite class :/
+                                let bac = new Bac(container.name, item, container.variant)
+                                bac = {
+                                    ...bac,
+                                    count: container.count,
+                                    weight: container.weight,
+                                }
+                                return bac
+                            }
+                            else if(container.type == 'bundle'){
+                                let bundle = new Bundle(container.name, item)
+                                bundle = {
+                                    ...bundle,
+                                    width: container.width,
+                                    length: container.length,
+                                    height: container.height,
+                                    weight: container.weight,
+                                    count: container.count,
+                                }
+                                return bundle
+                            }
+                            else if(container.type == 'cus'){
+                                console.log(container)
+                                return container
+    
+                            }
+                            else if(container.type == 'bUs'){
+                                return container
+    
+                            }
+                            else return 'error'
+                        } else return null
+                    }).filter(a => a !== null && a !== undefined)
+                    
+
+                    this.PFEP.push(part)
+
+                })
+            } catch (err) {
                 console.log('Error parsing JSON string', err)
             }
         })

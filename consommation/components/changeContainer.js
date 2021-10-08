@@ -106,31 +106,32 @@ class ChangeContainer{
             term.moveTo(2*term.width/3, 7); term(`weight: ${part.specs.weight}`);
         }
         displayPartsSpecs(part)
+        //input length
         term.moveTo(5, 4); term(`Entrer la longueur d'un bundle (en mm): `);
         let lengthInput = term.inputField({ cancelable: true, keyBindings: { ENTER: 'submit', CTRL_Z: 'cancel', BACKSPACE: 'backDelete' }}).promise
         lengthInput.then((length) => {
             length = Number(length)
             if(!isNaN(length)){
                 displayPartsSpecs(part)
+                //input width
                 term.moveTo(5, 6); term(`Entrer la largeur d'un bundle (mm): `);
                 let widthInput = term.inputField({ cancelable: true, keyBindings: { ENTER: 'submit', CTRL_Z: 'cancel', BACKSPACE: 'backDelete' }}).promise;
                 widthInput.then((width) => {
                     width = Number(width)
                     if(!isNaN(width)){
                         displayPartsSpecs(part);
+                        //input height
                         term.moveTo(5, 8); term(`Entrer la hauteur d'un bundle (mm): `);
                         let heightInput = term.inputField({ cancelable: true, keyBindings: { ENTER: 'submit', CTRL_Z: 'cancel', BACKSPACE: 'backDelete' }}).promise;
                         heightInput.then((height) => {
                             height = Number(height);
                             if(!isNaN(height)){
                                 console.log(length, width, height)
+
                             } else term(`Veuillez entrer un nombre`)
-
                         }).catch((e) => console.log(e))
-
-                    }
-                    else term(`Veuillez entrer un nombre`)
-                })
+                    } else term(`Veuillez entrer un nombre`)
+                }).catch((e) => console.log(e))
             } else term(`Veuillez entrer un nombre`)
         }).catch((e) => console.log(e))
 

@@ -1,3 +1,18 @@
+
+
+/*
+this.name = name;
+        this.type = 'cus';
+        this.contentType = type;
+        this.itemcode = part.itemcode;
+        this.itemSpecs = part.specs;
+        this.length = this.getDimensions(part, type, qte).length;
+        this.width = this.getDimensions(part, type, qte).width;
+        this.height = this.getDimensions(part, type, qte).height
+        this.count = this.confirmQte(part, qte).count;
+        this.weight = this.confirmQte(part, qte).weight;
+*/
+
 const MAX_DEPTH = 1070;
 /*
 CustomContainer:
@@ -122,31 +137,30 @@ function bundleBT(item, qte){
 
 }
 
-
-class CustomContainer{
-    constructor(name, type, part, qte){
+class customContainer{
+    constructor(name, item){
         this.name = name;
         this.type = 'cus';
-        this.contentType = type;
-        this.itemcode = part.itemcode;
-        this.itemSpecs = part.specs;
-        this.length = this.getDimensions(part, type, qte).length;
-        this.width = this.getDimensions(part, type, qte).width;
-        this.height = this.getDimensions(part, type, qte).height
-        this.count = this.confirmQte(part, qte).count;
-        this.weight = this.confirmQte(part, qte).weight;
-
+        this.itemCode = item.code;
+        this.itemSpecs = item.specs;
+        this.length;
+        this.width;
+        this.height;
+        this.maxCapacity;
+        this.weight = 0;
+        this.count = 0;
     }
 
-    getDimensions(item, type, qte){
+    setAutoDimensions = (item, type, qte) => {
         let dimensions;
         console.log(type)
-        if(type == 'Main'){
+
+        if (type == 'Main') {
             dimensions = handStorage(item, qte)
             console.log(dimensions)
         }
-        else if(type == 'bUs'){
-            if(item.family == 'Barre transversale'){
+        else if (type == 'bUs') {
+            if (item.family == 'Barre transversale') {
                 dimensions = bundleBT(item, qte)
                 console.log('\n\n\n\n\n------BT!!!-----\n\n\n')
             }
@@ -164,19 +178,13 @@ class CustomContainer{
             }
         }
         return dimensions
-    }
 
-    confirmQte = (item, qte) => {
-        if(this.length !== false && this.width !== false && this.height !== false){
-            return {
-                count: qte,
-                weight: qte * item.specs.weight
-            }
-        }
     }
 
 
+    fillCus = (qte) => {
+
+    }
 
 }
-
-module.exports = CustomContainer;
+module.exports = customContainer

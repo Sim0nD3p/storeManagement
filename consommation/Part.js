@@ -71,18 +71,34 @@ class Part{
         }
         this.storage = [];
         this.consommation = {
-            annuelle: data.consommation.annuelle,
-            mensuelleMoy: data.consommation.mensuelleMoy,
-            mensuelleMax: data.consommation.mensuelleMax,
-            commandeType: data.consommation.commandeType,
-            freqReappro: data.consommation.freqReappro,
-            totalOrders: data.consommation.totalOrders,
+            annuelle: undefined,
+            mensuelleMoy: undefined,
+            mensuelleMax: undefined,
+            commandeType: undefined,
+            freqReappro: undefined,
+            totalOrders: undefined,
         }
-        this.stockSecurite = this.safetyStock(data)
-        this.qteMax = this.getQteMax(data)
+        this.stockSecurite;
+        this.qteMax;
     }
-
-    importFromJSON = (JSON_object) => {
-
+    setSafetyStock = () => {
+        let safetyStock = null;
+        if(this.supplier[0] && this.consommation){
+            if(this.supplier[0].leadTimeMax && this.supplier[0].leadTime && this.consommation.mensuelleMoy && this.consommation.mensuelleMax){
+                safetyStock = (Number(this.supplier[0].leadTimeMax) * Number(this.consommation.mensuelleMax)) / (Number(this.supplier[0].leadTime) * Number(this.consommation.mensuelleMoy));
+            }
+        }
+        this.stockSecurite = safetyStock
+    }
+    setQteMax = () => {
+        let qteMax = null;
+        if(this.consommation && this.stockSecurite){
+            if(this.consommation.freqReappro && this.consommation.mensuelleMoy){
+                qteMax = this.consommation.freqReappro * this.consommation.mensuelleMoy + this.stockSecurite
+            }
+        }
+        this.qteMax = qteMax
     }
 }
+
+module.exports = Part;

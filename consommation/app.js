@@ -498,6 +498,7 @@ class App {
             'Maintenance',
             'Menu magasin',
             'Création',
+            'Enregistrer',
         ]
         const header = 'StoreManagement 10/2021'
 
@@ -516,6 +517,11 @@ class App {
                 case 5: this.maintenance(); break;
                 case 6: this.store.storeManager.storeManagerMenu(); break;
                 case 7: console.log('en d/veloppement'); break;
+                case 8: {
+                    this.store.exportPFEPJSON();
+                    this.industry.exportSuppliersJSON();
+                    break;
+                }
                 default: this.home(); break;
             }
         }).catch((e) => console.log(e))
@@ -1389,11 +1395,11 @@ class App {
         });
         //this.home()
         this.industry.importSuppliersJSON()
-        this.store.importPFEPJSON();
+        this.store.nImportPFEPJSON();
 
         setTimeout(() => {
             //this.categorizeParts()
-            this.home()
+            //this.home()
 
         }, 150)
 

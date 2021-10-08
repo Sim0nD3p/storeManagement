@@ -1,62 +1,35 @@
-/*
-        type: 'bac1',
-        description: 'Petit bac bleu',
-        inside: {
-            length: 315,
-            width: 280,
-            height: 145,
-        },
-        outside: {
-            length: 387,
-            width: 305,
-            height: 150,
-        }
-
-        PALETTE:
-            - width et length fixes
-            - height variable
-
-        BUNDEL:
-            - length base sur piece
-            - width et height base sur qte
-
-        pour les items sans bac, on a besoin de:
-            - dimensions occupee
-                - savoir les dimensions pour empiler les pieces
-                - type d'empilement
-
-
-*/
-
-/*
-booster bac pour pouvoir le remplir
-*/
+const BacData = require('./containerData');
 
 class Bac{
-    constructor(containerData, name, part){
+    constructor(name, item, variant_name){
         this.name = name;
-        this.itemSpecs = part.specs;
-        this.itemCode = part.code;
-        this.maxCapacity = this.maxCapacity(part);
-        this.count = 0
-        this.weight = containerData.weight;
-        this.type = containerData.type;
-        this.description = containerData.description;
-        this.inside = {
-            length: containerData.inside.length,
-            width: containerData.inside.width,
-            height: containerData.inside.height,
-        }
-
-        this.length = containerData.outside.length
-        this.width = containerData.outside.width
-        this.height = containerData.outside.height
-        
-        this.volumeInt = (this.inside.width * this.inside.length * this.inside.height) / 1000000000;
-        this.volumeExt = (this.width * this.length * this.height) / 1000000000; 
+        this.itemCode = item.code;
+        this.itemSpecs = item.specs;
+        this.type = 'bac';
+        this.variant = variant_name; //variant de bac
+        this.description = this.getVariantInfos(variant_name).description;
+        this.length = this.getVariantInfos(variant_name).length;
+        this.width = this.getVariantInfos(variant_name).width;
+        this.height = this.getVariantInfos(variant_name).height;
+        this.weight = 0;
+        this.count = 0;
+        this.maxCapacity = this.maxCapacity(item)
     }
 
-
+    getVariantInfos = (variant_name) => {
+        if(BacData.findIndex((a) => a.type == variant_name) !== -1){
+            let variant = BacData.find((a) => a.type == variant_name)
+            return {
+                description: variant.description,
+                length: variant.outside.length,
+                width: variant.outside.width,
+                height: variant.outside.height,
+            }
+        }
+        else{
+            return { description: null, length: null, width: null, height: null, }
+        } 
+    }
     //charge maximale 45kg (100 lbs)
     //https://laws.justice.gc.ca/fra/reglements/DORS-86-304/page-41.html#1163928-1175178
     // charge maximale retenue 25kg ou 55lbs (60lbs ok discute avec stephane 2021-07-08)
@@ -70,8 +43,8 @@ class Bac{
         }
         else return isNaN(part.emballage.TF.nbPieces) == false ? Math.ceil(part.emballage.TF.nbPieces) : undefined
     }
-    //on doit s'assurer d'avoir la capacité maximale sinon la fonction returne une erreur
-    fillBac(qte){
+
+    fillBac = (qte) => {
         if(this.maxCapacity){
             if(qte > this.maxCapacity){
                 qte -= this.maxCapacity;
@@ -93,5 +66,4 @@ class Bac{
 
     }
 }
-
 module.exports = Bac;

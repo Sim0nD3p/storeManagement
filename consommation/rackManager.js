@@ -92,6 +92,7 @@ class RackManager{
         let partsToPlace = [];
         while(partsToPlace.length < 25){
             if(partList[index + partsToPlace.length]){
+
                 if(typeNeeded.indexOf(partList[index + partsToPlace.length].storage[0].type.substring(0, 3)) !== -1){
                     let categorisation = {
                         consoMens: partList[index + partsToPlace.length].consommation ? partList[index + partsToPlace.length].consommation.mensuelleMoy : undefined,
