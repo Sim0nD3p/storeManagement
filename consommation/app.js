@@ -1399,7 +1399,7 @@ class App {
 
         setTimeout(() => {
             //this.categorizeParts()
-            //this.home()
+            this.home()
 
         }, 150)
 

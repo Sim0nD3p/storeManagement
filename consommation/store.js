@@ -12,6 +12,8 @@ const RackManager = require('./rackManager');
 const { METHODS } = require('http');
 const Part = require('./Part');
 const Bac = require('./containers/bac');
+const Cus = require('./containers/customContainer');
+const BUs = require('./containers/bUs');
 
 const MINIMUM_BUNDLE_LENGTH = 950;
 
@@ -226,17 +228,6 @@ class Store{
                         ...part,
                         ...item
                     }
-                    if(item.emballage.TF.type == 'cus'){
-                        let containers = this.storeManagerDesk(
-                            item.emballage.TF.type,   //should be bac1, bac1, bundle, cus, bUs
-                            item,
-                            item.qteMax ? Math.ceil(item.qteMax) : Math.ceil(item.emballage.TF.nbPieces)
-                        )
-                        container.forEach(c => {
-                            c.setAutoDimensions(item, type, qte)
-                        })
-
-                    }
                     part.supplier = item.supplier
                     part.storage = item.storage.map((container) => {
                         if(container){
@@ -262,12 +253,33 @@ class Store{
                                 return bundle
                             }
                             else if(container.type == 'cus'){
-                                console.log(container)
-                                return container
+                                let cus = new Cus(container.name, item);
+                                cus = {
+                                    ...cus,
+                                    length: container.length,
+                                    width: container.width,
+                                    height: container.height,
+                                    weight: container.weight,
+                                    count: container.count,
+                                    maxCapacity: container.count,
+                                }
+                                return cus
     
                             }
                             else if(container.type == 'bUs'){
-                                return container
+                                console.log(container)
+                                let bUs = new BUs(container.name, item);
+                                bUs = {
+                                    ...bUs,
+                                    length: container.length,
+                                    width: container.width,
+                                    height: container.height,
+                                    count: container.count,
+                                    weight: container.weight,
+                                    maxCapacity: container.maxCapacity,
+                                }
+
+                                return bUs
     
                             }
                             else return 'error'
