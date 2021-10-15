@@ -10,21 +10,34 @@ class Bundle{
         this.length;
         this.width;
         this.height;
-        this.weight;
+        this.weight = 0
+    }
+
+    setDimensions = (dimensions) => {
+        let keys = [ 'length', 'width', 'height' ]
+        if(Object.keys(dimensions).toString() == keys.toString()){
+            this.length = dimensions.length;
+            this.width = dimensions.width;
+            this.height = dimensions.height;
+        } else console.error('error - invalid dimension given to setDimensions @bundle.js')
     }
     fillBundle = (qte) => {
-        if(qte > this.widthNb * this.heightMaxNb){
-            this.count = this.widthNb * this.heightMaxNb
-            this.weight = this.count * this.itemSpecs.weight;
-            return qte - this.count
-        }
-        else {
-            this.count = qte;
-            this.weight = this.itemSpecs.weight * this.count
-            return 0
-        }
+        if(qte > 0){
+            if(!isNaN(this.maxCapacity) && this.maxCapacity > 0){
+                if(qte <= this.maxCapacity){
+                    this.count = qte
+                    this.weight = qte * this.itemSpecs.weight
+                    qte = 0;
+                }
+                else if(qte > this.maxCapacity){
+                    this.count = this.maxCapacity;
+                    this.weight = this.maxCapacity * this.itemSpecs.weight;
+                    qte = qte - this.maxCapacity;
+                }
+
+            } else console.error('Error - container.maxCapacity is not valid @bundle.js')
+        } else console.error('Error - cannot fill bundle with negative qte @bundle.js')
+        return qte
     }
-
 }
-
 module.exports = Bundle

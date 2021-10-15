@@ -21,7 +21,7 @@ const GAP = 150
 const MAX_HEIGHT = 6000
 const FRONT = 'FRONT'
 const BACK = 'BACK'
-const StoreUpdater = require('./storeUpdater')
+const StoreUpdater = require('./storeUpdater');
 
 const exportData = new ExportData()
 
@@ -903,9 +903,60 @@ class StoreManager {
         })
     }
 
+
+    bundleManager(item, partsLeft, dimensions, maxCapacity){
+        let array = [];
+        while(partsLeft > 0){
+            let name = 'bundle_' + item.code + '_' + array.length
+            let bundle = new Bundle(name, item);
+            bundle.setDimensions(dimensions);       //setting dimensions
+            bundle.maxCapacity = maxCapacity;       //setting maxCapacity
+            partsLeft = bundle.fillBundle(partsLeft);   //fills the bundle    
+            array.push(bundle);     //pushing bundle in containers array
+        }
+        return array
+    }
+    
+    //set auto dimensions on cus??
+    cusManager(item, partsLeft, dimensions, maxCapacity){
+        let array = [];
+        while(partsLeft > 0){
+            let name = 'cus_' + item.code + '_' + array.length
+            let cus = new CustomContainer(name, item)
+            dimensions ? cus.setDimensions(dimensions) : null
+            cus.maxCapacity = maxCapacity;
+            partsLeft = cus.fillCus(partsLeft);
+            array.push(cus)
+        }
+        return array
+    }
+    bUsManager(item, partsLeft, dimensions, maxCapacity){
+        let array = [];
+        while(partsLeft > 0){
+            let name = 'bUs_' + item.code + '_' + array.length;
+            let BUS = new bUs(name, item);
+            BUS.maxCapacity = maxCapacity
+            dimensions ? BUS.setDimensions(dimensions) : null;
+            partsLeft = BUS.fillBUs(partsLeft);
+            array.push(BUS)
+        }
+        return array
+    }
+
+
+    bacManager(item, partsLeft, variant){
+        let array = [];
+        while(partsLeft > 0){
+            let name = variant + '_' + item.code + '_' + array.length;
+            let container = new Bac(name, item, variant);
+            partsLeft = container.fillBac(partsLeft);
+            array.push(container)
+        }
+        return array
+    }
+    
     //for automatic creation
-    bundleManager(item, qte) {
-        let partsLeft = qte;
+    bundleManager_old(item, partsLeft) {
         let bundleCount = 0;
         let array = [];
         while (partsLeft > 0) {
@@ -913,7 +964,7 @@ class StoreManager {
                 name: 'bundle_' + item.code + '_' + bundleCount,
                 code: item.code,
                 specs: item.specs,
-                qte: qte
+                qte: partsLeft
             }
             let bundle = new Bundle(contentData);
             partsLeft = bundle.fillBundle(partsLeft)
@@ -924,9 +975,8 @@ class StoreManager {
         }
         return array
     }
-
     //qteMax, type
-    bacManager(type, item, qte){
+    bacManager_old(type, item, qte){
         if(!qte && item.qteMax){ qte = item.qteMax }
         
         let partsLeft = qte;
@@ -950,7 +1000,9 @@ class StoreManager {
         return array
 
     }
+
     /**
+     * OLD
      * Creates and assign new customContainer
      * @param {*object} item 
      * @param {*string} type 
@@ -976,7 +1028,7 @@ class StoreManager {
         } else return [null]
         return [container]
     }
-
+    //OLD
     makeBUs(item, type, qte){
         let container;
         let partsLeft = qte;
@@ -991,6 +1043,7 @@ class StoreManager {
         } else return [null]
     }
 
+    //OLD
     paletteManager(item, qte, data){
         console.log(item.code, qte)
         let array = []

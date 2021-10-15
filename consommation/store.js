@@ -114,19 +114,38 @@ class Store{
     */
 
 
+        storeManagerDesk = (item, type) => {
+            let containers = []
+            switch(type){
+                case 'bac': {
+                    break;
+                }
+                case 'bundle': {
+                    break;
+                }
+                case 'cus': {
+                    break;
+                }
+                case 'bUs': {
+                    break;
+                }
+
+            }
+
+        }
 
 
 
 
     /**
-     * Fills containers
+     * Fills containers BROKEN
      * @param {string} type - container type (bac1, bac2, bundle, bUs, cus)
      * @param {*object} part - part object from PFEP
      * @param {*number} qte - qte to place
      * @param {*} data 
      * @returns 
      */
-    storeManagerDesk(type, part, qte, data) {
+    storeManagerDesk_old(type, part, qte, data) {
         let containers = []
         switch(type){
             case 'bundle': {
@@ -267,7 +286,6 @@ class Store{
     
                             }
                             else if(container.type == 'bUs'){
-                                console.log(container)
                                 let bUs = new BUs(container.name, item);
                                 bUs = {
                                     ...bUs,

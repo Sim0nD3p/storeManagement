@@ -23,6 +23,9 @@ const dimensions = (specs) => {
     }
     return str += ` (mm)`
 }
+const containerDimensions = (container) => {
+    return container.length + ' x ' + container.width + ' x ' + container.height + ' (mm)'
+}
 const utilite = (partUtilite) => {
     let utiliteStr; 
     if(Array.isArray(partUtilite)){
@@ -456,7 +459,7 @@ class FichePiece{
             bluePrints.forEach(p => {
                 let container = storage[0]
                 if(p.name == 'Dimensions: '){
-                    term.moveTo(p.x, p.y); term.bold(p.name); term(dimensions(storage[p.prop]) ? dimensions(storage[p.prop]).toString().substring(0, 10) : filler);
+                    term.moveTo(p.x, p.y); term.bold(p.name); term(containerDimensions(container) ? containerDimensions(container).toString().substring(0, 20) : filler);
                 }
                 else if(p.name == 'Nombre de contenants maximal: '){
                     term.moveTo(p.x, p.y); term.bold(p.name); term(storage.length ? storage.length.toString().substring(0, 10) : filler);
