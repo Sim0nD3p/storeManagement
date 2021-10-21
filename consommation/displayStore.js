@@ -3,6 +3,9 @@ const ExportData = require('./exportData');
 const containerData = require('./containers/containerData');
 
 const exportData = new ExportData()
+const containerDimensions = (container) => {
+    return Math.ceil(container.length) + ' x ' + Math.ceil(container.width) + ' x ' + Math.ceil(container.height) + ' (mm)'
+}
 
 function formatDimensions(dimensionsArray){
     let string = '';
@@ -45,13 +48,55 @@ class DispayStore{
         })
         term(`La surface utilisée par les bundles est ${area/1000000} m2\n`)
     }
-    displayContainers() {
+    displayContainers(){
+        const displayNbParts = (part) => {
+            if(part.emballage.TF && part.emballage.TF.nbPieces){
+                if(!isNaN(part.emballage.TF.nbPieces)){
+                    return Math.ceil(part.emballage.TF.nbPieces)
+                }
+                else {
+                    return 'ND'
+                }
+            }
+
+        }
+        this.app.clearScreen();
+        this.app.lastScreen.screen = 'afficherMagasin'
+        const spacing = [0, 20, 40, 50, 75, 90];
+        let str = new Array(term.width).join('-')
+
+        const filler = 'ND'
+        term.column(spacing[0]); term.bold.underline('Code');
+        term.column(spacing[1]); term.bold.underline('Famille');
+        term.column(spacing[2]); term.bold.underline('Type');
+        term.column(spacing[3]); term.bold.underline('Dimensions');
+        term.column(spacing[4]); term.bold.underline('Qte pièces');
+        term.column(spacing[5]); term.bold.underline('Qte contenants');
+        term('\n')
+        this.app.store.PFEP.forEach(part => {
+            term.column(spacing[0]); term(part.code ? part.code : filler);
+            term.column(spacing[1]); term(part.family ? part.family : filler);
+            if(part.storage.length > 0){
+                term.column(spacing[2]); term(part.storage[0].type ? part.storage[0].type : filler);
+                term.column(spacing[3]); term(containerDimensions(part.storage[0]) ? containerDimensions(part.storage[0]) : filler);
+                term.column(spacing[4]); term(displayNbParts(part));
+                term.column(spacing[5]); term(part.storage.length ? part.storage.length : filler);
+            }
+            term('\n')
+            term(str)
+            term('\n')
+
+    
+        })
+        
+    }
+    displayContainers_old() {
         let partsArray = [];
         let nb = 0; let nbC = 0; let nbBac1 = 0; let nbBac2 = 0;
         let batard = []
         //0  1   2   3   4
-        let spacing = [0, 15, 35, 45, 50, 65]
-        term('Code');
+        let spacing = [0, 15, 35, 35, 65, 85]
+        term.column(spacing[0]); term('Code');
         term.column(spacing[1]); term('Famille');
         term.column(spacing[2]); term('Contenant');
         term.column(spacing[3]); term('Nb');
@@ -149,6 +194,18 @@ class DispayStore{
 
     }
 
+
+    displayShelf_new(){
+        let str = 'Sélectionner étagère'
+        term.moveTo(term.width/2-str.length/2, 2); term.bold.underline(str)
+        let shelvesList = []
+        this.app.store.racking.forEach(rack => {
+            shelvesList = shelvesList.concat(rack.shelves.map(s => s.name))
+        })
+        term.singleColumnMenu(shelvesList, {cancelable: true, keyBindings:{ENTER: 'submit', CTRL_Z:'escape', DOWN: 'next', UP: 'previous'}}).promise
+
+
+    }
     displayShelf(){
         term.bold('Sélectionner étagère\n');
         let menuItems = [];

@@ -460,7 +460,28 @@ class StoreManager {
             noContainerList: this.noContainerList,
 
         }
-        exportData.exportJSON(reviewObject, 'storeReviewObject', '../SORTIE')
+
+        const backupFiles = () => {
+            let storeReviewObject = fsPromise.readFile('../SORTIE/storeReviewObject.json', 'utf8')
+            storeReviewObject.then((string) => { fsPromise.writeFile('../SORTIE/storeBackup/storeReviewObject.json', string) }).catch((e) => console.log(e))
+
+            let racking = fsPromise.readFile('../SORTIE/racking.json', 'utf8')
+            racking.then((string) => { fsPromise.writeFile('../SORTIE/storeBackup/racking.json', string) }).catch((e) => console.log(e))
+
+            let shelvesArray = fsPromise.readdir('../SORTIE/shelves')
+            shelvesArray.then((array) => {
+                array.forEach(a => {
+                    let shelves = fsPromise.readFile('../SORTIE/shelves/' + a, 'utf8');
+                    shelves.then((string) => {
+                        let writeShelf = fsPromise.writeFile('../SORTIE/storeBackup/shelves/' + a, string)
+                        writeShelf.then((a) => console.log(a)).catch((e) => console.log(e))
+                    }).catch((e) => console.log(e))
+                })
+            }).catch((e) => console.log(e))
+        }
+        //for now juste copy backup manually
+        //backupFiles()
+        //exportData.exportJSON(reviewObject, 'storeReviewObject', '../SORTIE')
         const exportStore = () => {
             let currentString = '['
             term(`^y${this.app.store.shelves.length}^: shelves sont dans le magasin\n`)
@@ -546,13 +567,16 @@ class StoreManager {
             })
         }
 
+        /*
+    
+        this.app.clearScreen()
+        let verification = term.inputField()
         let t = deleteDir()
         t.then((e) => {
             exportStore()
         }).catch((e) => console.log(e))
 
-
-        
+        */
     }
     importStore = () => {
         console.log('importing store')

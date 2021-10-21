@@ -43,7 +43,7 @@
 
 
 class Part{
-    constructor(code, family) {
+    constructor(code) {
         this.code = code
         this.description;
         this.history;
