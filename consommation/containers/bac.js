@@ -13,7 +13,7 @@ class Bac{
         this.height = this.getVariantInfos(variant_name).height;
         this.weight = 0;
         this.count = 0;
-        this.maxCapacity = this.maxCapacity(item)
+        this.maxCapacity = this.getMaxCapacity(item)
     }
 
     getVariantInfos = (variant_name) => {
@@ -33,7 +33,7 @@ class Bac{
     //charge maximale 45kg (100 lbs)
     //https://laws.justice.gc.ca/fra/reglements/DORS-86-304/page-41.html#1163928-1175178
     // charge maximale retenue 25kg ou 55lbs (60lbs ok discute avec stephane 2021-07-08)
-    maxCapacity(part){
+    getMaxCapacity = (part) => {
         if(!isNaN(part.emballage.TF.nbPieces) && !isNaN(part.specs.weight)){
             if(25 / part.specs.weight < part.emballage.TF.nbPieces){
                 part.emballage.TF.nbPieces = Math.floor(25 / part.specs.weight);

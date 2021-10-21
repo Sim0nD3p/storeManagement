@@ -25,6 +25,8 @@ const data2021_08_06 = require
 const storageData = require('./storageData')
 const bundleSize = require('./containers/bundleSize');
 const Addresser = require('./addresser');
+const DisplayPartList = require('./components/displayPartList')
+const DisplaySuppliers = require('./components/displaySuppliers');
 
 const List = require('./draftInput');
 //const prompt = require('prompt-sync')({ sigint: true });
@@ -60,6 +62,8 @@ class App {
         this.displayStore = new DisplayStore(this);
         this.FichePiece = new FichePiece(this)
         this.addresser = new Addresser(this)
+        this.displayPartList = new DisplayPartList(this)
+        this.displaySuppliers = new DisplaySuppliers(this)
         this.log = ''
         this.enableGoBack = true;
 
@@ -86,10 +90,12 @@ class App {
         }
         else if (this.lastScreen.screen == 'addSupplier') { this.industry.addSupplier() }
         else if (this.lastScreen.screen == 'afficherPieces') { this.afficherPieces() }
+        else if(this.lastScreen.screen == 'displayPartListMenu'){ this.displayPartList.menu() }
         else if (this.lastScreen.screen == 'afficherPiecesSelectFamille') { this.selectionnerFamille() }
         else if (this.lastScreen.screen == 'calculConsom') { this.fichePiece.calculConsom(this.lastScreen.content) }
         else if (this.lastScreen.screen == 'modfierDetails') { this.fichePiece.modifierDetails(this.lastScreen.content) }
-        else if (this.lastScreen.screen == 'afficherSupplier') { this.ficheSupplier.afficherSupplier(this.lastScreen.content) }
+        else if (this.lastScreen.screen == 'displaySuppliers') { this.displaySuppliers.mainList() }
+        else if(this.lastScreen.screen == 'searchSupplier'){ this.displaySuppliers.searchSupplier() }
         else if (this.lastScreen.screen == 'maintenance') { this.maintenance(); this.lastScreen.screen = 'home' }
         else if (this.lastScreen.screen == 'afficherMagasin') { this.afficherMagasin() }
         else if(this.lastScreen.screen == 'modifierEntreposage'){ this.fichePiece.modifierEntreposage(this.lastScreen.content) }
@@ -307,10 +313,15 @@ class App {
     }
     infos() {
         this.clearScreen()
-        this.title('Informations relatives au PFEP vitruel');
-        term("La liste de piece utilisée comme base pour le PFEP est un rapport d'inventaire généré par Acomba le 2021-05-25\n")
-        term('\nMédothologie utilisée pour les calculs relatifs aux consommation de pièces:\n')
-        let menuItems = [
+        let str = 'Informations Store Manager 2021';
+        term.moveTo(term.width/2-str.length/2, 3); term.bold.underline(str)
+        str = `Pour plus d'informations, consulter la documentation`
+        term.moveTo(term.width/2-str.length/2, 4); term(str)
+
+        str = `Le projet est disponnible sur GitHub À l'addresse suivante: https://github.com/Sim0nD3p/storeManagement`
+        term.moveTo(term.width/2-str.length/2, 5); term(str)
+
+        /*let menuItems = [
             'Instructions pour importer de nouveaux fichiers source et pour mettre à jour le PFEP',
             'Médothologie utilisée pour le calcul de consommation anuelle moyenne',
             'Médothologie utilisée pour le calcul de consommation mensuelle moyenne',
@@ -362,7 +373,7 @@ class App {
                 this.lastScreen.screen = 'infos'
                 term('\nAppuyer sur CTRL + Z pour retourner en arrière\n')
             }
-        })
+        })*/
 
     }
 
@@ -396,6 +407,7 @@ class App {
         input.then((res) => {
             let part = this.store.getItemFromPFEP(res)
             if(part !== -1){
+                //ERROR - throw 2 menus when invalid code then valid code
                 //this.lastScreen = { screen: 'afficherPiece', content: part }
                 this.FichePiece.displayPart(part)
             }
@@ -512,8 +524,8 @@ class App {
                 case 0: this.infos(); break;
                 case 1: this.rechercherItem(); break;
                 case 2: this.afficherMagasin(); break;
-                case 3: this.afficherPieces(); break;
-                case 4: this.fournisseurs(); break;
+                case 3: this.displayPartList.menu(); break;
+                case 4: this.displaySuppliers.mainList(); break;
                 case 5: this.maintenance(); break;
                 case 6: this.store.storeManager.storeManagerMenu(); break;
                 case 7: console.log('en d/veloppement'); break;

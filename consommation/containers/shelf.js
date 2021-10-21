@@ -26,7 +26,7 @@ class Shelf{
         this.address; //range in numbers
         this.priority;
         this.isDoubleSided = false;
-        this.width = 107; //mm
+        this.width = 107; //cm
         this.capacity = shelfData ? shelfData.rating / 2.2046 : undefined;  //1 kg == 2.2046 lbs
         this.length = shelfData ? shelfData.length : undefined;
         this.weight = 0; //masse kg
@@ -835,6 +835,10 @@ class Shelf{
 
     }
 
+    /**
+     * Calcule la priorité sous forme de consommation moyenne des pièces sur l'étagère
+     * @returns 
+     */
     getPriorityIndex = () => {
         let array = []
         let shelfConsom = 0;
@@ -941,6 +945,10 @@ class Shelf{
         if(this.getAccessRatio() == 0){ this.isDoubleSided = false }
         else if(this.getAccessRatio() !== 0){ this.isDoubleSided = true }
     }
+    /**
+     * Calcule la consommation totale de l'étagère
+     * @returns 
+     */
     setTotalConsom = () => {
         let contList = []
         this.content.forEach(cont => { if(contList.findIndex(a => a.name.split('_')[1] == cont.name.split('_')[1]) == -1){ contList.push(cont) } });    //list of parts

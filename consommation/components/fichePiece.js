@@ -1,6 +1,7 @@
 const term = require(`terminal-kit`).terminal
 const ChangeSupplier = require('./changeSupplier');
 const ChangeContainer = require('./changeContainer');
+const ChangeConsom = require('./changeConsom');
 const filler = 'ND'
 
 const phoneNumber = (number) => {
@@ -23,6 +24,9 @@ const dimensions = (specs) => {
     }
     return str += ` (mm)`
 }
+const containerDimensions = (container) => {
+    return container.length + ' x ' + container.width + ' x ' + container.height + ' (mm)'
+}
 const utilite = (partUtilite) => {
     let utiliteStr; 
     if(Array.isArray(partUtilite)){
@@ -37,8 +41,9 @@ class FichePiece{
         this.bindCursorToKeys = false
         this.index = 0;
         this.part;
-        this.changeSupplier = new ChangeSupplier(app)
+        this.changeSupplier = new ChangeSupplier(app);
         this.changeContainer = new ChangeContainer(app);
+        this.changeConsom = new ChangeConsom(app)
 
 
     }
@@ -221,8 +226,11 @@ class FichePiece{
                             }
                         }
                         this.app.clearScreen()
-                        this.modifierPiece(this.part);
-                        this.moveCursor('DOWN', this.index-1)
+                        //this.moveCursor('DOWN', this.index-1)
+                        setTimeout(() => {
+                            this.modifierPiece(this.part);
+
+                        }, 10)
                     }).catch((e) => console.log(e))
                 }).catch((e) => console.log(e)) 
             }
@@ -232,6 +240,7 @@ class FichePiece{
                     //this.accessProp(this.part, p.prop).forEach(s => baseStr += s + ' ')
                 }
                 this.userInput(p.x + p.name.length, p.y, 'te').then((res) => {
+                    this.app.clearScreen();
                     term.red(res)
                     this.modifierPiece(this.part);
                     this.moveCursor('DOWN', this.index-1)
@@ -251,6 +260,7 @@ class FichePiece{
                 }
                 this.userInput(p.x + p.name.length, p.y, '').then((res) => {
                     console.log(res);
+                    this.app.clearScreen()
                     this.setProp(p, res);
                     this.modifierPiece(this.part);
                     this.moveCursor('DOWN', this.index-1)
@@ -262,10 +272,14 @@ class FichePiece{
             this.bindCursorToKeys = false
             this.app.lastScreen = { screen: 'modifyPart', content: this.part, index: this.index }
 
+
+            //changer supplier et recalculer donnees e fonction du leadTime
+
             this.app.clearScreen()
             this.changeSupplier.managePartSupplier(this.part)
         }
         else if(p.type == 'consommation'){
+
 
         }
         else if(p.type == 'emballage'){
@@ -456,7 +470,7 @@ class FichePiece{
             bluePrints.forEach(p => {
                 let container = storage[0]
                 if(p.name == 'Dimensions: '){
-                    term.moveTo(p.x, p.y); term.bold(p.name); term(dimensions(storage[p.prop]) ? dimensions(storage[p.prop]).toString().substring(0, 10) : filler);
+                    term.moveTo(p.x, p.y); term.bold(p.name); term(containerDimensions(container) ? containerDimensions(container).toString().substring(0, 20) : filler);
                 }
                 else if(p.name == 'Nombre de contenants maximal: '){
                     term.moveTo(p.x, p.y); term.bold(p.name); term(storage.length ? storage.length.toString().substring(0, 10) : filler);
@@ -489,6 +503,17 @@ class FichePiece{
         })
         return bluePrints
     }
+    displayPartShelf = (part) => {
+        this.app.clearScreen()
+        let partLocation = this.app.store.getPartsLocation(part)
+        let racking = this.app.store.racking.find((a) => a.address == partLocation.rack)
+        if(racking){
+            let shelf = racking.shelves.find((a) => a.address == partLocation.shelf)
+            if(shelf.content.findIndex((a) => a.name.split('_')[1] == part.code) !== -1){
+                shelf.getShelf()
+            }
+        }
+    }
 
     displayPart = (part) => {
         this.app.clearScreen()
@@ -502,6 +527,7 @@ class FichePiece{
                 'Afficher données brutes',
                 'Historique des commandes',
                 'Modifier pièce',
+                'Afficher étagère'
             ]
             let menu = term.singleColumnMenu(
                 menuItems,
@@ -516,7 +542,8 @@ class FichePiece{
                         switch(res.selectedIndex){
                             case 0: this.rawData(part); break;
                             case 1: this.displayHistoric(part.history); break;
-                            case 2: this.modifierPiece(part)
+                            case 2: this.modifierPiece(part); break;
+                            case 3: this.displayPartShelf(part)
                         }
                     }
                 }

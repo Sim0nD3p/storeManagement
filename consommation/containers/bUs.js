@@ -12,6 +12,12 @@ class bUs{
         this.maxCapacity;
     }
 
+    setDimensions = (dimensions) => {
+        this.length = dimensions.length;
+        this.width = dimensions.width;
+        this.height = dimensions.height;
+    }
+
     /**
      * Calcule les dimensions du racking necessaire en fonctino de la piece
      * **imported from old class, better ways to do it
@@ -112,6 +118,24 @@ class bUs{
         }
     
 
+    }
+
+    fillBUs = (qte) => {
+        if(qte > 0){
+            if(!isNaN(this.maxCapacity) && this.maxCapacity > 0){
+                if(qte <= this.maxCapacity){
+                    this.count = qte;
+                    this.weight = this.itemSpecs.weight * qte;
+                    qte = 0
+                }
+                else if(qte > this.maxCapacity){
+                    this.count = this.maxCapacity;
+                    this.weight = this.itemSpecs.weight * this.maxCapacity;
+                    qte = qte - this.maxCapacity;
+                }
+            } else console.error('Error - container.maxCapacity is not valid @bUs.js')
+        } else console.error('Error - cannot fill bundle with negative qte @bUs.js')
+        return qte
     }
 }
 

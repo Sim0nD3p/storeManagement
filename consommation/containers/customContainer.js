@@ -151,6 +151,12 @@ class customContainer{
         this.count = 0;
     }
 
+    setDimensions = (dimensions) => {
+        this.length = dimensions.length;
+        this.width = dimensions.width;
+        this.height = dimensions.height;
+    }
+
     setAutoDimensions = (item, type, qte) => {
         let dimensions;
         console.log(type)
@@ -183,6 +189,21 @@ class customContainer{
 
 
     fillCus = (qte) => {
+        if(qte > 0){
+            if(!isNaN(this.maxCapacity) && this.maxCapacity > 0){
+                if(qte < this.maxCapacity){
+                    this.count = qte
+                    this.weight = this.itemSpecs.weight * qte
+                    qte = 0
+                }
+                else if(qte >= this.maxCapacity){
+                    this.count = this.maxCapacity;
+                    this.weight = this.itemSpecs.weight * this.maxCapacity;
+                    qte = qte - this.maxCapacity;
+                }
+            } else console.error('Error - container.maxCapacity is not valid @customContainer.js')
+        } else console.error('Error - cannot fill customContainer with negative qte @customContainer.js')
+        return qte
 
     }
 
