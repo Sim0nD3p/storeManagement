@@ -29,6 +29,7 @@ const DisplayPartList = require('./components/displayPartList')
 const DisplaySuppliers = require('./components/displaySuppliers');
 
 const List = require('./draftInput');
+const { parentPort } = require('worker_threads');
 //const prompt = require('prompt-sync')({ sigint: true });
 
 function checkFiles(path) {
@@ -1085,23 +1086,23 @@ class App {
                 }
                 else if(response.selectedIndex === 12){
                     let part = this.store.getItemFromPFEP('SEP3411')
-                    this.FichePiece.displayPart(part)
+                    //this.FichePiece.displayPart(part)
+                    part.getSupplier()
 
                 }
                 else if(response.selectedIndex == 14){
-                    console.log('TAG')
-                    let toRemove = 0
-                    console.log(this.store.PFEP.length)
-                    for(let i = 0; i < this.store.PFEP.length; i++){
-                        if(!this.store.PFEP[i].code){
-                            this.store.PFEP.splice(i, 1)
-                            toRemove++
-                            break;
+                    this.store.PFEP.forEach(part => {
+                        if(part.emballage.TF && part.storage.length > 0){
+                            if(part.emballage.TF.type.substring(0, 3) !== 'bac'){
+                                part.emballage.TF.nbPieces = part.storage[0].count
+                                part.emballage.TF.dimensions = {
+                                    length: part.storage[0].length,
+                                    width: part.storage[0].width,
+                                    height: part.storage[0].height
+                                }
+                            }
                         }
-                    }
-
-                    console.log(toRemove)
-                    console.log(this.store.PFEP.length)
+                    })
 
 
                 }

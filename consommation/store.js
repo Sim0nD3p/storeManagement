@@ -14,6 +14,7 @@ const Part = require('./Part');
 const Bac = require('./containers/bac');
 const Cus = require('./containers/customContainer');
 const BUs = require('./containers/bUs');
+const Supplier = require('./supplier');
 
 const MINIMUM_BUNDLE_LENGTH = 950;
 
@@ -242,12 +243,27 @@ class Store{
             try {
                 let PFEPJSON = JSON.parse(jsonString);
                 PFEPJSON.map((item, index) => {
-                    let part = new Part()
+                    let part = new Part(item.code)
                     part = {
                         ...part,
-                        ...item
+                        description: item.description,
+                        history: item.history,
+                        family: item.family,
+                        tag: item.tag,
+                        //supplier: ['caliss', 'tabarnak'],
+                        utilite: item.utilite,
+                        class: item.class,
+                        specs: item.specs,
+                        emballage: item.emballage,
+                        //storage,
+                        consommation: item.consommation,
+                        stockSecurite: item.stockSecurite,
+                        qteMax: item.qteMax,
                     }
-                    part.supplier = item.supplier
+                    part.supplier = item.supplier.map((supp) => {
+                        let s = new Supplier(supp, 'json')
+                        return s
+                    })
                     part.storage = item.storage.map((container) => {
                         if(container){
                             if(container.type.includes('bac')){    //gotta change bac type, rewrite class :/

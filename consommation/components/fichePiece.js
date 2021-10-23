@@ -3,6 +3,7 @@ const ChangeSupplier = require('./changeSupplier');
 const ChangeContainer = require('./changeContainer');
 const ChangeConsom = require('./changeConsom');
 const filler = 'ND'
+const Functions = require('../functions');
 
 const phoneNumber = (number) => {
     return number.substring(0, 3) + '-' + number.substring(3, 6) + '-' + number.substring(6, 11)
@@ -44,6 +45,7 @@ class FichePiece{
         this.changeSupplier = new ChangeSupplier(app);
         this.changeContainer = new ChangeContainer(app);
         this.changeConsom = new ChangeConsom(app)
+        this.functions = new Functions()
 
 
     }
@@ -279,6 +281,15 @@ class FichePiece{
             this.changeSupplier.managePartSupplier(this.part)
         }
         else if(p.type == 'consommation'){
+            this.app.clearScreen()
+            this.bindCursorToKeys = false;
+            this.app.lastScreen = {
+                screen: 'modifyPart',
+                content: this.part,
+                index: this.index
+            }
+            this.changeConsom.menu(this.part)
+
 
 
         }
@@ -313,6 +324,54 @@ class FichePiece{
             this.changeContainer.containerSelector(this.part)
 
         }
+        else if(p.type == 'quantiteInventaire'){
+            this.app.lastScreen = {
+                screen: 'modifyPart',
+                content: this.part,
+                index: this.index
+            }
+            this.bindCursorToKeys = false
+            this.app.clearScreen();
+            this.app.clearScreen();
+
+            const menuItems = ['Entrer manuelle des données', 'Calcul automatique selon données de consommation'];
+
+            let menu = term.singleColumnMenu(menuItems, {cancelable: true, keyBindings: { CTRL_Z: 'escape', ENTER: 'submit', DOWN: 'next', UP: 'previous'}}).promise
+            menu.then((res) => {
+                if(!res.canceled){
+                    if(res.selectedIndex == 0){
+                        term.moveTo(10, 5); term('Entrer valeur pour stock de sécurité: ')
+                        let s = term.inputField({ x:55, y: 5, cancelable: true, keyBindings: { ENTER: 'submit', BACKSPACE: 'backDelete', CTRL_Z: 'cancel' }}).promise
+                        s.then((ss) => {
+                            if(ss !== undefined){
+                                this.app.store.getItemFromPFEP(this.part.code).stockSecurite = Number(ss)
+                                term.moveTo(10, 6); term('Entrer valeur pour quantité maximale: ')
+
+                                let q = term.inputField({ x:55, y: 6, cancelable: true, keyBindings: { ENTER: 'submit', BACKSPACE: 'backDelete', CTRL_Z: 'cancel' }}).promise
+                                q.then((qte) => {
+                                    if(qte !== undefined){
+                                        this.app.store.getItemFromPFEP(this.part.code).qteMax = Number(qte)
+                                    }
+                                }).catch((e) => console.log(e))
+
+
+                            }
+                        }).catch((e) => console.log(e))
+
+
+                    }
+                    else if(res.selectedIndex == 1){
+                        let SS = this.functions.safetyStock(this.part.supplier[0].leadTime, this.part.supplier[0].leadTimeMax, this.part.consommation.mensuelleMoy, this.part.consommation.mensuelleMax);
+                        this.app.store.getItemFromPFEP(this.part.code).stockSecurite = SS
+                        console.log(SS)
+
+                        let qte = this.functions.maxQty(this.part.consommation.freqReappro, this.part.consommation.mensuelleMoy, SS)
+                        this.app.store.getItemFromPFEP(this.part.code).qteMax = qte
+                        console.log(qte)
+                    }
+                }
+            }).catch((e) => console.log(e))
+        }
     }
 
     modifierPiece = (part) => {
@@ -328,12 +387,14 @@ class FichePiece{
         term.moveTo(leftMargin, 22); term.bold.underline('INFORMATIONS EMBALLAGE');
         term.moveTo(leftMargin, 30); term.bold.underline('INFORMATIONS ENTREPOSAGE');
         term.moveTo(term.width/3+leftMargin, 4); term.bold.underline('INFORMATIONS DE CONSOMMATION')
-
+        term.moveTo(term.width/3+leftMargin, 11); term.bold.underline(`QUANTITÉES INVENTAIRE`);
+        
         let primary = this.primaryInfos(part, leftMargin, filler, 5); primary ? plans = plans.concat(primary) : null;
         let supplier = this.supplierInfos(part.supplier[0], leftMargin, filler, 15); supplier ? plans = plans.concat(supplier) : null;
         let emballage = this.emballage(part.emballage, leftMargin, filler, 23); emballage ? plans = plans.concat(emballage) : null
         let storage = this.storage(part.storage, leftMargin, filler, 31); storage ? plans = plans.concat(storage) : null
         let consommation = this.consommation(part.consommation, term.width/3+leftMargin, filler, 5); consommation ? plans = plans.concat(consommation) : null
+        let quantiteInventaire = this.quantiteInventaire(part, term.width/3+leftMargin, filler, 12); quantiteInventaire ? plans = plans.concat(quantiteInventaire) : null
         
         plans = plans.sort((a, b) => {
             if(a.x == b.x) return a.y - b.y
@@ -425,7 +486,10 @@ class FichePiece{
             return bluePrints
         }
         else {
+            let bluePrints = { prop: null, name: 'Informations fournisseur manquantes', x: leftMargin, y: yStart, type: 'supplier[0]' }
             term.moveTo(leftMargin, yStart); term.red('Informatins fournisseur manquantes')
+            term.moveTo(bluePrints.x, bluePrints.y); term.bold(bluePrints.name);
+            return bluePrints
         } 
         
     }
@@ -503,6 +567,17 @@ class FichePiece{
         })
         return bluePrints
     }
+    quantiteInventaire = (part, leftMargin, filler, yStart) => {
+        let bluePrints = [
+            { prop: 'qteMax', name: 'Quantité maximale: ', x: leftMargin, y: yStart, type: 'quantiteInventaire' },
+            { prop: 'stockSecurite', name: 'Stock sécurité: ', x: leftMargin, y: yStart+1, type: 'quantiteInventaire' },
+        ]
+        bluePrints.forEach(p => {
+            term.moveTo(p.x, p.y); term.bold(p.name); term(part[p.prop] ? part[p.prop] : filler);
+        })
+        return bluePrints
+
+    }
     displayPartShelf = (part) => {
         this.app.clearScreen()
         let partLocation = this.app.store.getPartsLocation(part)
@@ -572,6 +647,9 @@ class FichePiece{
         term.moveTo(3, 3)
         term.moveTo(term.width/3 + leftMargin, 4); term.bold.underline(`INFORMATION DE CONSOMMATION`);
         this.consommation(part.consommation, term.width/3 + leftMargin, filler, 5);
+
+        term.moveTo(term.width/3+leftMargin, 11); term.bold.underline(`QUANTITÉES INVENTAIRE`);
+        this.quantiteInventaire(part, term.width/3+leftMargin, filler, 12)
 
         term.moveTo(3, 3)
         partMenu(2*term.width/3 + leftMargin)

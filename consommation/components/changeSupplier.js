@@ -1,8 +1,11 @@
 const term = require('terminal-kit').terminal
+const Part = require('../Part');
+const Functions = require('../functions')
 
 class ChangeSupplier{
     constructor(app, part){
         this.app = app;
+        this.functions = new Functions()
     }
     test = () => {
         console.log('test!')
@@ -44,6 +47,27 @@ class ChangeSupplier{
                 if(res !== undefined){
                     if (this.app.industry.getSupplierName(res).leadTime && this.app.industry.getSupplierName(res).leadTimeMax) {
                         this.app.store.getItemFromPFEP(part.code).supplier.unshift(this.app.industry.getSupplierName(res))
+                        for(let i = 0; i < 2; i++){
+                            if(part.supplier[i]){
+                                let SS = this.functions.safetyStock(
+                                    part.supplier[i].leadTime,
+                                    part.supplier[i].leadTimeMax,
+                                    part.consommation.mensuelleMoy,
+                                    part.consommation.mensuelleMax
+                                )
+                                let qte = this.functions.maxQty(
+                                    part.consommation.freqReappro,
+                                    part.consommation.mensuelleMoy,
+                                    SS
+                                )
+                                let containers = this.app.store.storeManager.getNewStorage(part, qte)
+
+                                console.log(`qte: ${qte}`)
+                                console.log(containers.length)
+                            }
+
+                        }
+                        
                     }
                     else {
                         console.log('error')

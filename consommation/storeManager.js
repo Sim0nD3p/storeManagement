@@ -927,6 +927,39 @@ class StoreManager {
         })
     }
 
+    getNewStorage = (part, qteMax) => {
+        if(part.emballage.TF.type !== undefined){
+            let containers = []
+            switch(part.emballage.TF.type){
+                case 'bac1': {
+                    containers = this.bacManager(part, qteMax, 'bac1');
+                    break;
+                }
+                case 'bac2': {
+                    containers = this.bacManager(part, qteMax, 'bac2');
+                    break;
+
+                }
+                case 'bundle': {
+                    containers = this.bundleManager(part, qteMax, part.emballage.TF.dimensions, part.emballage.TF.nbPieces);
+                    break;
+
+                }
+                case 'cus': {
+                    containers = this.cusManager(part, qteMax, part.emballage.TF.dimensions, part.emballage.TF.nbPieces);
+                    break;
+
+                }
+                case 'bUs': {
+                    containers = this.bUsManager(part, qteMax, part.emballage.TF.dimensions, part.emballage.TF.nbPieces);
+                    break;
+
+                }
+            }
+            return containers
+        }
+    }
+
 
     bundleManager(item, partsLeft, dimensions, maxCapacity){
         let array = [];

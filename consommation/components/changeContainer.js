@@ -176,6 +176,11 @@ class ChangeContainer{
             let dimensions = this.storageParamsInput(part)
             dimensions.then(([dim, maxCapacity]) => {
                 let containers = this.app.store.storeManager.bundleManager(part, part.qteMax, dim, maxCapacity)
+                this.app.store.getItemFromPFEP(part.code).emballage.TF = {
+                    type: 'bundle',
+                    nbPieces: maxCapacity,
+                    dimensions: dim
+                }
                 resolve(containers)
             }).catch((e) => console.log(e))
 
@@ -196,6 +201,11 @@ class ChangeContainer{
             let dimensions = this.storageParamsInput(part)
             dimensions.then(([dim, maxCapacity]) => {
                 let containers = this.app.store.storeManager.cusManager(part, part.qteMax, dim, maxCapacity)
+                this.app.store.getItemFromPFEP(part.code).emballage.TF = {
+                    type: 'cus',
+                    nbPieces: maxCapacity,
+                    dimensions: dim
+                }
                 resolve(containers)
             }).catch((e) => console.log(e))
 
@@ -215,6 +225,11 @@ class ChangeContainer{
             let dimensions = this.storageParamsInput(part)
             dimensions.then(([dim, maxCapacity]) => {
                 let containers = this.app.store.storeManager.bUsManager(part, part.qteMax, dim, maxCapacity)
+                this.app.store.getItemFromPFEP(part.code).emballage.TF = {
+                    type: 'bUs',
+                    nbPieces: maxCapacity,
+                    dimensions: dim
+                }
                 resolve(containers)
             })
 

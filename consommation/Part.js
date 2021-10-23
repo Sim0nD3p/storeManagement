@@ -80,24 +80,60 @@ class Part{
         }
         this.stockSecurite;
         this.qteMax;
+        this.getSupplier = this.getSupplier.bind(this)
     }
-    setSafetyStock = () => {
+    getSupplier = () => {
+        console.log(this.code)
+        console.log(this.specs)
+        console.log(this.supplier == undefined, this.supplier.length)
+    }
+    getTest = () => {
+        console.log(this.description)
+    }
+    
+    setSafetyStock = (supplierIndex, set) => {
+        if(!supplierIndex){ supplierIndex = 0 }
+        if(set == undefined){ set = true }
         let safetyStock = null;
-        if(this.supplier[0] && this.consommation){
-            if(this.supplier[0].leadTimeMax && this.supplier[0].leadTime && this.consommation.mensuelleMoy && this.consommation.mensuelleMax){
-                safetyStock = (Number(this.supplier[0].leadTimeMax) * Number(this.consommation.mensuelleMax)) / (Number(this.supplier[0].leadTime) * Number(this.consommation.mensuelleMoy));
+        console.log(supplierIndex)
+        console.log(this.supplier[0])
+        console.log(this.supplier[supplierIndex])
+        if(this.supplier[supplierIndex] && this.consommation){
+            console.log('allo')
+            if(this.supplier[supplierIndex].leadTimeMax && this.supplier[supplierIndex].leadTime && this.consommation.mensuelleMoy && this.consommation.mensuelleMax){
+                safetyStock = (Number(this.supplier[supplierIndex].leadTimeMax) * Number(this.consommation.mensuelleMax)) / (Number(this.supplier[supplierIndex].leadTime) * Number(this.consommation.mensuelleMoy));
             }
         }
-        this.stockSecurite = safetyStock
+        if(set == true){
+            this.stockSecurite = safetyStock
+        }
+        return safetyStock
     }
-    setQteMax = () => {
+    setQteMax = (stockSecurite, set) => {
+        if(stockSecurite == undefined){ stockSecurite = this.stockSecurite }
+        if(set == undefined){ set = true }
         let qteMax = null;
-        if(this.consommation && this.stockSecurite){
+        if(this.consommation && stockSecurite){
             if(this.consommation.freqReappro && this.consommation.mensuelleMoy){
-                qteMax = this.consommation.freqReappro * this.consommation.mensuelleMoy + this.stockSecurite
+                qteMax = this.consommation.freqReappro * this.consommation.mensuelleMoy + stockSecurite
             }
         }
-        this.qteMax = qteMax
+        if(set == true){
+            this.qteMax = qteMax
+        }
+        return qteMax
+    }
+    setConsom(startYear){
+        let consommation = {
+            annuelle: dataAnalyser.annualAve(this, startYear).moyenne_annuelle,
+            mensuelleMoy: dataAnalyser.monthlyAve(this, {year: startYear, month: 1}, 'auto', true),
+            mensuelleMax: dataAnalyser.maxMonthlyConsum(this, startYear, 'auto').maxConsom,
+            commandeType: dataAnalyser.commandeTypique(this, startYear).commandeType,
+            freqReappro: dataAnalyser.freqOrder(this, startYear).aveOrderFreq,
+            totalOrders: dataAnalyser.totalOrderSize(this, startYear)
+
+        }
+        return consommation
     }
 }
 

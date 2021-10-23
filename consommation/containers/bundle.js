@@ -34,7 +34,6 @@ class Bundle{
                     this.weight = this.maxCapacity * this.itemSpecs.weight;
                     qte = qte - this.maxCapacity;
                 }
-
             } else console.error('Error - container.maxCapacity is not valid @bundle.js')
         } else console.error('Error - cannot fill bundle with negative qte @bundle.js')
         return qte

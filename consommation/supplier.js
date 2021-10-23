@@ -1,6 +1,11 @@
 const term = require('terminal-kit').terminal;
 const infosFournisseurs = require('./infosFournisseurs');
 
+/*
+constructor(name, phone, address)
+
+*/
+
 class Fournisseur{
     constructor(data, type){
         this.name = data.name;
